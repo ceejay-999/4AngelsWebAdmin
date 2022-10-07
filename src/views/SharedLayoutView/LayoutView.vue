@@ -1,9 +1,4 @@
-<script setup>
-  import '../../assets/plugins/jquery/jquery.min.js';
-  import '../../assets/bootstrap/js/bootstrap.bundle.min.js'
-  import '../../assets/plugins/simplebar/simplebar.min.js';
-  import '../../assets/js/sleek.js';
-</script>
+
 <template>
   <aside class="left-sidebar bg-sidebar">
     <div id="sidebar" class="sidebar sidebar-with-footer">
