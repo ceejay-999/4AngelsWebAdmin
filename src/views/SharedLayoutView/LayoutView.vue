@@ -1,7 +1,8 @@
 
 <template>
-  <aside class="left-sidebar bg-sidebar">
-    <div id="sidebar" class="sidebar sidebar-with-footer">
+  <div class="wrapper">
+    <aside class="left-sidebar bg-sidebar">
+    <div id="sidebar" class="sidebar ">
       <!-- Aplication Brand -->
       <div class="app-brand">
         <a href="/index.html" title="Sleek Dashboard">
@@ -33,12 +34,14 @@
             UI Elements
           </li> -->
 
-          <li class="has-sub ">
+          <li class="has-sub">
+            <RouterLink class="sidenav-item-link" to="/role">
             <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#components"
               aria-expanded="false" aria-controls="components">
               <i class="mdi mdi-settings"></i>
               <span class="nav-text">Role</span>
             </a>
+            </RouterLink>
           </li>
 
           <li class="has-sub ">
@@ -54,6 +57,13 @@
               aria-expanded="false" aria-controls="forms">
               <i class="mdi mdi-hospital-building"></i>
               <span class="nav-text">Branches</span>
+            </a>
+          </li>
+          <li class="has-sub ">
+            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#forms"
+              aria-expanded="false" aria-controls="forms">
+              <i class="mdi mdi-account-box"></i>
+              <span class="nav-text">Designation</span>
             </a>
           </li>
           <li class="has-sub ">
@@ -537,8 +547,22 @@
       </div>
     </nav>
   </header>
+  <div class="content-wrapper">
+    <div class="content">
+      <slot />
+    </div>
+  </div>
+  </div>
   </div>
 </template>
+<script>
+export default ({
+  name: "App",
+  components: {
+
+  },
+})
+</script>
 <style scoped>
   @import '../../assets/sleek.css';
   @import '../../assets/plugins/nprogress/nprogress.css';
