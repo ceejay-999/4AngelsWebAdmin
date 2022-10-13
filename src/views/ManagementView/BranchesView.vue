@@ -1,8 +1,5 @@
 <template>
     <LayoutView>
-        <div class="toast" >
-
-        </div>
         <div class="modal fade" id="exampleModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -16,7 +13,7 @@
                     <div class="modal-body">
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Name</label>
-                                <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *">
+                                <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *" required>
                                 <div class="invalid-feedback">
 								   
 							    </div>
@@ -35,40 +32,19 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body">
-                        Are you sure you want to delete this?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger btn-pill" @click="DeleteRole(delrole)">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!--Modal-->
         <div class="breadcrumb-wrapper">
-            <h1>Role</h1>
+            <h1>Branches</h1>
 
             
                 <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0">
                     <li class="breadcrumb-item">
-                    <RouterLink to="/dashboard">
+                    <a href="index.html">
                         <span class="mdi mdi-home"></span>                
-                    </RouterLink>
+                    </a>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page">Role</li>
+                    <li class="breadcrumb-item" aria-current="page">Branches</li>
                 </ol>
                 </nav>
 
@@ -77,10 +53,10 @@
             <div class="col-12">
                 <div class="card card-default">
                     <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
-                        <h2>Role Table</h2>
+                        <h2>Branches Table</h2>
 
                         <a data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
-                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
+                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add
                         </a>
                     </div>
 
@@ -104,8 +80,7 @@
 </template>
 <script>
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
-import { axios , elementLoad} from '@/functions';
-import toastr from 'toastr';
+import { axiosReq } from '@/functions';
 
 export default ({
     name: "App",
@@ -116,108 +91,10 @@ export default ({
         return {
             rolename: "",
             roledesc: "",
-            delrole: "",
-        }
-    },
-    methods:{
-        SubmitRole()
-        {
-            if(this.rolename == "")
-            {
-                document.querySelector(".invalid-feedback").textContent = "Role name is required!";
-                document.querySelector(".invalid-feedback").style.display = "block";
-                return;
-            }
-            else{
-                if(document.querySelector(".invalid-feedback").style.display == "block")
-                {
-                    document.querySelector(".invalid-feedback").style.display = "none";
-                }
-                document.querySelector(".toast").id = "toaster";
-                axios.post("roles/create",null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector(".modal").style.display = "none";
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 3000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-
-            }
-
-            
-        },
-        DeleteRole(data)
-        {
-            if(data == "")
-            {
-                this.callToaster("toast-top-right",2);
-            }
-            else
-            {
-                document.querySelector(".toast").id = "toaster";
-                axios.post("roles/delete?id="+data).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",3);
-                        document.querySelector("#exampleModal").style.display = "none";
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 3000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-            }
-        },
-        callToaster(positionClass, reserror) {
-            if (document.getElementById("toaster")) {
-                toastr.options = {
-                closeButton: true,
-                debug: false,
-                newestOnTop: false,
-                progressBar: true,
-                positionClass: positionClass,
-                preventDuplicates: false,
-                onclick: null,
-                showDuration: "300",
-                hideDuration: "1000",
-                timeOut: "3000",
-                extendedTimeOut: "1000",
-                showEasing: "swing",
-                hideEasing: "linear",
-                showMethod: "fadeIn",
-                hideMethod: "fadeOut"
-                };
-                if(reserror == 1)
-                {
-                    toastr.success("Data was save successfully", "Successfully Save!");
-                }
-                if(reserror == 2)
-                {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                if(reserror == 3)
-                {
-                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
-                }
-            }
         }
     },
     mounted() {
-        document.querySelector(".toast").id = "";
+        $(document).ready(function(){
             $('#hoverable-data-table').dataTable({
               aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],
               rowReorder: {
@@ -225,7 +102,7 @@ export default ({
               },
               responsive: true,
               ajax : {
-                url: 'https://www.4angelshc.com/mobile/roles?_batch=true',
+                url: 'https://www.4angelshc.com/mobile/branches/',
                 dataSrc: 'result'
               },
               columns : [
@@ -233,25 +110,51 @@ export default ({
                 { data : "name" },
                 { data : "id",
                     render: function(data){
-                        return '<span class="mdi mdi-square-edit-outline"></span> <span class="mdi mdi-eye"></span> <a data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
+                        return '<span class="mdi mdi-square-edit-outline"></span> <span class="mdi mdi-eye"></span> <span class="mdi mdi-trash-can red"></span>'
                     }
                 }
               ],
           });
-          elementLoad('#deleterow').then(()=>{
-            document.querySelectorAll('#deleterow').forEach(el=>{
-                el.onclick = e=>{
-                const dataelem = e.target.closest("[data-value]")
-                this.delrole = dataelem.dataset.value;
-                }
-            })
-          });
+        });
+        
     },
+    methods:{
+        SubmitRole(){
+            if(this.rolename == "")
+            {
+                document.querySelector(".invalid-feedback").style.display = "block";
+                document.querySelector(".invalid-feedback").textContent = "Role Name is Required!";
+
+            }
+            else
+            {
+                if(document.querySelector(".invalid-feedback").style.display == "none")
+                {
+                    document.querySelector(".invalid-feedback").style.display = "none";
+                    document.querySelector(".invalid-feedback").textContent = "";
+                }
+                else
+                {
+                    document.querySelector(".invalid-feedback").style.display = "none";
+                    document.querySelector(".invalid-feedback").textContent = "";
+                }
+                axiosReq({
+                    method: 'post',
+                    url: 'https://www.4angelshc.com/mobile/roles/create',
+                    data:{
+                        name: this.rolename,
+                    }
+                }).then(res=>{
+                    document.querySelector(".modal").style.display = "none";
+                    this.$router.go(0);
+                    
+                })
+            }
+        },
+    }
 })
 </script>
 <style>
-@import '../../assets/sleek.css';
-@import 'toastr/build/toastr.min.css';
 
 .red{
     color: #aa0927;
@@ -351,8 +254,5 @@ label {
 }
 .card-body{
     overflow: auto;
-}
-.breadcrumb{
-    background-color: transparent !important;
 }
 </style>

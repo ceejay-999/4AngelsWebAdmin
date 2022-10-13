@@ -7,17 +7,14 @@
             <div class="card-body p-5">
               <img class="logo-img" src="../../assets/Logo.png" />
               <h4 class="text-dark mb-5" id="cent">Sign In Admin</h4>
-              
               <form action="/index.html">
                 <div class="row">
                   <div class="form-group col-md-12 mb-4">
                     <input type="email" class="form-control input-lg" id="email" aria-describedby="emailHelp" placeholder="Username">
                   </div>
-
                   <div class="form-group col-md-12 ">
                     <input type="password" class="form-control input-lg" id="password" placeholder="Password">
                   </div>
-
                   <div class="col-md-12">
                     <div class="d-flex my-2 justify-content-between">
                       <div class="d-inline-block mr-3">
@@ -26,10 +23,8 @@
                           <div class="control-indicator"></div>
                         </label>
                       </div>
-
                       <p><a class="text-blue" href="#">Forgot Your Password?</a></p>
                     </div>
-
                     <button type="submit" class="btn btn-lg btn-primary btn-block mb-4">Sign In</button>
                   </div>
                 </div>

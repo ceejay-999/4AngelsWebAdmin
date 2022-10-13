@@ -5,10 +5,9 @@ import router from './router'
 //plugins
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.js'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import '../src/assets/bootstrap/js/bootstrap.bundle.min.js'
 import '../src/assets/plugins/simplebar/simplebar.min.js';
-import '../src/assets/js/sleek.js';
 
 //Components
 import LayoutView from '../src/views/SharedLayoutView/LayoutView.vue';
@@ -23,3 +22,5 @@ app.mount('#app')
 
 //initailize components
 app.component('LayoutView', LayoutView)
+
+

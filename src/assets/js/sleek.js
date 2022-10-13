@@ -11,7 +11,6 @@
 ====== End ======*/
 
 $(document).ready(function () {
-  "use strict";
 
   /*======== SCROLLBAR SIDEBAR ========*/
   var sidebarScrollbar = $(".sidebar-scrollbar");
