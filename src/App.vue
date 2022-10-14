@@ -4,6 +4,6 @@
 
 <style>
   body{
-    background: #d6d6d6 !important;
+    background: #f5f6fa !important;
   }
 </style>

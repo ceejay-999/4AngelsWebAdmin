@@ -3,11 +3,11 @@
         <div class="toast" >
 
         </div>
-        <div class="modal fade" id="exampleModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+        <div class="modal fade" id="exampleEditModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Add Role</h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Role ID: {{roleid}}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -17,7 +17,39 @@
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Name</label>
                                 <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *">
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback feedback1">
+								   
+							    </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Description</label>
+                                <textarea type="text" class="form-control" v-model="roledesc" id="exampleInputPassword1" placeholder="Description"/>
+                            </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" @click="clearVariable" class="btn btn-danger btn-pill" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-pill editbut" data-dismiss="" @click="EditRole">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Add Role</h5>
+                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Name</label>
+                                <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *">
+                                <div class="invalid-feedback feedback2">
 								   
 							    </div>
                             </div>
@@ -29,8 +61,8 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" @click="SubmitRole">Submit</button>
+                        <button type="button" @click="clearVariable" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" id="submitbut" @click="SubmitRole">Submit</button>
                     </div>
                 </div>
             </div>
@@ -40,18 +72,40 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
                     <div class="modal-body">
-                        Are you sure you want to delete this?
+                        Are you sure you want to delete this? {{roleid}}
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger btn-pill" @click="DeleteRole(delrole)">Delete</button>
+                        <button type="button" @click="clearVariable" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger btn-pill delbut" data-dismiss="modal" @click="DeleteRole(roleid)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModalTooltip" tabindex="-1" role="dialog" aria-labelledby="exampleModalTooltip" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle2">Role ID: {{roleid}}</h5>
+                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <h5>Role Name: {{rolename}}</h5>
+                        <p>Description: {{roledesc}}</p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="DeleteRole(roleid)">Delete</button>
+                        <button type="button" data-dismiss="modal" data-toggle="modal" data-target="#exampleEditModalForm" target="_blank" class="btn btn-primary btn-pill">Edit</button>
                     </div>
                 </div>
             </div>
@@ -79,7 +133,7 @@
                     <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
                         <h2>Role Table</h2>
 
-                        <a data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
+                        <a @click="clearVariable" data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
                             <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
                         </a>
                     </div>
@@ -116,49 +170,91 @@ export default ({
         return {
             rolename: "",
             roledesc: "",
-            delrole: "",
+            roleid: "",
         }
     },
     methods:{
-        SubmitRole()
+        EditRole()
         {
             if(this.rolename == "")
             {
-                document.querySelector(".invalid-feedback").textContent = "Role name is required!";
-                document.querySelector(".invalid-feedback").style.display = "block";
+                document.querySelector(".feedback1").textContent = "Role name is required!";
+                document.querySelector(".feedback1").style.display = "block";
                 return;
             }
             else{
-                if(document.querySelector(".invalid-feedback").style.display == "block")
-                {
-                    document.querySelector(".invalid-feedback").style.display = "none";
-                }
                 document.querySelector(".toast").id = "toaster";
-                axios.post("roles/create",null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
+                axios.post("roles/update?id="+this.roleid,null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
+                    this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
                     {
+                        this.clearVariable();
                         this.callToaster("toast-top-right",1);
-                        document.querySelector(".modal").style.display = "none";
+                        document.querySelector('#exampleEditModalForm').style.display = "none"
                         setTimeout(() => {
                             this.$router.go(0);
                         }, 3000);
                     }
                     else
                     {
+                        this.clearVariable();
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+            }
+        },
+        ViewRole(data)
+        {
+            this.clearVariable();
+            axios.post("roles?id="+data).catch(res=>{
+
+                }).then(res=>{
+                    this.rolename = res.data.result.name;
+                    this.roledesc = res.data.result.description;
+                    this.roleid = data;
+                });
+        },
+        SubmitRole()
+        {
+            if(this.rolename == "")
+            {
+                document.querySelector(".feedback2").textContent = "Role name is required!";
+                document.querySelector(".feedback2").style.display = "block";
+                return;
+            }
+            else{
+                document.querySelector(".toast").id = "toaster";
+                document.querySelector(".feedback2").style.display = "none";
+                axios.post("roles/create",null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
+                    this.clearVariable();
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    if(res.data.success)
+                    {
+                        this.clearVariable();
+                        this.callToaster("toast-top-right",1);
+                        document.querySelector('#exampleModalForm').style.display = "none"
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }
                 });
 
             }
-
-            
         },
         DeleteRole(data)
         {
+            this.clearVariable();
             if(data == "")
             {
+                document.querySelector(".toast").id = "toaster";
                 this.callToaster("toast-top-right",2);
             }
             else
@@ -170,10 +266,10 @@ export default ({
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",3);
-                        document.querySelector("#exampleModal").style.display = "none";
+                        document.querySelector(".delbut").dataset.dismiss = "modal";
                         setTimeout(() => {
                             this.$router.go(0);
-                        }, 3000);
+                        }, 2000);
                     }
                     else
                     {
@@ -194,7 +290,7 @@ export default ({
                 onclick: null,
                 showDuration: "300",
                 hideDuration: "1000",
-                timeOut: "3000",
+                timeOut: "2000",
                 extendedTimeOut: "1000",
                 showEasing: "swing",
                 hideEasing: "linear",
@@ -214,6 +310,12 @@ export default ({
                     toastr.success("Data was successfully deleted!", "Successfully Deleted!");
                 }
             }
+        },
+        clearVariable()
+        {
+            this.roleid = "",
+            this.rolename = "";
+            this.roledesc = "";
         }
     },
     mounted() {
@@ -233,7 +335,7 @@ export default ({
                 { data : "name" },
                 { data : "id",
                     render: function(data){
-                        return '<span class="mdi mdi-square-edit-outline"></span> <span class="mdi mdi-eye"></span> <a data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
+                        return '<a class="actionb" data-toggle="modal" data-target="#exampleEditModalForm" target="_blank"><span id="editrow" data-value='+data+' class="mdi mdi-square-edit-outline"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModalTooltip" target="_blank"><span id="viewrow" data-value='+data+' class="mdi mdi-eye"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
                     }
                 }
               ],
@@ -241,8 +343,29 @@ export default ({
           elementLoad('#deleterow').then(()=>{
             document.querySelectorAll('#deleterow').forEach(el=>{
                 el.onclick = e=>{
+                this.clearVariable();
                 const dataelem = e.target.closest("[data-value]")
-                this.delrole = dataelem.dataset.value;
+                this.roleid = dataelem.dataset.value;
+                }
+            })
+          });
+          elementLoad('#viewrow').then(()=>{
+            document.querySelectorAll('#viewrow').forEach(el=>{
+                el.onclick = e=>{
+                this.clearVariable();
+                const dataelem = e.target.closest("[data-value]")
+                this.roleid = dataelem.dataset.value;
+                this.ViewRole(this.roleid);
+                }
+            })
+          });
+          elementLoad('#editrow').then(()=>{
+            document.querySelectorAll('#editrow').forEach(el=>{
+                el.onclick = e=>{
+                this.clearVariable();
+                const dataelem = e.target.closest("[data-value]")
+                this.roleid = dataelem.dataset.value;
+                this.ViewRole(this.roleid);
                 }
             })
           });
@@ -354,5 +477,17 @@ label {
 }
 .breadcrumb{
     background-color: transparent !important;
+}
+.breadcrumb-wrapper h1 {
+  color: #1b223c;
+  font-size: 1.63rem;
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+  line-height: 1.5;
+  color: #8a909d;
+  text-align: left;
+}
+.actionb{
+    cursor: pointer;
 }
 </style>

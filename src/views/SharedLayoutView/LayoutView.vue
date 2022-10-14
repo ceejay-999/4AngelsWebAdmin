@@ -40,27 +40,17 @@
             </RouterLink>
           </li>
 
-          <li class="has-sub ">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#icons"
-              aria-expanded="false" aria-controls="icons">
-              <i class="mdi mdi-calendar-text"></i>
-              <span class="nav-text">Schedules</span>
-            </a>
-          </li>
-
-          <li class="has-sub ">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#forms"
-              aria-expanded="false" aria-controls="forms">
+          <li class="has-sub" data-url="/branch">
+            <RouterLink class="sidenav-item-link" to="/branch">
               <i class="mdi mdi-hospital-building"></i>
-              <span class="nav-text">Branches</span>
-            </a>
+              <span class="nav-text">Manage</span>
+            </RouterLink>
           </li>
-          <li class="has-sub ">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#forms"
-              aria-expanded="false" aria-controls="forms">
+          <li class="has-sub" data-url="/designation">
+            <RouterLink class="sidenav-item-link" to="/designation">
               <i class="mdi mdi-account-box"></i>
               <span class="nav-text">Designation</span>
-            </a>
+            </RouterLink>
           </li>
           <li class="has-sub ">
             <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#forms"
