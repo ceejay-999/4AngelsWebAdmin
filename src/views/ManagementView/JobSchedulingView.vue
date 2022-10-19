@@ -13,11 +13,10 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-
 export default ({
     name: "App",
     components: {
-        LayoutView
+    LayoutView
     },
 })
 </script>

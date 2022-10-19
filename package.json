@@ -7,8 +7,13 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
+    "@mdi/font": "^7.0.96",
     "axios": "^1.1.2",
-    "bootstrap": "^4.6.0",
+    "bootstrap": "^4.6.2",
+    "node-sass": "^7.0.3",
+    "nprogress": "^0.2.0",
+    "sass-loader": "^13.1.0",
+    "simplebar": "^5.3.9",
     "toastr": "^2.1.4",
     "vue": "^3.2.38",
     "vue-router": "^4.1.5"

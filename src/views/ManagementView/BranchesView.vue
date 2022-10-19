@@ -135,7 +135,7 @@
         <!--Modal-->
         <div class="breadcrumb-wrapper breadcrumb-contacts">
             <div>
-                <h1>Manage</h1>
+                <h1>Branch</h1>
 
             
                 <nav aria-label="breadcrumb">
@@ -145,7 +145,7 @@
                         <span class="mdi mdi-home"></span>                
                     </RouterLink>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page">Manage</li>
+                    <li class="breadcrumb-item" aria-current="page">Branch</li>
                 </ol>
                 </nav>
             </div>
@@ -177,7 +177,7 @@
                         <ul class="list-unstyled">
                             <li class="d-flex mb-1">
                             <i class="mdi mdi-map mr-1"></i>
-                            <span>{{a.address}}</span>
+                            <span>{{a.location}}</span>
                             </li>
                         </ul>
                         </div>
@@ -241,7 +241,7 @@ export default ({
 
             }).then(res=>{
                 this.branchname = res.data.result.name;
-                this.branchloc = res.data.result.address;
+                this.branchloc = res.data.result.location;
                 this.branchid = data;
             });
         },
@@ -251,7 +251,7 @@ export default ({
                 document.querySelector(".feedback5").style.display = "none";
                 document.querySelector(".feedback6").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
-                axios.post("branches/create",null,{name: this.branchname, address: this.branchloc, created_at: ""}).catch(res=>{
+                axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: ""}).catch(res=>{
                     this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -414,190 +414,27 @@ export default ({
     },
 })
 </script>
-<style>
-@import '../../assets/sleek.css';
-@import 'toastr/build/toastr.min.css';
-
-.red{
-    color: #aa0927;
-}
-.head{
-    background-color: #ffff !important;
-
-}
-.link{
-    display: flex !important;
-    align-items: center !important;
-}
-.close{
-    background-color: transparent;
-    border: 0;
-}
-.modal-body{
-    position: relative;
-    flex: 1 1 auto;
-    padding: 1rem;
-}
-.form-group,.input-group{
-    margin-bottom: 1.25rem;
-}
-.form-group label, .input-group label {
-  color: #1b223c;
-  font-size: 0.98rem;
-}
-.form-group .form-control, .input-group .form-control {
-  font-size: 0.98rem;
-  padding: .5rem 1.06rem;
-  border-color: #e5e9f2;
-}
-.text-muted {
-  color: #6c757d !important;
-}
-.pl-0, .px-0 {
-  padding-left: 0 !important;
-}
-.form-check {
-  position: relative;
-  display: block;
-  padding-left: 1.25rem;
-}
-label {
-  display: inline-block;
-}
-.btn:not(:disabled):not(.disabled) {
-  cursor: pointer;
-}
-.btn-primary {
-  color: #ffffff;
-  background-color: #4c84ff;
-  border-color: #4c84ff;
-}
-.btn {
-  display: inline-block;
-  font-weight: 500;
-  color: #8a909d;
-  text-align: center;
-  vertical-align: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  background-color: transparent;
-  border: 1px solid transparent;
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  padding: 0.59rem 1rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  border-radius: 0.25rem;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-.modal-footer > * {
-  margin: 0.25rem;
-}
-.btn.btn-pill {
-  border-radius: 100px;
-}
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1rem 1rem;
-  border-bottom: 1px solid #e5e9f2;
-  border-top-left-radius: calc(0.3rem - 1px);
-  border-top-right-radius: calc(0.3rem - 1px);
-}
-.modal-body {
-  position: relative;
-  flex: 1 1 auto;
-  padding: 1rem;
-}
-.card-body{
-    overflow: auto;
-}
-.breadcrumb{
-    background-color: transparent !important;
-}
-.breadcrumb .breadcrumb-item {
-  font-size: 0.98rem;
-  text-transform: capitalize;
-}
-.breadcrumb-wrapper.breadcrumb-contacts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.actionb{
-    cursor: pointer;
-}
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  word-wrap: break-word;
-  background-color: #ffffff;
-  background-clip: border-box;
-  border: 1px solid #e5e9f2;
-  border-radius: 0.25rem;
-}
-.card-default {
-  margin-bottom: 1.5rem;
-}
-.media {
-  display: flex;
-  align-items: flex-start;
-}
-.media-body {
-  flex: 1;
-}
-.text-dark {
-  color: #1b223c !important;
-}
-.mb-2, .my-2 {
-  margin-bottom: 0.5rem !important;
-}
-.list-unstyled {
-  padding-left: 0;
-  list-style: none;
-}
-ul {
-  margin: 0;
-  padding: 0;
-    padding-left: 0px;
-}
-.mb-1, .my-1 {
-  margin-bottom: 0.25rem !important;
-}
-ul li {
-  list-style-type: none;
-}
-.d-flex {
-  display: flex !important;
-}
-.rounded {
-  border-radius: 0.25rem !important;
-}
-.img-fluid{
-    width: 100px;
-    height: 100px !important;
-}
-.card {
-  word-wrap: break-word;
-}
-.btn-dots-icon
-{
-    position: absolute;
-    top: -13px;
-    right: 16px;
-    font-size: 25px;
-}
+<style scoped>
+@import '../../assets/scss/_card.scss';
+@import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/scss/_type.scss';
+@import '../../assets/scss/_reboot.scss';
+@import '../../assets/sleek.min.css';
 .textcenter{
     display: block;
     margin: 0 auto;
     font-size: 20px;
 }
+.img-fluid{
+    width: 100px;
+    height: 100px !important;
+}
+.btn-dots-icon
+{
+    position: absolute;
+    top: -26px;
+    right: -8px;
+    font-size: 25px;
+}
+
 </style>

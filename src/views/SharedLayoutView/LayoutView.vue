@@ -22,19 +22,43 @@
             </RouterLink>
           </li>
           <li class="has-sub ">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#app"
-              aria-expanded="false" aria-controls="app">
+            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#buttons"
+                          aria-expanded="false" aria-controls="buttons">
+              <i class="mdi mdi-calendar-clock"></i>
+              <span class="nav-text">Time Clock</span><b class="caret"></b>
+            </a>
+            <ul class="collapse " id="buttons">
+              <div class="sub-menu">
+                <li class="">
+                  <RouterLink class="sidenav-item-link" to="/timeclock">Today</RouterLink>
+                </li>
+
+                <li class="">
+                  <RouterLink class="sidenav-item-link"  to="/timesheets">Timesheets</RouterLink>
+                </li>
+
+                <li class="">
+                  <a href="button-group.html">Request</a>
+                </li>
+
+              </div>
+            </ul>
+          </li>
+          <li class="has-sub ">
+            <RouterLink class="sidenav-item-link" to="/jobschedule">
+              <i class="mdi mdi-calendar"></i>
+              <span class="nav-text">Job Scheduling</span>
+            </RouterLink>
+          </li>
+          <li class="has-sub ">
+            <RouterLink class="sidenav-item-link" to="/employee">
               <i class="mdi mdi-account-multiple"></i>
               <span class="nav-text">Employee</span>
-            </a>
+            </RouterLink>
           </li>
 
-          <!-- <li class="section-title">
-            UI Elements
-          </li> -->
-
           <li class="has-sub" data-url="/role">
-            <RouterLink class="sidenav-item-link" to="/role">
+            <RouterLink class="sidenav-item-link" to="/designation">
               <i class="mdi mdi-settings"></i>
               <span class="nav-text">Role</span>
             </RouterLink>
@@ -43,21 +67,8 @@
           <li class="has-sub" data-url="/branch">
             <RouterLink class="sidenav-item-link" to="/branch">
               <i class="mdi mdi-hospital-building"></i>
-              <span class="nav-text">Manage</span>
+              <span class="nav-text">Facilities</span>
             </RouterLink>
-          </li>
-          <li class="has-sub" data-url="/designation">
-            <RouterLink class="sidenav-item-link" to="/designation">
-              <i class="mdi mdi-account-box"></i>
-              <span class="nav-text">Designation</span>
-            </RouterLink>
-          </li>
-          <li class="has-sub ">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#forms"
-              aria-expanded="false" aria-controls="forms">
-              <i class="mdi mdi-history"></i>
-              <span class="nav-text">History</span>
-            </a>
           </li>
         </ul>
       </div>
@@ -875,11 +886,10 @@ export default ({
 })
 </script>
 <style scoped>
-  @import '../../assets/sleek.css';
-  @import '../../assets/plugins/nprogress/nprogress.css';
-  @import '../../assets/plugins/simplebar/simplebar.css';
-
-  .app-brand{
+@import '../../assets/scss/_sidebar.scss';
+@import '../../assets/scss/_reboot.scss';
+@import '../../assets/sleek.min.css';
+.app-brand{
     background-color: #f3feff !important;
   }
   .app-brand .brand-name{
@@ -891,8 +901,5 @@ export default ({
   }
   .app-brand a img{
     max-width: 55px !important;
-  }
-  .sidebar .sidebar-inner{
-    margin-top: 1rem !important;
   }
 </style>

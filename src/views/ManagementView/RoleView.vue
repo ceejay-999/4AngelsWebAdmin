@@ -7,24 +7,19 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Role ID: {{roleid}}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Position ID: {{roleid}}</h5>
+                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
                     <div class="modal-body">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Name</label>
-                                <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *">
+                                <label for="exampleInputEmail1">Position</label>
+                                <input type="text" class="form-control" v-model="position"  placeholder="Position *">
                                 <div class="invalid-feedback feedback1">
 								   
 							    </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Description</label>
-                                <textarea type="text" class="form-control" v-model="roledesc" id="exampleInputPassword1" placeholder="Description"/>
                             </div>
                     </div>
 
@@ -39,7 +34,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Add Role</h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">Add Position</h5>
                         <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -47,16 +42,11 @@
 
                     <div class="modal-body">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Name</label>
-                                <input type="text" class="form-control" v-model="rolename"  placeholder="Role Name *">
-                                <div class="invalid-feedback feedback2">
+                                <label for="exampleInputEmail1">Position</label>
+                                <input type="text" class="form-control" v-model="position" placeholder="Position *">
+                                <div class="invalid-feedback feedback3">
 								   
 							    </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Description</label>
-                                <textarea type="text" class="form-control" v-model="roledesc" id="exampleInputPassword1" placeholder="Description" />
                             </div>
                     </div>
 
@@ -99,8 +89,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <h5>Role Name: {{rolename}}</h5>
-                        <p>Description: {{roledesc}}</p>
+                        <h5>Position: {{position}}</h5>
                     </div>
 
                     <div class="modal-footer">
@@ -113,8 +102,6 @@
         <!--Modal-->
         <div class="breadcrumb-wrapper">
             <h1>Role</h1>
-
-            
                 <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0">
                     <li class="breadcrumb-item">
@@ -125,7 +112,6 @@
                     <li class="breadcrumb-item" aria-current="page">Role</li>
                 </ol>
                 </nav>
-
         </div>
         <div class="row">
             <div class="col-12">
@@ -144,7 +130,8 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Date Created</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -156,7 +143,7 @@
         </div>
     </LayoutView>
 </template>
-<script>
+<script type="script">
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios , elementLoad} from '@/functions';
 import toastr from 'toastr';
@@ -164,27 +151,26 @@ import toastr from 'toastr';
 export default ({
     name: "App",
     components: {
-    LayoutView
+    LayoutView,
     },
     data(){
         return {
-            rolename: "",
-            roledesc: "",
+            position: "",
             roleid: "",
         }
     },
     methods:{
         EditRole()
         {
-            if(this.rolename == "")
+            if(this.position == "")
             {
-                document.querySelector(".feedback1").textContent = "Role name is required!";
+                document.querySelector(".feedback1").textContent = "Position name is required!";
                 document.querySelector(".feedback1").style.display = "block";
                 return;
             }
             else{
                 document.querySelector(".toast").id = "toaster";
-                axios.post("roles/update?id="+this.roleid,null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
+                axios.post("designation/update?id="+this.roleid,null,{position:this.position}).catch(res=>{
                     this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -208,26 +194,25 @@ export default ({
         ViewRole(data)
         {
             this.clearVariable();
-            axios.post("roles?id="+data).catch(res=>{
+            axios.post("designation?id="+data).catch(res=>{
 
                 }).then(res=>{
-                    this.rolename = res.data.result.name;
-                    this.roledesc = res.data.result.description;
+                    this.position = res.data.result.position;
                     this.roleid = data;
                 });
         },
         SubmitRole()
         {
-            if(this.rolename == "")
+            if(this.position == "")
             {
-                document.querySelector(".feedback2").textContent = "Role name is required!";
-                document.querySelector(".feedback2").style.display = "block";
+                document.querySelector(".feedback3").textContent = "Position name is required!";
+                document.querySelector(".feedback3").style.display = "block";
                 return;
             }
             else{
                 document.querySelector(".toast").id = "toaster";
-                document.querySelector(".feedback2").style.display = "none";
-                axios.post("roles/create",null,{name:this.rolename,description:this.roledesc,created_at:""}).catch(res=>{
+                document.querySelector(".feedback3").style.display = "none";
+                axios.post("designation/create",null,{position:this.position}).catch(res=>{
                     this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -260,7 +245,7 @@ export default ({
             else
             {
                 document.querySelector(".toast").id = "toaster";
-                axios.post("roles/delete?id="+data).catch(res=>{
+                axios.post("designation/delete?id="+data).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
@@ -313,10 +298,42 @@ export default ({
         },
         clearVariable()
         {
-            this.roleid = "",
-            this.rolename = "";
-            this.roledesc = "";
-        }
+            this.position = "";
+            this.roleid = "";
+        },
+        checkError(data){
+            var val = 0;
+            if(this.position == "" && data == 2)
+            {
+                document.querySelector(".feedback2").textContent = "Branch name is required!";
+                document.querySelector(".feedback2").style.display = "block";
+                val = 1;
+            }
+            else
+            {
+                document.querySelector(".feedback2").textContent = "";
+                document.querySelector(".feedback2").style.display = "none";
+            }
+            if(this.basic_salary == "" && data == 1)
+            {
+                document.querySelector(".feedback5").textContent = "Branch name is required!";
+                document.querySelector(".feedback5").style.display = "block";
+                val = 1;
+            }
+            if(this.branchname != "" && this.branchloc != "")
+            {
+                document.querySelector(".feedback1").textContent = "";
+                document.querySelector(".feedback2").textContent = "";
+                document.querySelector(".feedback3").textContent = "";
+                document.querySelector(".feedback4").textContent = "";
+                document.querySelector(".feedback5").style.display = "none";
+                document.querySelector(".feedback3").style.display = "none";
+                document.querySelector(".feedback5").style.display = "none";
+                document.querySelector(".feedback6").style.display = "none";
+                val = 0;
+            }
+            return val;
+        },
     },
     mounted() {
         document.querySelector(".toast").id = "";
@@ -327,12 +344,13 @@ export default ({
               },
               responsive: true,
               ajax : {
-                url: 'https://www.4angelshc.com/mobile/roles?_batch=true',
+                url: 'https://www.4angelshc.com/mobile/designation?_batch=true',
                 dataSrc: 'result'
               },
               columns : [
                 { data : "id" },
-                { data : "name" },
+                { data : "position" },
+                { data : "created_at" },
                 { data : "id",
                     render: function(data){
                         return '<a class="actionb" data-toggle="modal" data-target="#exampleEditModalForm" target="_blank"><span id="editrow" data-value='+data+' class="mdi mdi-square-edit-outline"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModalTooltip" target="_blank"><span id="viewrow" data-value='+data+' class="mdi mdi-eye"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
@@ -372,122 +390,8 @@ export default ({
     },
 })
 </script>
-<style>
-@import '../../assets/sleek.css';
-@import 'toastr/build/toastr.min.css';
-
-.red{
-    color: #aa0927;
-}
-.head{
-    background-color: #ffff !important;
-
-}
-.link{
-    display: flex !important;
-    align-items: center !important;
-}
-.close{
-    background-color: transparent;
-    border: 0;
-}
-.modal-body{
-    position: relative;
-    flex: 1 1 auto;
-    padding: 1rem;
-}
-.form-group,.input-group{
-    margin-bottom: 1.25rem;
-}
-.form-group label, .input-group label {
-  color: #1b223c;
-  font-size: 0.98rem;
-}
-.form-group .form-control, .input-group .form-control {
-  font-size: 0.98rem;
-  padding: .5rem 1.06rem;
-  border-color: #e5e9f2;
-}
-.text-muted {
-  color: #6c757d !important;
-}
-.pl-0, .px-0 {
-  padding-left: 0 !important;
-}
-.form-check {
-  position: relative;
-  display: block;
-  padding-left: 1.25rem;
-}
-label {
-  display: inline-block;
-}
-.btn:not(:disabled):not(.disabled) {
-  cursor: pointer;
-}
-.btn-primary {
-  color: #ffffff;
-  background-color: #4c84ff;
-  border-color: #4c84ff;
-}
-.btn {
-  display: inline-block;
-  font-weight: 500;
-  color: #8a909d;
-  text-align: center;
-  vertical-align: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  background-color: transparent;
-  border: 1px solid transparent;
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  padding: 0.59rem 1rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  border-radius: 0.25rem;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-.modal-footer > * {
-  margin: 0.25rem;
-}
-.btn.btn-pill {
-  border-radius: 100px;
-}
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1rem 1rem;
-  border-bottom: 1px solid #e5e9f2;
-  border-top-left-radius: calc(0.3rem - 1px);
-  border-top-right-radius: calc(0.3rem - 1px);
-}
-.modal-body {
-  position: relative;
-  flex: 1 1 auto;
-  padding: 1rem;
-}
-.card-body{
-    overflow: auto;
-}
-.breadcrumb{
-    background-color: transparent !important;
-}
-.breadcrumb-wrapper h1 {
-  color: #1b223c;
-  font-size: 1.63rem;
-  font-weight: 500;
-  font-family: "Roboto", sans-serif;
-  line-height: 1.5;
-  color: #8a909d;
-  text-align: left;
-}
-.actionb{
-    cursor: pointer;
-}
+<style scoped>
+@import '../../assets/scss/_card.scss';
+@import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/sleek.min.css';
 </style>

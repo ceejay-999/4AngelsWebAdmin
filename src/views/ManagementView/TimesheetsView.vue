@@ -13,11 +13,10 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-
 export default ({
     name: "App",
     components: {
-        LayoutView
+    LayoutView
     },
 })
 </script>
@@ -27,4 +26,5 @@ export default ({
 @import '../../assets/scss/_type.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
+
 </style>

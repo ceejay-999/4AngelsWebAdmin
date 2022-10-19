@@ -159,7 +159,7 @@
 <script>
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios , elementLoad} from '@/functions';
-import toastr from 'toastr';
+
 
 export default ({
     name: "App",
@@ -369,113 +369,10 @@ export default ({
     },
 })
 </script>
-<style>
-@import '../../assets/sleek.css';
-@import 'toastr/build/toastr.min.css';
-
-.red{
-    color: #aa0927;
-}
-.head{
-    background-color: #ffff !important;
-
-}
-.link{
-    display: flex !important;
-    align-items: center !important;
-}
-.close{
-    background-color: transparent;
-    border: 0;
-}
-.modal-body{
-    position: relative;
-    flex: 1 1 auto;
-    padding: 1rem;
-}
-.form-group,.input-group{
-    margin-bottom: 1.25rem;
-}
-.form-group label, .input-group label {
-  color: #1b223c;
-  font-size: 0.98rem;
-}
-.form-group .form-control, .input-group .form-control {
-  font-size: 0.98rem;
-  padding: .5rem 1.06rem;
-  border-color: #e5e9f2;
-}
-.text-muted {
-  color: #6c757d !important;
-}
-.pl-0, .px-0 {
-  padding-left: 0 !important;
-}
-.form-check {
-  position: relative;
-  display: block;
-  padding-left: 1.25rem;
-}
-label {
-  display: inline-block;
-}
-.btn:not(:disabled):not(.disabled) {
-  cursor: pointer;
-}
-.btn-primary {
-  color: #ffffff;
-  background-color: #4c84ff;
-  border-color: #4c84ff;
-}
-.btn {
-  display: inline-block;
-  font-weight: 500;
-  color: #8a909d;
-  text-align: center;
-  vertical-align: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  background-color: transparent;
-  border: 1px solid transparent;
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-  padding: 0.59rem 1rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  border-radius: 0.25rem;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-.modal-footer > * {
-  margin: 0.25rem;
-}
-.btn.btn-pill {
-  border-radius: 100px;
-}
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1rem 1rem;
-  border-bottom: 1px solid #e5e9f2;
-  border-top-left-radius: calc(0.3rem - 1px);
-  border-top-right-radius: calc(0.3rem - 1px);
-}
-.modal-body {
-  position: relative;
-  flex: 1 1 auto;
-  padding: 1rem;
-}
-.card-body{
-    overflow: auto;
-}
-.breadcrumb{
-    background-color: transparent !important;
-}
-.actionb{
-    cursor: pointer;
-}
+<style scoped>
+@import '../../assets/scss/_card.scss';
+@import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/scss/_type.scss';
+@import '../../assets/scss/_reboot.scss';
+@import '../../assets/sleek.min.css';
 </style>
