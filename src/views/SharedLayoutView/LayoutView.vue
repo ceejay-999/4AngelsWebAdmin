@@ -21,7 +21,7 @@
               <span class="nav-text">Dashboard</span>
             </RouterLink>
           </li>
-          <li class="has-sub ">
+          <li class="has-sub " data-url="/timeclock">
             <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#buttons"
                           aria-expanded="false" aria-controls="buttons">
               <i class="mdi mdi-calendar-clock"></i>
@@ -44,20 +44,20 @@
               </div>
             </ul>
           </li>
-          <li class="has-sub ">
+          <li class="has-sub " data-url="/jobschedule">
             <RouterLink class="sidenav-item-link" to="/jobschedule">
               <i class="mdi mdi-calendar"></i>
               <span class="nav-text">Job Scheduling</span>
             </RouterLink>
           </li>
-          <li class="has-sub ">
+          <li class="has-sub " data-url="/employee">
             <RouterLink class="sidenav-item-link" to="/employee">
               <i class="mdi mdi-account-multiple"></i>
               <span class="nav-text">Employee</span>
             </RouterLink>
           </li>
 
-          <li class="has-sub" data-url="/role">
+          <li class="has-sub" data-url="/designation">
             <RouterLink class="sidenav-item-link" to="/designation">
               <i class="mdi mdi-settings"></i>
               <span class="nav-text">Role</span>

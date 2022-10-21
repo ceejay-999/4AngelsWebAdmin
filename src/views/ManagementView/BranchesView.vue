@@ -36,14 +36,8 @@
                     <div class="form-group row mb-6">
                             <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Branch Image</label>
 
-                        <div class="col-sm-8 col-lg-9">
-                            <div class="custom-file mb-1">
-                                <input type="file" class="custom-file-input" id="coverImage" required>
-                                <label class="custom-file-label" for="coverImage">Choose file...</label>
-                                <div class="invalid-feedback feedback1">
-                                            
-                                </div>
-                            </div>
+                            <div class="col-sm-8 col-lg-6">
+                                <FileView></FileView>
                             </div>
                         </div>
 
@@ -90,16 +84,10 @@
                     <div class="form-group row mb-6">
                             <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Branch Image</label>
 
-                        <div class="col-sm-8 col-lg-9">
-                            <div class="custom-file mb-1">
-                                <input type="file" class="custom-file-input" id="coverImage" required>
-                                <label class="custom-file-label" for="coverImage">Choose file...</label>
-                                <div class="invalid-feedback feedback4">
-                                            
-                                </div>
+                        <div class="col-sm-8 col-lg-6">
+                            <FileView></FileView>
                             </div>
-                            </div>
-                        </div>
+                    </div>
 
                         <div class="row mb-2">
                             <div class="col-lg-12">
@@ -191,11 +179,13 @@
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios } from '@/functions';
 import toastr from 'toastr';
+import FileView from '../../views/FileManager.vue';
 
 export default ({
     name: "App",
     components: {
-    LayoutView
+    LayoutView,
+    FileView
     },
     data(){
         return {

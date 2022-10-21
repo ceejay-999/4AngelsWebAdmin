@@ -40,6 +40,7 @@
 </script>
 
 <style scoped>
+@import '../../assets/sleek.min.css';
 .logo-img{
   margin: 0 auto;
   display: flex;

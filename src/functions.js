@@ -67,8 +67,9 @@ const lStore = new AsyncStorage('https://www.4angelshc.com/mobile/');
 
 
 class AxiosR{
-    constructor(baseUrl){
+    constructor(baseUrl,defHeaders=null){
         this.baseUrl = baseUrl;
+        this.defHeaders = defHeaders;
     }
 
     get(endpoint){
@@ -83,7 +84,8 @@ class AxiosR{
             method:'post',
             url: this.baseUrl+endpoint
         };
-        if(headers!=null) params[headers] = headers;
+        if(headers == 'default') params[headers] = this.defHeaders
+        else if(headers!=null) params[headers] = headers;
         if(body!=null) params["data"] = toFormData(body);
         return axiosA(params);
     }
@@ -140,6 +142,7 @@ export  function validateForm(obj,rules){
         }else if(r != 'callback'){
             let emailregex = /[a-z0-9._]+@[a-z]+\.[a-z]{2,3}/i;
             let intregex = /[0-9]+/;
+            
 
             validated[r] = true;
 
@@ -147,71 +150,69 @@ export  function validateForm(obj,rules){
                 validated[r] = true;
             else if (rules[r].isEmail ){
                 validated[r] = 'invalid_email';
-                break;
+                continue;
             }
 
             if(rules[r].isInteger && obj[r].match(intregex))
                 validated[r] = true;
             else if(rules[r].isInteger) {
                 validated[r] = 'invalid_number';
-                break;
+                continue;
             }
 
             if(rules[r].regexMatch != null && obj[r].match(rules[r].regexMatch))
                 validated[r] = true;
             else if(rules[r].regexMatch != null) {
                 validated[r] = 'value_and_regex_not_match';
-                break;
+                continue;
             }
-
-            if(rules[r].equalTo != null &&  obj[r] == rules[r].equalTo)
+            if(rules[r].equalTo != null && obj[r] == rules[r].equalTo){
                 validated[r] = true;
-            else if(rules[r].equalTo != null) {
+            }else if(rules[r].equalTo != null && rules[r].equalTo != obj[r]) {
                 validated[r] = 'values_not_match';
-                break;
+                continue;
             }
+            
 
             if(typeof rules[r].maxChars == 'number' && rules[r].maxChars >= obj[r].length)
                 validated[r] = true;
             else if(typeof rules[r].maxChars == 'number') {
                 validated[r] = 'invalid_length_max';
-                break;
+                continue;
             }
 
             if(typeof rules[r].minChars == 'number' && rules[r].minChars <= obj[r].length)
                 validated[r] = true;
             else if(typeof rules[r].minChars == 'number') {
                 validated[r] = 'invalid_length_min';
-                break;
+                continue;
             }
 
-
+            
         }
     }
+
 
     let someEmpty = false;
     if(rules.callback != null){
         for(let v in validated){
             if(validated[v] === 'empty'){
                 validated.allValid = false;
-                rules.callback();
+                rules.callback(v);
                 someEmpty = true;
-                break;
             }
         }
     }
-    if(!someEmpty){
         for(let v in validated){
             if(validated[v] != true){
                 validated.allValid = false;
+                if(v == 'allValid' || v == 'callback') continue;
                 if(rules[v].callback != null){
                     rules[v].callback(validated[v],v);
-                    break;
                 }
 
             }
         }
-    }
 
     return validated;
 }

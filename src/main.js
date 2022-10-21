@@ -11,6 +11,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 //Components
 import LayoutView from '../src/views/SharedLayoutView/LayoutView.vue';
+import FileView from '../src/views/FileManager.vue';
 
 
 
@@ -22,5 +23,6 @@ app.mount('#app')
 
 //initailize components
 app.component('LayoutView', LayoutView)
+app.component('FileView', FileView)
 
 
