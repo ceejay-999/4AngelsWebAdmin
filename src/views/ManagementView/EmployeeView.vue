@@ -190,6 +190,7 @@
         </div>
         </div>
         <div class="row">
+            <div class="textcenter"></div>
             <div class="col-lg-6 col-xl-4" v-for="u in users" :key = "u.id">
                 <div class="card card-default p-4">
                 <a href="javascript:0" class="media text-secondary" data-toggle="modal" data-target="#modal-contact" @click="ViewDetailsEmp(u.id)">
@@ -317,7 +318,7 @@
 						</div>
                         <div class="col-sm">
 							<div class="form-group">
-								<label for="fname">Assign to branch</label>
+								<label for="fname">Assign to Facilities</label>
 								<select class="chosen-select" id="ebranc" multiple>
                                     <option v-for="bran in branches" :value="bran.id">{{bran.name}}</option>
                                 </select>
@@ -438,7 +439,7 @@
                         <p>{{viewusers.username}}</p>
                         <p class="text-dark font-weight-medium pt-4 mb-2">Date Hired</p>
                         <p>{{viewusers.date_hired}}</p>
-                        <p class="text-dark font-weight-medium pt-4 mb-2">Branch</p>
+                        <p class="text-dark font-weight-medium pt-4 mb-2">Assigned Facilities</p>
                         <p v-for="br in viewdetailsusersbranch"><span>{{br.name}}</span> {{br.location}}</p>
                         </div>
                     </div>
@@ -481,6 +482,7 @@ export default ({
             viewusers: {},
             role: "",
             userid: "",
+            search: "",
         }
     }, 
     mounted() {
@@ -510,10 +512,96 @@ export default ({
                 }).then(res=>{
                   this.users = res.data.result;
                 })
+        //Searching
+        document.querySelector("#search-input").onkeyup = (e)=>{
+        if(!(e.key == 'Enter')) return;
+        this.search = document.querySelector("#search-input").value;
+        axios.post("users?lastname="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+            }).then(res=>{
+                if(res.data.success)
+                {
+                    this.users = [];
+                    if(res.data.success){
+                        this.users = res.data.result;
+                        document.querySelector(".textcenter").style.display = "none";
+                    }
+                    else{
+                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                        document.querySelector(".textcenter").style.display = "block";
+                    }
+                }
+                else
+                {
+                    axios.post("users?firstname="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+                    }).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.users = [];
+                            if(res.data.success){
+                                this.users = res.data.result;
+                                document.querySelector(".textcenter").style.display = "none";
+                            }
+                            else{
+                                document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                                document.querySelector(".textcenter").style.display = "block";
+                            }
+                        }
+                        else
+                        {
+                            
+                        }
+                    });
+                }
+            });
+        //End of Searching
+        }
+        document.querySelector("#search-btn").onclick = ()=>{
+        this.search = document.querySelector("#search-input").value;
+        axios.post("users?lastname="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+            }).then(res=>{
+                if(res.data.success)
+                {
+                    this.users = [];
+                    if(res.data.success){
+                        this.users = res.data.result;
+                        document.querySelector(".textcenter").style.display = "none";
+                    }
+                    else{
+                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                        document.querySelector(".textcenter").style.display = "block";
+                    }
+                }
+                else
+                {
+                    axios.post("users?firstname="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+                    }).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.users = [];
+                            if(res.data.success){
+                                this.users = res.data.result;
+                                document.querySelector(".textcenter").style.display = "none";
+                            }
+                            else{
+                                document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                                document.querySelector(".textcenter").style.display = "block";
+                            }
+                        }
+                        else
+                        {
+                            
+                        }
+                    });
+                }
+            });
+        };
     },
     methods : {
         cleardata(){
-            this.role = "";
             this.firstname = "";
             this.lastname = "";
             this.phonenumber = "";
@@ -525,6 +613,9 @@ export default ({
             this.password = "";
             this.confirmpassword = "";
             this.designations = "";
+            this.role = "";
+            this.userid = "";
+            this.search = "";
         },
         EditEmployee(){
             this.cleardata();
@@ -720,7 +811,7 @@ export default ({
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",2);
-
+                        this.cleardata();
                         setTimeout(() => {
                             this.$router.go(0);
                         }, 2000);
@@ -924,5 +1015,10 @@ export default ({
 .img-fluid{
     width: 100px;
     height: 100px !important;
+}
+.textcenter{
+    display: none;
+    margin: 0 auto;
+    font-size: 20px;
 }
 </style>

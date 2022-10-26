@@ -101,7 +101,7 @@
         </div>
         <!--Modal-->
         <div class="breadcrumb-wrapper">
-            <h1>Role</h1>
+            <h1>Designation</h1>
                 <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0">
                     <li class="breadcrumb-item">
@@ -109,7 +109,7 @@
                         <span class="mdi mdi-home"></span>                
                     </RouterLink>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page">Role</li>
+                    <li class="breadcrumb-item" aria-current="page">Designation</li>
                 </ol>
                 </nav>
         </div>
@@ -117,10 +117,10 @@
             <div class="col-12">
                 <div class="card card-default">
                     <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
-                        <h2>Role Table</h2>
+                        <h2>Designation Table</h2>
 
                         <a @click="clearVariable" data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
-                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
+                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Designation
                         </a>
                     </div>
 

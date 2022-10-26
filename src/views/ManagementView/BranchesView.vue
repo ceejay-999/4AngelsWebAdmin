@@ -29,12 +29,12 @@
                 <div class="modal-content">
                 <form >
                     <div class="modal-header px-4">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Edit Branch ID: {{branchid}}</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Edit Facility ID: {{branchid}}</h5>
                     </div>
 
                     <div class="modal-body px-4">
                     <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Branch Image</label>
+                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
 
                             <div class="col-sm-8 col-lg-6">
                                 <FileView></FileView>
@@ -44,7 +44,7 @@
                         <div class="row mb-2">
                             <div class="col-lg-12">
                             <div class="form-group">
-                                <label for="firstName">Branch name</label>
+                                <label for="firstName">Facility name</label>
                                 <input type="text" class="form-control" v-model="branchname" placeholder="Branch Name *">
                                 <div class="invalid-feedback feedback2">
                                             
@@ -55,7 +55,7 @@
                         <div class="row mb-2">
                             <div class="col-lg-12">
                             <div class="form-group">
-                                <label for="firstName">Location name</label>
+                                <label for="firstName">Location </label>
                                 <input type="text" class="form-control" v-model="branchloc" placeholder="Location *">
                                 <div class="invalid-feedback feedback3">
                                             
@@ -75,14 +75,14 @@
         <div class="modal fade" id="modal-add-contact" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
-                <form >
+                <form>
                     <div class="modal-header px-4">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Create New Branch</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Create New Facility</h5>
                     </div>
 
                     <div class="modal-body px-4">
                     <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Branch Image</label>
+                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
 
                         <div class="col-sm-8 col-lg-6">
                             <FileView></FileView>
@@ -92,7 +92,7 @@
                         <div class="row mb-2">
                             <div class="col-lg-12">
                             <div class="form-group">
-                                <label for="firstName">Branch name</label>
+                                <label for="firstName">Facility name</label>
                                 <input type="text" class="form-control" v-model="branchname" placeholder="Branch Name *">
                                 <div class="invalid-feedback feedback5">
                                             
@@ -103,7 +103,7 @@
                         <div class="row mb-2">
                             <div class="col-lg-12">
                             <div class="form-group">
-                                <label for="firstName">Location name</label>
+                                <label for="firstName">Location</label>
                                 <input type="text" class="form-control" v-model="branchloc" placeholder="Location *">
                                 <div class="invalid-feedback feedback6">
                                             
@@ -123,7 +123,7 @@
         <!--Modal-->
         <div class="breadcrumb-wrapper breadcrumb-contacts">
             <div>
-                <h1>Branch</h1>
+                <h1>Facilities</h1>
 
             
                 <nav aria-label="breadcrumb">
@@ -133,12 +133,12 @@
                         <span class="mdi mdi-home"></span>                
                     </RouterLink>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page">Branch</li>
+                    <li class="breadcrumb-item" aria-current="page">Facilities</li>
                 </ol>
                 </nav>
             </div>
             <div>
-                <button type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Branch
+                <button type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Facility
                 </button>
             </div>
         </div>
@@ -180,6 +180,7 @@ import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios } from '@/functions';
 import toastr from 'toastr';
 import FileView from '../../views/FileManager.vue';
+import { elementLoad } from '../../functions';
 
 export default ({
     name: "App",
@@ -193,6 +194,7 @@ export default ({
             branchname: "",
             branchloc: "",
             branchid: "",
+            search: "",
         }
     },
     methods:{
@@ -395,12 +397,50 @@ export default ({
         }).then(res=>{
             if(res.data.success){
                 this.branches = res.data.result;
+                console.log("test");
                 document.querySelector(".textcenter").style.display = "none";
             }
             else{
                 document.querySelector(".textcenter").textContent = "No Data to be presented!";
             }
         });
+        elementLoad('#search-btn').then(()=>{
+            document.querySelector("#search-btn").onclick = ()=>{
+            this.search = document.querySelector("#search-input").value;
+            axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+                }).then(res=>{
+                    this.branches = [];
+                    if(res.data.success){
+                        this.branches = res.data.result;
+                        document.querySelector(".textcenter").style.display = "none";
+                    }
+                    else{
+                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                    }
+                });
+            };
+        })
+        document.querySelector("#search-input").onkeyup = (e)=>{
+        if(!(e.key == 'Enter')) return;
+        this.search = document.querySelector("#search-input").value;
+        axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+            }).then(res=>{
+                if(res.data.success)
+                {
+                    this.users = [];
+                    if(res.data.success){
+                        this.branches = res.data.result;
+                        document.querySelector(".textcenter").style.display = "none";
+                    }
+                    else{
+                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                        document.querySelector(".textcenter").style.display = "block"; 
+                    }
+                }
+            });
+        }
     },
 })
 </script>

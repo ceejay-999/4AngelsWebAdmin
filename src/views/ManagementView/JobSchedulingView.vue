@@ -1,18 +1,14 @@
 <template>
     <LayoutView>
-        <div class="error-wrapper rounded border bg-white px-5">
-            <div class="row justify-content-center align-items-center text-center">
-                <div class="col-xl-4">
-                    <h1 class="text-primary bold error-title">404</h1>
-                    <p class="pt-4 pb-5 error-subtitle">We are still Developing this Page. Comeback Later</p>
-                    <RouterLink to="/dashboard" class="btn btn-primary btn-pill">Back to Home</RouterLink>
-                </div>
-            </div>
-        </div>
+        <AppointView>
+
+        </AppointView>
     </LayoutView>
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
+import AppointView from "../../views/SharedLayoutView/AppointmentsCalendar.vue"
+
 export default ({
     name: "App",
     components: {

@@ -1,19 +1,20 @@
 <template>
+<div class="toast" >
+
+</div>
     <div class="container d-flex align-items-center justify-content-center vh-100">
       <div class="row justify-content-center">
         <div class="col-lg-6 col-md-10">
           <div class="card">
-
             <div class="card-body p-5">
               <img class="logo-img" src="../../assets/Logo.png" />
               <h4 class="text-dark mb-5" id="cent">Sign In Admin</h4>
-              <form action="/index.html">
                 <div class="row">
                   <div class="form-group col-md-12 mb-4">
-                    <input type="email" class="form-control input-lg" id="email" aria-describedby="emailHelp" placeholder="Username">
+                    <input type="email" v-model="loginInput" class="form-control input-lg" id="email" aria-describedby="emailHelp" placeholder="Username">
                   </div>
                   <div class="form-group col-md-12 ">
-                    <input type="password" class="form-control input-lg" id="password" placeholder="Password">
+                    <input type="password" class="form-control input-lg" v-model="password" id="password" placeholder="Password">
                   </div>
                   <div class="col-md-12">
                     <div class="d-flex my-2 justify-content-between">
@@ -25,10 +26,9 @@
                       </div>
                       <p><a class="text-blue" href="#">Forgot Your Password?</a></p>
                     </div>
-                    <button type="submit" class="btn btn-lg btn-primary btn-block mb-4">Sign In</button>
+                    <button type="submit" class="btn btn-lg btn-primary btn-block mb-4" @click="login">Sign In</button>
                   </div>
                 </div>
-              </form>
             </div>
           </div>
         </div>
@@ -36,7 +36,108 @@
     </div>
 </template>
 <script>
+import { axios , validateForm,lStore } from '@/functions.js';
+import toastr from 'toastr';
 
+export default({
+  name: 'LoginPage',
+  data() {
+      return{
+          loginInput: "",
+          password: "",
+      };
+  },
+  methods: {
+    login(){
+      document.querySelector(".toast").id = "toaster";
+      // console.log('aw');
+      let rules = {password:{isRequired:true}};
+      let input = {password:this.password};
+      rules.email = {isRequired:true,callback:()=>{this.callToaster("toast-top-right",4)}};
+      input.email = this.loginInput;
+      rules.callback = ()=>{this.callToaster("toast-top-right",5)};
+      const valid = validateForm(input,rules);
+        if(!valid.allValid) return;
+
+        console.log(this.loginInput);
+        
+        this.formLoading = true;
+
+        axios.post('users/login',null,{
+            login: this.loginInput,
+            password: this.password
+        }).catch(err=>{
+            console.log(err.response);
+            this.callToaster("toast-top-right",5);
+        }).then(res=>{
+            console.log(res.data);
+            if(res.data.msg === 'user not found') this.callToaster("toast-top-right",6);
+            if(res.data.msg === 'wrong password') this.callToaster("toast-top-right",6);
+            this.formLoading = false;
+            
+            if(res.data.success) {
+                if(res.data.result.role == "Admin"){
+
+                  lStore.set('user_id',res.data.result.id);
+                  lStore.set('user_token',res.data.token);
+                  lStore.set('user_info', res.data.result);
+                  this.callToaster("toast-top-right",1)
+                  this.$router.replace('/dashboard');
+                }
+                else
+                {
+                  this.callToaster("toast-top-right",6);
+                }
+            }
+      });
+    },
+    callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: true,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror == 1)
+                {
+                    toastr.success("Login successfully!", "Login Successfully!");
+                }
+                if(reserror == 2)
+                {
+                    toastr.error("Something went Wrong!", "Error!");
+                }
+                if(reserror == 3)
+                {
+                    toastr.error("Password must be more than 8 characters!", "Error!");
+                }
+                if(reserror == 4)
+                {
+                  toastr.error("Email must be in valid format!", "Error!");
+                }
+                if(reserror == 5)
+                {
+                  toastr.error("All fields are required!", "Error!");
+                }
+                if(reserror == 6)
+                {
+                  toastr.error("Username or password doesn`t match!","Error!");
+                }
+            }
+        },
+  }
+});
 </script>
 
 <style scoped>

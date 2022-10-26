@@ -60,7 +60,7 @@
           <li class="has-sub" data-url="/designation">
             <RouterLink class="sidenav-item-link" to="/designation">
               <i class="mdi mdi-settings"></i>
-              <span class="nav-text">Role</span>
+              <span class="nav-text">Designation</span>
             </RouterLink>
           </li>
 
@@ -87,7 +87,7 @@
           <button type="button" name="search" id="search-btn" class="btn btn-flat">
             <i class="mdi mdi-magnify"></i>
           </button>
-          <input type="text" name="query" id="search-input" class="form-control" placeholder="'button', 'chart' etc."
+          <input type="text" name="query" id="search-input" class="form-control" placeholder="Search"
             autofocus autocomplete="off" />
         </div>
         <div id="search-results-container">
@@ -558,6 +558,12 @@ export default ({
   components: {
 
   },
+  data(){
+    return{
+      search: "",
+      branches: "",
+    }
+  },
   mounted(){
     $(document).ready(function () {
 
@@ -881,7 +887,7 @@ export default ({
                 el.classList.remove('expand');
             }
         }); 
-    }
+    },
   },
 })
 </script>

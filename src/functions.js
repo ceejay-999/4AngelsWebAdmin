@@ -44,6 +44,12 @@ export class AsyncStorage{
         stringObj = JSON.parse(stringObj);
         return stringObj;
     }
+
+
+    isset(key){
+        if(localStorage.getItem('async_'+key) == null) return false;
+        return true;
+    }
 }
 
 // COMP FUNCTIONS FOR ASYNCSTORAGE
@@ -62,7 +68,7 @@ function isJsonString(str) {
     return true;
 }
 
-const lStore = new AsyncStorage('https://www.4angelshc.com/mobile/');
+export const lStore = new AsyncStorage('https://www.4angelshc.com/mobile/');
 // END OF COMP FUNCTIONS FOR ASYNCSTORAGE
 
 
