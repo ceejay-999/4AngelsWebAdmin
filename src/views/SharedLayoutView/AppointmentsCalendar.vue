@@ -1,117 +1,172 @@
 <template>
-    <button @click="view = !view">{{(view) ? 'Employee' : 'Month'}} View</button>
-    <div class="calendarComp">
-        <div id="calendar" >
-            <div v-if="view==0">
-                <h2>Month View</h2>
-                <h3>{{currentCalendar.monthString}} of {{currentCalendar.year}}</h3>
-                <div class="calendarCtrl">
-                    <button @click="prevYear">&laquo;</button>
-                    <button @click="prevMonth">&#10094;</button>
-                    <button @click="nextMonth">&#10095;</button>
-                    <button @click="nextYear">&raquo;</button>
-                    <input type="date" v-model="queryDate.rcvrString">
-                    <button @click="gotoDate">Go</button>
-                </div>
-                
+    <div class="breadcrumb-wrapper breadcrumb-contacts">
+        <h2>Job Schedule</h2>
+        <div class="option">
+            <button class="btn btn-primary" @click="view = !view;timeViewPanel = !timeViewPanel;buildCalendar()">{{(view) ? 'Create' : 'Assign'}} Schedule </button> 
+        </div>
+    </div>
+    <div class="card card-default">
+        <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
+            <h3>{{currentCalendar.monthString}} of {{currentCalendar.year}}</h3>
+            <div class="option">
+                <button class="btn btn-primary hide"  @click="view = !view;">{{(view) ? 'Employee' : 'Month'}} View</button> 
+                <button class="btn btn-success" @click="saveChanges">Save</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="calendarComp">
+                <div id="calendar" >
+                    <div v-if="view==0">
+                        <div class="calendarCtrl">
+                            <button class="mb-1 btn btn-info" @click="prevYear">&laquo;</button>
+                            <button class="mb-1 btn btn-info" @click="prevMonth">&#10094;</button>
+                            <button class="mb-1 btn btn-info" @click="nextMonth">&#10095;</button>
+                            <button class="mb-1 btn btn-info" @click="nextYear">&raquo;</button>
+                            <input class="form-control" type="date" v-model="queryDate.rcvrString">
+                            <button class="mb-1 btn btn-info" @click="gotoDate">Go</button>
+                        </div>
+                        
+                            
                     
-            
-                <div class="calendarView">
-                    <div class="calendarWeekHeads" v-for="c in currentCalendar.weekString" :key="c">{{c}}</div>
-                    <div class="calendarDays"  :key="c" :id="c.dateId" :class="c.type" v-for="c in currentCalendar.viewArray" :data-dispkey="c.dateNum" @click="selectDay($event,c.dateNum)" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="drop" :data-datestring="c.dateString">
-                        {{c.dateNum}}
-                        <div class="dayMark" v-for="(d,i) in c.dayMark" :key="d" :draggable="d.refMarker == null" :data-daymark="stringify(d)" @dragstart="dragStart" :style="'background:'+d.color" @click="selectDayMark(d)" :class="{selectedMark: (d.index == this.newMarkDetails.index)}">
-                            <strong>{{d.title}}</strong>
-                            <em>{{d.index}}</em>
-                            <p>From {{d.time_start}}</p>
-                            <p>To {{d.time_end}}</p>
+                        <div class="calendarView">
+                            <div class="calendarWeekHeads" v-for="c in currentCalendar.weekString" :key="c">{{c}}</div>
+                            <div class="calendarDays"  :key="c" :id="c.dateId" :class="c.type" v-for="c in currentCalendar.viewArray" :data-dispkey="c.dateNum" @click="selectDay($event,c.dateNum)" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="drop" :data-datestring="c.dateString">
+                                {{c.dateNum}}
+                                <div class="dayMark" v-for="(d) in c.dayMark" :key="d" :draggable="d.refMarker == null" :data-daymark="stringify(d)" @dragstart="dragStart" :style="'background:'+d.color" @click="selectDayMark(d)" :class="{selectedMark: (d.index == this.newMarkDetails.index)}">
+                                    <strong>{{d.time_start}} {{d.title}}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="employeeWeekView" v-if="view==1">
+                        
+                        <h2><small>({{dateFormat('%lm %d, %y',computeDays(1)[2])}} to {{dateFormat('%lm %d, %y',computeDays(7)[2])}})</small></h2>
+                        <div class="but">
+                            <button class="mb-1 btn btn-info" @click="weekStartChange(7,'dec')">&laquo; -1 Week</button>
+                            <button class="mb-1 btn btn-info" @click="weekStartChange(1,'dec')">&#10094; -1 Day</button>
+                            <button class="mb-1 btn btn-info" @click="weekStartChange(1,'inc')">&#10095; +1 Day</button>
+                            <button class="mb-1 btn btn-info" @click="weekStartChange(7,'inc')">&raquo; +1 Week</button>
+                        </div>
+                        <h3>Open Schedules</h3>
+                        <div class="weekgrid1">
+                            <div v-for="i in 7" :key="i" class="topBoxes2">{{weekViewLabel(computeDays(i)[2])}} <span>{{computeDays(i)[0]}}</span></div>
+                                <div class="schedBox dateBox" v-for="i in 7" :key="i" :id="'date-'+computeDays(i)[1]" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="drop" :data-datestring="computeDays(i)[2]" @click="selectDate($event,'date-'+computeDays(i)[2])">
+                                <div class="dayMark" v-for="(d) in dayMarks['date-'+computeDays(i)[1]]" :key="d" draggable="true" :data-daymark="stringify(d)" @dragstart="dragStart" :style="'background:'+d.color+';width:'+(topBoxes2 - 40)+'px'"
+                                    @click="selectDayMark(d)" :class="{selectedMark: (d == this.selectedDayMark)}" v-show="isOpenSchedule(d)">
+                                    <strong>{{d.time_start}} {{d.title}}</strong>
+                                    <em>{{d.index}}</em>
+                                    <p>From {{d.time_start}}</p>
+                                    <p>To {{d.time_end}}</p>
+                                    <p>Employees: {{objectKeys(d.employees).length}}/{{d.max_emp}}</p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="weekgrid1">
+                            
+                        </div>
+
+                        <h3>Employee Schedules</h3>
+                        <div class="weekgrid2">
+                            <div><strong>Employee</strong></div>
+                            <div v-for="i in 7" :key="i" class="topBoxes">{{weekViewLabel(computeDays(i)[2])}} <span>{{computeDays(i)[0]}}</span></div>
+                        </div>
+                        <div class="weekgrid2 employeegrid" v-for="emp in empScheds" :key="emp">
+                            <div><strong>{{emp.name}}</strong></div>
+                            <div class="schedBox empSchedBox" v-for="i in 7" :key="i" :data-day="'date-'+computeDays(i)[1]" :data-for="emp.id" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="dropSched">
+
+                                <div class="dayMark" v-for="(d) in empSchedList('date-'+computeDays(i)[1],emp.id)" :key="d" :data-daymark="stringify(d)" :style="'background:'+d.color+';width:'+(this.topBoxes - 45)+'px'" @click="deleteThis(d.index,emp.id)">
+                                    <strong>{{d.title}}</strong>
+                                    <p>From {{d.time_start}}</p>
+                                    <a href="javascript:;" @click="deleteThis(d.index,emp.id)">(x) Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                    </div>
+                </div>
+
+                <div class="modal" v-if="hasSelected" id="exampleModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle">
+                    <div class="modal-dialog modal-lg" role="document">
+		                <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{(selectedDayMark == null) ? 'Add':'Edit'}} Schedule</h5>
+                                <button type="button" class="close" @click="newMarkDetails = {index:0};selectedDayMark=null;hasSelected = false;">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- <div class="addMarker"> -->
+                                    <div class="form-group">
+                                        Date: <strong>{{queryDate.monthString}} {{queryDate.day}}, {{currentCalendar.year}}</strong> to <input class="form-control" id="end_date" type="date" v-model="newMarkDetails.end_date" />
+                                    </div>
+                                    <br />
+                                    Time: From <input class="form-control" type="time" v-model="newMarkDetails.time_start"> to <input class="form-control" type="time"  v-model="newMarkDetails.time_end"><br/>
+                                    Color: 
+                                    <div class="color_selector_container">
+                                    <ul class="color_selector_list">
+                                        <li v-for="c in colors" :key="c" :style="'background:'+c+';border: 3px solid '+c" @click="newMarkDetails.color = c" :class="{selected:(newMarkDetails.color == c)}"></li>
+                                    </ul></div>
+                                    <input class="form-control" placeholder="Add Title" v-model="newMarkDetails.title">
+                                    <textarea class="form-control" placeholder="Add Description" v-model="newMarkDetails.description"></textarea>
+
+                                    <div class="branch_inputlist">
+                                            <input class="form-control" placeholder="Branch" :value="branchName(newMarkDetails.branch)" readonly>
+                                            <ul>
+                                                <li @click="newMarkDetails.branch = ''"> - Select Branch - </li>
+                                                <li v-for="b in branches" :key="b.id" :data-id="b.id" @click="newMarkDetails.branch = b.id">{{b.name}}</li>
+                                            </ul>
+                                        </div>
+                                    <input class="form-control" type="number" placeholder="Max Employees" v-model="newMarkDetails.max_emp" @input="updateEmpSchedList">
+                                    <div class="selected_emps">
+                                        <div class="selected_emps_inputlist">
+                                            <input class="form-control" placeholder="Assign Schedule to Employees" v-model="searchEmpBox">
+                                            <ul id="selected_emps_datalist" v-if="searchEmpBox != ''">
+                                                <li v-for="e in searchEmpResult" :key="e.id" :data-id="e.id" @click="selectEmpSched(e.id);searchEmpBox = ''">{{e.name}}</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <ul id="selected_emps_emplist">
+                                            <li v-for="e,i in newMarkDetails.employees" :key="e" :data-id="e">{{e}}
+                                                <a href="javascript:;" @click="delete deleteEmpSched(i)">&#10005;</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                <!-- </div> -->
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-info btn-pill" @click="newMarkDetails = {index:0};selectedDayMark=null;hasSelected = false;">Cancel</button>
+                                <button class="btn btn-danger btn-pill" @click="deleteSched(this.newMarkDetails.index)" v-if="selectedDayMark!=null" >Delete Schedule</button>
+                                <button class="btn btn-primary btn-pill" @click="addMarker">{{(selectedDayMark == null) ? 'Create':'Update'}} Schedule</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="employeeWeekView" v-if="view==1">
-                
-                <h2>Employee View <small>({{dateFormat('%lm %d, %y',computeDays(1)[2])}} to {{dateFormat('%lm %d, %y',computeDays(7)[2])}})</small></h2>
-                <button @click="weekStartChange(7,'dec')">&laquo; -1 Week</button>
-                <button @click="weekStartChange(1,'dec')">&#10094; -1 Day</button>
-                <button @click="weekStartChange(1,'inc')">&#10095; +1 Day</button>
-                <button @click="weekStartChange(7,'inc')">&raquo; +1 Week</button>
-                <h3>Open Schedules</h3>
-                <div class="weekgrid1">
-                    <div v-for="i in 7" :key="i">{{weekViewLabel(computeDays(i)[2])}} <span>{{computeDays(i)[0]}}</span></div>
-                </div>
-                <div class="weekgrid1">
-                    <div class="schedBox dateBox" v-for="i in 7" :key="i" :id="'date-'+computeDays(i)[1]" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="drop" :data-datestring="computeDays(i)[2]" @click="selectDate($event,'date-'+computeDays(i)[2])">
-                        <div class="dayMark" v-for="(d) in dayMarks['date-'+computeDays(i)[1]]" :key="d" draggable="true" :data-daymark="stringify(d)" @dragstart="dragStart" :style="'background:'+d.color"
-                            @click="selectDayMark(d)" :class="{selectedMark: (d == this.selectedDayMark)}" v-show="isOpenSchedule(d)">
-                            <strong>{{d.title}}</strong>
-                            <em>{{d.index}}</em>
-                            <p>From {{d.time_start}}</p>
-                            <p>To {{d.time_end}}</p>
-                            <p>Employees: {{objectKeys(d.employees).length}}/{{d.max_emp}}</p>
-
+                <div class="dayMarkPanel" v-if="timeViewPanel">
+                        
+                    <div>
+                        <h3>Time View for {{queryDate.monthString}} {{queryDate.day}}, {{currentCalendar.year}}</h3>
+                        <div class="timeView">
+                            <div class="time" v-for="(index,i) in 24" :key="i" :id="'timemark-'+i">
+                                <span>{{(i == 0) ? '12' :(i>12) ? (i-12):i}} {{(i==12) ? 'pm' : (i>12) ? 'pm' : 'am'}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <h3>Employee Schedules</h3>
-                <div class="weekgrid2">
-                    <div><strong>Employee</strong></div>
-                    <div v-for="i in 7" :key="i">{{weekViewLabel(computeDays(i)[2])}} <span>{{computeDays(i)[0]}}</span></div>
-                </div>
-                <div class="weekgrid2 employeegrid" v-for="emp in empScheds" :key="emp">
-                    <div><strong>{{emp.name}}</strong></div>
-                    <div class="schedBox empSchedBox" v-for="i in 7" :key="i" :data-day="'date-'+computeDays(i)[1]" :data-for="emp.id" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="dropSched">
-
-                        <div class="dayMark" v-for="(d,i) in empSchedList('date-'+computeDays(i)[1],emp.id)" :key="d" :data-daymark="stringify(d)" :style="'background:'+d.color">
-                            <strong>{{d.title}}</strong>
-                            <em>{{d.index}}</em>
-                            <p>From {{d.time_start}}</p>
-                            <p>To {{d.time_end}}</p>
-                            <a href="javascript:;" @click="deleteThis(d.index,emp.id)">(x) Remove</a>
-                        </div>
-                    </div>
-                </div>
                 
                 
+
             </div>
         </div>
-
-        <div class="modal" v-if="hasSelected">
-            <div class="addMarker">
-                <h2>{{(selectedDayMark == null) ? 'Add':'Edit'}} Schedule</h2>
-                Date: <strong>{{queryDate.monthString}} {{queryDate.day}}, {{currentCalendar.year}}</strong> to <input id="end_date" type="date" v-model="newMarkDetails.end_date">
-                <br />
-                Time: From <input type="time" v-model="newMarkDetails.time_start"> to <input type="time"  v-model="newMarkDetails.time_end"><br/>
-                Color: <input type="color" placeholder="Add Branch" v-model="newMarkDetails.color">
-                <input placeholder="Add Title" v-model="newMarkDetails.title">
-                <input placeholder="Add Branch" v-model="newMarkDetails.branch">
-                <input type="number" placeholder="Max Employees" v-model="newMarkDetails.max_emp">
-                <button @click="addMarker">{{(selectedDayMark == null) ? 'Create':'Update'}} Schedule</button>
-                <button @click="newMarkDetails = {index:0};selectedDayMark=null;hasSelected = false;">Cancel</button>
-            </div>
-        </div>
-        <div class="dayMarkPanel">
-             
-            <div hidden>
-                <h3>Time View for {{queryDate.monthString}} {{queryDate.day}}, {{currentCalendar.year}}</h3>
-                <div class="timeView">
-                    <div class="time" v-for="(index,i) in 24" :key="i" :id="'timemark-'+i">
-                        <span>{{(i == 0) ? '12' :(i>12) ? (i-12):i}} {{(i==12) ? 'pm' : (i>12) ? 'pm' : 'am'}}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        
-        
-
     </div>
     
 </template>
 
 <script>
-import {dateFormat, elementLoad,formatDateString} from '../../functions';
+import {dateFormat, elementLoad, formatDateString, validateForm, axios} from '../../functions';
 
 export default ({
     data(){
@@ -134,7 +189,8 @@ export default ({
                 day: 1
             },
             weekStart:28,
-            colors: ['#ff9e9e','#ffe29e','#caff9e','#9effe0','#9ec3ff'],
+            colors: ['#4054b2','#d30915','#1b9ce2','#3bb57a','#f2522c'],
+            branches:[],
 
             dayMarks:{},
             empScheds:[
@@ -143,8 +199,13 @@ export default ({
                 {id:3,name: 'James'},
                 {id:4,name: 'Marco'},
             ],
-            newMarkDetails:{},
-            selectedDayMark:null
+            searchEmpBox:'',
+            newMarkDetails:{employees:{}},
+            deletedIndexes:[],
+            topBoxes:0,       
+            topBoxes2:0,     
+            selectedDayMark:null,
+            timeViewPanel: true
     
         }
     },
@@ -284,7 +345,7 @@ export default ({
         },
         selectDay(e,dNum){
             this.hasSelected = true;          
-            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0}}
+            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{}}}
         	if(document.querySelector(".selected") != null)
                 document.querySelector(".selected").classList.remove("selected");
             this.queryDate.year = this.currentCalendar.year;
@@ -301,10 +362,9 @@ export default ({
         },
         selectDate(e,dateString){
             this.hasSelected = true;
-            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0}}
+            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{}}}
         	if(document.querySelector(".selected") != null)
                 document.querySelector(".selected").classList.remove("selected");
-            console.log(dateString);
             let dateParse = new Date(dateString.match('[0-9]+-[0-9]+-[0-9]+')[0]);
             this.queryDate.year = dateParse.getFullYear();
             this.queryDate.month = dateParse.getMonth();
@@ -320,10 +380,50 @@ export default ({
         },
         addMarker(){
             if(this.selectedDayMark != null && this.selectedDayMark != '') {this.updateMarker(); return}
-            
             let dateString = this.queryDate.year + '-' +
             (this.queryDate.month+1) + '-' +
             this.queryDate.day;
+
+            let valid = validateForm(this.newMarkDetails,{
+                title:"required",
+                branch:"required",
+                time_start:"required",
+                time_end:"required",
+                max_emp:{
+                    isRequired: true,
+                    greaterThan: 0
+                },
+                color:"required",
+                callback(e){
+                    if(e == 'max_emp') e = 'Max Employees';
+                    if(e == 'time_start') e = 'Start Time';
+                    if(e == 'time_end') e = 'End Time';
+                    alert(e.charAt(0).toUpperCase() + e.substring(1) + ' field is empty!');
+                }
+            });
+            
+            if(!valid.allValid) return;
+
+            if(this.newMarkDetails.end_date != null){
+                let dateStart = new Date(formatDateString(dateString).replaceAll(' ',''));
+                let dateEndDate = new Date(formatDateString(this.newMarkDetails.end_date).replaceAll(' ',''));
+                
+                if(dateStart > dateEndDate){            
+                    alert('Start date should be earlier than the end date!');
+                    return;
+                }
+            }
+                
+            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start+':00');
+            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end+':00');
+                
+            if(dateStart > dateEndDate){            
+                alert('Start time should be earlier than the end time!');
+                return;
+            }
+
+            //end of validation
+
             this.newMarkDetails.dateId = 'date-'+this.queryDate.year+"" + this.queryDate.month + this.queryDate.day;
             this.newMarkDetails.start_date = dateString;
             if(this.newMarkDetails.end_date != null) this.newMarkDetails.end_date = formatDateString(this.newMarkDetails.end_date).replaceAll(' ','');
@@ -365,7 +465,8 @@ export default ({
             let dateStringIndex = String(d.getUTCFullYear())+String(d.getUTCMonth())+String(d.getUTCDate())+
             String(d.getHours())+String(d.getMinutes())+String(d.getSeconds());
             this.newMarkDetails.index = dateStringIndex;
-            this.newMarkDetails.employees = {};
+            this.newMarkDetails.created = true;
+            console.log(this.newMarkDetails);
             this.dayMarks[this.newMarkDetails.dateId].push(JSON.parse(JSON.stringify(this.newMarkDetails)));
             this.dayMarks[this.newMarkDetails.dateId].sort((e,f)=>{
                 let a = new Date(dateString+' '+e.time_start+':00').getTime();
@@ -375,7 +476,7 @@ export default ({
             this.buildCalendar();
             this.duplicateMarker(this.newMarkDetails);
             
-            this.newMarkDetails = {index:0};
+            this.newMarkDetails = {index:0,employees:{}};
             this.hasSelected = false;
             
         },
@@ -387,6 +488,7 @@ export default ({
             dateStart.setDate(dateStart.getDate()+1);
             let dateEnd = new Date(markDet.end_date);
             let numDays = Math.round((dateEnd-dateStart)/(1000*60*60*24));
+            let tempSched = {};
 
             for(let i = 1; i <= numDays + 1; i++){
                 let sched = markDet;
@@ -403,10 +505,10 @@ export default ({
 
                 let conflicts = 0;
                 this.dayMarks[newDateId].forEach(x=>{
-                    let a1 = new Date(newDateString+' '+x.time_start+':00').getTime();
-                    let b1 = new Date(newDateString+' '+x.time_end+':00').getTime();
-                    let a2 = new Date(newDateString+' '+sched.time_start+':00').getTime();
-                    let b2 = new Date(newDateString+' '+sched.time_end+':00').getTime();
+                    let a1 = new Date(newDateString+x.time_start).getTime();
+                    let b1 = new Date(newDateString+x.time_end).getTime();
+                    let a2 = new Date(newDateString+sched.time_start).getTime();
+                    let b2 = new Date(newDateString+sched.time_end).getTime();
                     
                     if(
                         ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2))
@@ -418,12 +520,18 @@ export default ({
 
                 if(conflicts > 0){
                     alert('Schedule Conflict!');
+                    this.deleteSched(sched.index,true);
                     this.hasSelected = false;
                     return;
                 }
 
 
-                this.dayMarks[newDateId].push(JSON.parse(JSON.stringify(sched)));
+                tempSched[newDateId] = sched;
+            }
+
+            for(let ts in tempSched){
+                if(this.dayMarks[ts] == null) this.dayMarks[ts] = new Array();
+                this.dayMarks[ts].push(JSON.parse(JSON.stringify(tempSched[ts])));
             }
             
 
@@ -432,6 +540,47 @@ export default ({
 
         },
         updateMarker(){
+            let dateString = this.queryDate.year + '-' +
+            (this.queryDate.month+1) + '-' +
+            this.queryDate.day;
+
+            let valid = validateForm(this.newMarkDetails,{
+                title:"required",
+                branch:"required",
+                time_start:"required",
+                time_end:"required",
+                max_emp:{
+                    isRequired: true,
+                    greaterThan: 0
+                },
+                color:"required",
+                callback(e){
+                    if(e == 'max_emp') e = 'Max Employees';
+                    if(e == 'time_start') e = 'Start Time';
+                    if(e == 'time_end') e = 'End Time';
+                    alert(e.charAt(0).toUpperCase() + e.substring(1) + ' field is empty!');
+                }
+            });
+            
+            if(!valid.allValid) return;
+
+            if(this.newMarkDetails.end_date != null){
+                let dateStart = new Date(formatDateString(dateString).replaceAll(' ',''));
+                let dateEndDate = new Date(formatDateString(this.newMarkDetails.end_date).replaceAll(' ',''));
+                
+                if(dateStart > dateEndDate){            
+                    alert('Start date should be earlier than the end date!');
+                    return;
+                }
+            }
+                
+            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start+':00');
+            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end+':00');
+                
+            if(dateStart > dateEndDate){            
+                alert('Start time should be earlier than the end time!');
+                return;
+            }
             
             let mark = this.newMarkDetails;
             
@@ -462,13 +611,8 @@ export default ({
                 return;
             }
             
-            if(this.newMarkDetails.max_emp <= Object.keys(this.dayMarks[mark.dateId][index].employees).length){
-                alert(`Please reduce the number of employees having this schedule to ${this.newMarkDetails.max_emp}!`);
-                this.hasSelected = false;
-
-                return;
-            }
             
+            this.newMarkDetails.updated = true;
             
             
 
@@ -498,7 +642,7 @@ export default ({
 
             this.buildCalendar();
             this.buildTimeView();
-            this.newMarkDetails = {index:0};
+            this.newMarkDetails = {index:0,employees:{}};
             this.selectedDayMark = null;
             this.hasSelected = false;
             
@@ -513,32 +657,31 @@ export default ({
                 let newEl = document.createElement('div');
                 newEl.id = 'time-'+el.dateString+'-'+i;
                 
-                let dateString = formatDateString(el.dateString+' '+el.time_start+':00');
-                let dateString2 = formatDateString(el.dateString+' '+el.time_end+':00');
+                let dateString = formatDateString(el.dateString+' '+el.time_start);
+                let dateString2 = formatDateString(el.dateString+' '+el.time_end);
                 let dateString3 = formatDateString(el.dateString +' 00:00:00');
                 let diff = (new Date(dateString).getTime() - new Date(dateString3).getTime())/3600000;
                 let diff2 = (new Date(dateString2).getTime() - new Date(dateString).getTime())/3600000;
                 const left = 85 + (i * 20);
-                const colors = ['#ff9e9e','#ffe29e','#caff9e','#9effe0','#9ec3ff'];
-    
+
+                
                 let top = document.getElementById('timemark-'+Math.floor(diff)).offsetTop;
                 let height = (top - document.getElementById('timemark-23').offsetTop) + 41;
                 if(diff2 >= 0) height = (diff2*document.getElementById('timemark-'+Math.floor(new Date(dateString).getHours())).offsetHeight)-8;
-
                 
                 top+= document.getElementById('timemark-'+Math.floor(diff)).offsetHeight * (diff % 1);
-                newEl.style = `position: absolute;top: ${top}px;background: ${colors[colorIndexer]};left: ${left}px;padding: 4px;height: ${height}px;position: absolute;box-shadow: 0 0 5px #000;min-height:20px;overflow:hidden`;
+                newEl.style = `width: calc(100% - ${left}px);position: absolute;top: ${top}px;background: ${el.color};left: ${left}px;padding: 4px;height: ${height}px;position: absolute;box-shadow: 0 0 5px #000;min-height:20px;overflow:hidden`;
                 document.querySelector('.timeView').appendChild(newEl);
-                newEl.innerHTML = `<strong class="dayMarkerTitle" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 0 5px;display: block;font-size: 14px;">${el.title}</strong>`+
-                `<p class="dayMarkerP" style="font-size:12px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 !important">${el.time_start}</p>`+
-                `<p class="dayMarkerP" style="font-size:12px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 !important;">${el.time_end}</p>`;
+                newEl.innerHTML = `<strong class="dayMarkerTitle" style="color:#fff;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 0 5px;display: block;font-size: 14px;">${el.title}</strong>`+
+                `<p class="dayMarkerP" style="color:#fff;font-size:12px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 !important">${el.time_start}</p>`+
+                `<p class="dayMarkerP" style="color:#fff;font-size:12px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0 !important;">${el.time_end}</p>`;
                 if(colorIndexer >= 4) colorIndexer = 0;
                 else colorIndexer++;
             });
         },
         dragStart(e){
             this.selectedDayMark = null;
-            this.newMarkDetails = {index:0};
+            this.newMarkDetails = {index:0,employees:{}};
             if(e.target.parentElement.classList.contains('empSchedBox')) return;
             try{
                 e.dataTransfer.setData('daymarkData',e.target.dataset.daymark);
@@ -613,7 +756,6 @@ export default ({
             let dateEnd = new Date(obj.end_date);
             let numDays = Math.round((dateEnd-dateStart)/(1000*60*60*24)) + 1;
             obj.start_date = formatDateString(newDate).replaceAll(' ','');
-            console.log(obj.dateString);
             let dateEndDate = new Date(obj.start_date);
             dateEndDate.setDate(dateEndDate.getDate()+numDays);
             obj.end_date = dateEndDate.getFullYear()+"-"+(dateEndDate.getMonth()+1)+"-"+dateEndDate.getDate();
@@ -625,13 +767,13 @@ export default ({
                     if(this.dayMarks[dayMark][i].index === obj.index) this.dayMarks[dayMark].splice(i,1);
                 }
             }
-            console.log(obj.dateString);
+
+            obj.updated = true;
 
             this.duplicateMarker(obj);
 
             delete obj.refMarker;
             
-            console.log(obj.dateString);
             
             this.dayMarks[newKey].push(JSON.parse(JSON.stringify(obj)));
             this.dayMarks[newKey].sort((e,f)=>{
@@ -652,7 +794,7 @@ export default ({
 
         dropSched(e){
             this.selectedDayMark = null;
-            this.newMarkDetails = {index:0};
+            this.newMarkDetails = {index:0,employees:{}};
             let test = '';
             try{test = JSON.parse(e.dataTransfer.getData('daymarkData'));}
             catch(err){return;}
@@ -673,15 +815,36 @@ export default ({
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].index === obj.index) { 
-                        this.dayMarks[dayMark][i].employees[empid] = {id:emp.id,name:emp.name};
-                        
+                        this.dayMarks[dayMark][i].employees[empid] = emp.name;
+                        this.dayMarks[dayMark][i].updated = true;
                     }
                 }
             }
             
-            this.newMarkDetails = {index:0};
+            this.newMarkDetails = {index:0,employees:{}};
         },
-        
+
+        selectEmpSched(id){
+            if(!parseInt(this.newMarkDetails.max_emp)) return;
+            if(Object.keys(this.newMarkDetails.employees).length >= parseInt(this.newMarkDetails.max_emp)) return;
+            
+            let emp = this.empScheds.find(el => el.id == id);
+            this.newMarkDetails.employees[emp.id] = emp.name;
+            for(let e in this.newMarkDetails.employees) {if(e == '' || e == null) delete this.newMarkDetails.employees[e];}
+        },
+        updateEmpSchedList(){
+            if(!(parseInt(this.newMarkDetails.max_emp) >= 0)) return;
+            let list = JSON.parse(JSON.stringify(this.newMarkDetails.employees));
+            for(let e in list){
+                
+                if((Object.keys(this.newMarkDetails.employees).length <= parseInt(this.newMarkDetails.max_emp))) break;
+                else delete this.newMarkDetails.employees[e];
+                
+            }
+        },
+        deleteEmpSched(id){
+            delete this.newMarkDetails.employees[id];
+        }, 
 
         empSchedList(dateId,empId){
             let dayMark = this.dayMarks[dateId];
@@ -709,10 +872,26 @@ export default ({
             return JSON.stringify(obj);
         },
 
-        deleteThis(index,empId){
+        deleteSched(index,isReverted=false){
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].index === index) { 
+                        this.dayMarks[dayMark].splice(i,1);
+                    }
+                }
+            }
+            if(isReverted) this.deletedIndexes.push(index);
+            this.newMarkDetails = {index:0};
+            this.selectedDayMark=null;
+            this.hasSelected = false;
+            this.buildCalendar();
+        },
+
+        deleteThis(index,empId){
+            for(let dayMark in this.dayMarks){
+                for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
+                    if(this.dayMarks[dayMark][i].index === index) {
+                        this.dayMarks[dayMark][i].updated = true;
                         delete this.dayMarks[dayMark][i].employees[empId];
                     }
                 }
@@ -754,6 +933,112 @@ export default ({
                 this.queryDate.day = newDate.getDate();
                 this.weekStart = dateNum2 + this.weekStart;
             }
+        },
+
+        saveChanges(){
+            let created = [];
+            let updated = [];
+            for(let dayMark in this.dayMarks){
+                for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
+                    if(this.dayMarks[dayMark][i].refMarker == null) {
+                        if(this.dayMarks[dayMark][i].created == true && this.dayMarks[dayMark][i].updated == null )
+                            created.push(this.dayMarks[dayMark][i]);
+                        if(this.dayMarks[dayMark][i].updated == true && this.dayMarks[dayMark][i].created == null )
+                            updated.push(this.dayMarks[dayMark][i]);
+                    }
+                }
+            }
+
+            
+            let parsedCreated = [];
+            let parsedUpdated = [];
+            created.forEach(el=>{
+                let obj = {
+                    id: el.index,
+                    title: el.title,
+                    description: el.description,
+                    max_employees: el.max_emp,
+                    shift_start: el.time_start,
+                    shift_end: el.time_end,
+                    shift_date: el.start_date,
+                    shift_date_end: el.end_date,
+                    status: 0,
+                    branch_id: el.branch,
+                    assigns:[]
+                };
+                for(let e in el.employees){
+                    let assigned = {};
+                    assigned.user_id =  this.empScheds.find(el=>el.id == e).id;
+                    assigned.schedule_id = el.index;
+                    console.log(assigned);
+                    obj.assigns.push(assigned);
+                }
+
+                parsedCreated.push(obj);
+            });
+
+            updated.forEach(el=>{
+                let obj = {
+                    id: el.index,
+                    title: el.title,
+                    description: el.description,
+                    max_employees: el.max_emp,
+                    shift_start: el.time_start,
+                    shift_end: el.time_end,
+                    shift_date: el.start_date,
+                    shift_date_end: el.end_date,
+                    color: el.color,
+                    status: 0,
+                    branch_id: el.branch,
+                    assigns:[]
+                };
+                
+                for(let e in el.employees){
+                    let assigned = {};
+                    assigned.user_id =  this.empScheds.find(el=>el.id == e).id;
+                    assigned.schedule_id = el.index;
+                    console.log(assigned);
+                    obj.assigns.push(assigned);
+                }
+            
+
+                parsedUpdated.push(obj);
+            });
+
+            parsedCreated.forEach(el=>{
+                let assigns = el.assigns;
+                delete el.assigns;
+                axios.post('schedule/create',null,el).then(res=>console.log(res));
+                axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
+                    assigns.forEach(el=>{
+                        axios.post('assigned/create',null,el).then(res=>console.log(res));
+                    })
+                });
+            });
+
+
+
+            parsedUpdated.forEach(el=>{
+                let assigns = el.assigns;
+                delete el.assigns;
+                console.log(assigns);
+                axios.post('schedule/update?id='+el.id,null,el).then(res=>console.log(res));
+                axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
+                    assigns.forEach(el=>{
+                        axios.post('assigned/create',null,el).then(res=>console.log(res));
+                    })
+                });
+                
+            });
+
+            
+        },
+
+        branchName(id){
+            if(id == '') return;
+            let finder = this.branches.find(el=>el.id == id);
+            if(finder != null) return finder.name;
+            return '';
         }
         
     },  
@@ -796,8 +1081,103 @@ export default ({
         this.buildCalendar();
 
     },
-    computed:{
+    mounted()
+    {
 
+        axios.post('branches?_batch=true',null,null).then(res=>{
+            this.branches = res.data.result;
+        });
+
+        axios.post('users?_batch=true',null,null).then(res=>{
+            let list = [];
+            res.data.result.forEach(el=>{
+                el.name = el.firstname + ' '+ el.lastname;
+                list.push(el);
+            })
+            this.empScheds = list;
+
+            axios.post('schedule?_batch=true',null,null).then(res=>{
+                this.dayMarks = {};
+                res.data.result.forEach(el=>{
+                    let obj = {
+                        index: el.id,
+                        branch: el.branch_id,
+                        color: el.color,
+                        start_date: el.shift_date,
+                        end_date: el.shift_date_end,
+                        time_end: el.shift_end,
+                        time_start: el.shift_start,
+                        max_emp:el.max_employees,
+                        title: el.title,
+                        description: el.description,
+                        employees:{}
+                    };
+                    obj.dateString = el.shift_date;
+                    let newDate = new Date(el.shift_date.replaceAll(' ',''));
+                    obj.dateId = 'date-'+String(newDate.getFullYear()) + String(newDate.getMonth()) + String(newDate.getDate());
+
+                    if(this.dayMarks[obj.dateId] == null) this.dayMarks[obj.dateId] = new Array();
+                    
+
+                    axios.post('assigned?_batch=true,schedule_id='+obj.index,null,null).then(res2=>{
+                        if(res2.data.result != null){
+                            res2.data.result.forEach(el=>{
+                                obj.employees[el.user_id] =  this.empScheds.find(el2=>el.user_id == el2.id).name;
+                            });
+                        }
+
+                        this.dayMarks[obj.dateId].push(obj);
+                        this.duplicateMarker(obj);
+                    });
+                })
+
+                this.buildCalendar();
+            });
+        });
+
+
+
+
+        // let obj = {
+        //             id: el.index,
+        //             title: el.title,
+        //             max_employees: el.max_emp,
+        //             shift_start: el.time_start,
+        //             shift_end: el.time_end,
+        //             shift_date: el.start_date,
+        //             shift_date_end: el.end_date,
+        //             status: 0,
+        //             branch_id: el.branch
+        //         };
+
+
+
+        elementLoad('.topBoxes').then(el=>{
+            this.topBoxes = el.offsetWidth;
+            window.onresize = ()=>{
+                this.topBoxes = el.offsetWidth;
+            };
+        });
+
+        elementLoad('.topBoxes2').then(el=>{
+            this.topBoxes2 = el.offsetWidth;
+            window.onresize = ()=>{
+                this.topBoxes2 = el.offsetWidth;
+            };
+        })
+
+
+        },
+    computed:{
+        searchEmpResult(){
+            return this.empScheds.filter(el=>(
+                (this.searchEmpBox.toLowerCase().includes(el.name.toLowerCase()) || el.name.toLowerCase().includes(this.searchEmpBox.toLowerCase())) &&
+                (this.newMarkDetails.employees[el.id] == null) &&
+                this.searchEmpBox != ''
+            ));
+        }
+
+        
     }
 
 
@@ -807,33 +1187,47 @@ export default ({
 
 
 <style scoped>
+@import '../../assets/scss/_card.scss';
+@import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/sleek.min.css';
+
+.hide {visibility: hidden !important;}
+.empSchedBox{min-height: 170px;}
+.option{width: 15%;justify-content: space-evenly;display: flex;}
+#calendar h2 {color: #1b223c;font-size: 1.99rem;font-weight: 500;}
+#calendar h3{color: #1b223c;font-size: 1.63rem;font-weight: 500;}
+.timeView{color: #1b223c;font-size: 1.10rem;font-weight: 500;}
+.modal-header h2{color: #1b223c;font-size: 1.99rem;font-weight: 500;}
+.modal-lg{width: 800px;}
+.dayMarkPanel h3{color: #1b223c;font-size: 1.63rem;font-weight: 500;}
+.but button{margin-left: 5px;}
+.dateBox{min-height: 170px;}
 .calendarComp{display: flex;font-family: sans-serif;flex-wrap: wrap;}
-    #calendar{padding:20px;margin: 0 auto;width: calc(70% - 41px);border-right:1px solid #ddd}
+    #calendar{padding:20px;margin: 0 auto;width: 100%;}
     h2 > small{font-size: 18px;font-style: italic;}
 
     .calendarCtrl{display: grid;grid-template-columns: 1fr 1fr 1fr 1fr 3fr 1fr;width: 100%;margin:5px 0;gap:5px}
     .calendarCtrl button{padding: 10px;display: block;box-sizing: border-box}
     .calendarCtrl input{padding: 10px;display: block;box-sizing: border-box}
-    .calendarView {display: grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:5px;}
-    .calendarView > div{border-bottom: 1px solid #ccc;padding: 10px}
-    .calendarView .calendarWeekHeads{text-align: center;}
-    .calendarView .calendarDays{min-height: 70px;transition:0.4 s;position: relative;  max-height: 115px;overflow-y: auto;}
+    .calendarView {display: grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;border:1px solid #ccc;border-bottom:none}
+    .calendarView > div{padding: 10px}
+    .calendarView > div:not(:nth-child(7n)){border-right: 1px solid #ccc;}
+    .calendarView .calendarWeekHeads{text-align: center;border-bottom:1px solid #ccc}
+    .calendarView .calendarDays{min-height: 170px;transition:0.4s;position: relative; height: 115px;overflow-y: auto;border-bottom:1px solid #ccc}
+    
     .calendarView .dateBox:hover, .calendarView .dateBox.dragEnter{outline:2px dotted #555; box-shadow: inset 0 0 5px #aaa}
     .calendarView .dateBox.selected{outline:2px solid #555;}
     .calendarView .emptyBox{pointer-events:none}
-    .calendarView .today{background:#ddd}
-    .dayMarkPanel{width: calc(30% - 40px);padding: 20px;}
-    .timeView {max-height: 300px;overflow-y: scroll;border:1px solid #ddd;padding: 15px;resize: vertical;position:relative}
+    .calendarView .today{background:rgba(255,220,40,.15)}
+    .dayMarkPanel{width: 100%;padding: 20px;}
+    .timeView {max-height: calc(100vh - 180px);overflow-y: scroll;border:1px solid #ddd;padding: 15px;resize: vertical;position:relative}
     .timeView .time{display: flex;border-top:1px solid #ddd;height: 30px;padding: 10px;}
     .timeView .time span{margin-top: -20px;background: #fff;padding: 0 5px;}
 
-    .modal{background: rgb(0,0,0,0.5);position: fixed;width: 100%;height: 100%;top:0;left:0;display:flex;justify-content: center;align-items: center;}
-    .addMarker {background: #fff;padding: 20px;max-width: 600px;border-radius: 20px;}
-    .addMarker input{border: none;background: #eee;padding: 5px;font-size: 16px;font-weight: medium;}
-    input[type='time'],input[type='date'],input[type='color']{margin-bottom: 10px;}
-    input:not([type='time']):not([type='date']):not([type='color']){width: calc(100% - 20px);margin: 5px 0;padding: 10px;}
-    .addMarker button{width: 120px;height: 30px;margin-left: auto;display: block;}
-    .dayMark{background: #ff9e9e;padding: 5px;font-size: 12px;margin: 10px 0;}
+    .modal{background: rgb(0,0,0,0.5);position: fixed;width: 100%;height: 100%;top:0;left:0;display:flex;z-index: 1050; overflow: scroll;}
+    input[type='time'],input[type='date'],.color_selector_input{margin-bottom: 10px;}
+    input:not([type='time']):not([type='date']):not(.color_selector_input){width: 100%;margin: 5px 0;padding: 10px;}
+    .dayMark{background: #ff9e9e;padding: 5px;font-size: 12px;margin: 10px 0; color: #fff;border-radius: 5px;border: 4px double #fff;}
     .dayMark em{font-size:11px;}
     .dayMark strong, .dayMark p{white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin: 0;}
     .dayMark strong{margin: 0 0 5px;display: block;font-size: 14px;}
@@ -845,12 +1239,38 @@ export default ({
     .weekgrid2{display: grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;}
     [class^="weekgrid"] div{padding:10px;text-align: center;}
     .weekgrid2 > div:first-child, .weekgrid2 > div:nth-child(9n){text-align: left;}
-    [class^="weekgrid"] div:not(:nth-child(8n)){border-right: 1px solid #aaa;}
+    [class^="weekgrid"] div:not(:nth-child(7n)){border-right: 1px solid #aaa;}
     .weekgrid1 div:last-child{border-right:none}
     [class^="weekgrid"] span{display: flex;width: 40px;height: 40px;align-items: center;background: #ddd;justify-content: center;margin: 10px auto 0px;border-radius: 50%;}
     .weekgrid2 > div:first-child{display: flex;align-items: center;}
+    .weekgrid2 div:not(:nth-child(8n)){border-right: 1px solid #aaa;}
     .schedBox,.employeegrid div:first-child{border-top:1px solid #aaa}
+    
     .schedBox:hover{box-shadow: inset 0 0 7px #aaa;}
-    .selectedMark{border: 3px inset #555;}  
+    .selectedMark{border: 3px inset #555;}
+    
+    .color_selector_container{margin-top:10px;}
+    .color_selector_container input{margin: 0;}
+    .color_selector_container ul{margin: 0;list-style: none;padding-left: 0;border:1px solid #ccc;display: flex;justify-content: stretch;}
+    .color_selector_container li{margin: 0;padding:20px;height: 20px;flex-grow: 1;transition:0.4s}
+    .color_selector_container li.selected{border:3px solid #000 !important}
+
+    .selected_emps{margin: 20px 0;position: relative;}
+    .selected_emps input {margin:0 !important}
+    .selected_emps_inputlist{position: relative;}
+    .selected_emps #selected_emps_datalist {margin: 0;list-style: none;padding-left: 0;border:1px solid #ccc;position: absolute;top:100%;width: 100%;background: #fff;}
+    .selected_emps #selected_emps_datalist li{margin: 0;padding:5px;transition:0.4s}
+    .selected_emps #selected_emps_datalist li:hover{background: #ccc;}
+    #selected_emps_emplist{display: flex;list-style: none;padding-left: 0;gap:5px}
+    #selected_emps_emplist li{padding: 5px 10px;border: 1px solid #aaa;border-radius: 22px;}
+    #selected_emps_emplist li a{text-decoration: none;text-decoration: none;color: #fff;border-radius: 50%;background: #aaa;padding: 2px;width: 15px;height: 15px;display: inline-block;text-align: center;font-size: 7px;vertical-align: middle;margin: 0 0 2px 5px;}
+    #selected_emps_emplist li a:hover{background: #222;color:#fff}
+
+    .branch_inputlist{position: relative;z-index: 20;}
+    .branch_inputlist input {margin:5px 0 !important}
+    .branch_inputlist input:hover + ul,.branch_inputlist ul:hover{display: block;}
+    .branch_inputlist ul {display:none;margin: 0;list-style: none;padding-left: 0;border:1px solid #ccc;position: absolute;top:100%;width: 100%;background: #fff;}
+    .branch_inputlist ul li{margin: 0;padding:5px;transition:0.4s}
+    .branch_inputlist ul li:hover{background: #ccc;}
     
 </style>

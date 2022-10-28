@@ -1,7 +1,8 @@
 /* Version 2.0 */
 
 import axiosA from 'axios';
-import { ciapi } from './globals';
+// import { ciapi } from './globals';
+const ciapi = '';
 
 
 export class AsyncStorage{
@@ -97,7 +98,7 @@ class AxiosR{
     }
 }
 
-export const axios = new AxiosR(ciapi);
+export const axios = new AxiosR('https://www.4angelshc.com/mobile/');
 
 export function elementLoad(selector){
     return new Promise(resolve=>{
@@ -146,8 +147,8 @@ export  function validateForm(obj,rules){
             obj[r] == undefined || obj[r] == '' ){
                 validated[r] = true;  
         }else if(r != 'callback'){
-            let emailregex = /[a-z0-9._]+@[a-z]+\.[a-z]{2,3}/i;
-            let intregex = /[0-9]+/;
+            let emailregex = /^[a-z0-9._]+@[a-z]+\.[a-z]{2,5}$/i;
+            let intregex = /^[0-9]+$/;
             
 
             validated[r] = true;
@@ -178,7 +179,34 @@ export  function validateForm(obj,rules){
                 validated[r] = 'values_not_match';
                 continue;
             }
+
+            if(rules[r].greaterThan != null && obj[r] > rules[r].greaterThan){
+                validated[r] = true;
+            }else if(rules[r].greaterThan != null) {
+                validated[r] = 'value_not_greater';
+                continue;
+            }
             
+            if(rules[r].lessThan != null && obj[r] < rules[r].lessThan){
+                validated[r] = true;
+            }else if(rules[r].lessThan != null) {
+                validated[r] = 'value_not_lesser';
+                continue;
+            }
+
+            if(rules[r].greaterOrEqualTo != null && obj[r] > rules[r].greaterOrEqualTo){
+                validated[r] = true;
+            }else if(rules[r].greaterOrEqualTo != null) {
+                validated[r] = 'value_not_greater_or_equal';
+                continue;
+            }
+            
+            if(rules[r].lesserOrEqualTo != null && obj[r] < rules[r].lesserOrEqualTo){
+                validated[r] = true;
+            }else if(rules[r].lesserOrEqualTo != null) {
+                validated[r] = 'value_not_greater_or_equal';
+                continue;
+            }
 
             if(typeof rules[r].maxChars == 'number' && rules[r].maxChars >= obj[r].length)
                 validated[r] = true;
