@@ -86,7 +86,7 @@ class AxiosR{
         });
     }
 
-    post(endpoint,headers=null,body=null){
+    post(endpoint,headers=null,body=null,opts={}){
         let params = {
             method:'post',
             url: this.baseUrl+endpoint
@@ -94,6 +94,7 @@ class AxiosR{
         if(headers == 'default') params[headers] = this.defHeaders
         else if(headers!=null) params[headers] = headers;
         if(body!=null) params["data"] = toFormData(body);
+        params = {...params,...opts};
         return axiosA(params);
     }
 }

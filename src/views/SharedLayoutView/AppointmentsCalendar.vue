@@ -10,7 +10,7 @@
             <h3>{{currentCalendar.monthString}} of {{currentCalendar.year}}</h3>
             <div class="option">
                 <button class="btn btn-primary hide"  @click="view = !view;">{{(view) ? 'Employee' : 'Month'}} View</button> 
-                <button class="btn btn-success" @click="saveChanges">Save</button>
+                <button class="btn btn-success" @click="saveChanges">{{(actions > 0) ? 'Save' : 'Saved'}}</button>
             </div>
         </div>
         <div class="card-body">
@@ -166,7 +166,7 @@
 </template>
 
 <script>
-import {dateFormat, elementLoad, formatDateString, validateForm, axios} from '../../functions';
+import {dateFormat, elementLoad, formatDateString, validateForm, axios} from '../../functions.js';
 
 export default ({
     data(){
@@ -199,6 +199,7 @@ export default ({
                 {id:3,name: 'James'},
                 {id:4,name: 'Marco'},
             ],
+            actions:0,
             searchEmpBox:'',
             newMarkDetails:{employees:{}},
             deletedIndexes:[],
@@ -466,6 +467,7 @@ export default ({
             String(d.getHours())+String(d.getMinutes())+String(d.getSeconds());
             this.newMarkDetails.index = dateStringIndex;
             this.newMarkDetails.created = true;
+            this.actions++,
             console.log(this.newMarkDetails);
             this.dayMarks[this.newMarkDetails.dateId].push(JSON.parse(JSON.stringify(this.newMarkDetails)));
             this.dayMarks[this.newMarkDetails.dateId].sort((e,f)=>{
@@ -613,6 +615,7 @@ export default ({
             
             
             this.newMarkDetails.updated = true;
+            this.actions++;
             
             
 
@@ -769,6 +772,7 @@ export default ({
             }
 
             obj.updated = true;
+            this.actions++;
 
             this.duplicateMarker(obj);
 
@@ -817,6 +821,7 @@ export default ({
                     if(this.dayMarks[dayMark][i].index === obj.index) { 
                         this.dayMarks[dayMark][i].employees[empid] = emp.name;
                         this.dayMarks[dayMark][i].updated = true;
+                        this.actions++;
                     }
                 }
             }
@@ -892,6 +897,7 @@ export default ({
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].index === index) {
                         this.dayMarks[dayMark][i].updated = true;
+                        this.actions++;
                         delete this.dayMarks[dayMark][i].employees[empId];
                     }
                 }
@@ -938,6 +944,7 @@ export default ({
         saveChanges(){
             let created = [];
             let updated = [];
+            
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].refMarker == null) {
@@ -1031,7 +1038,7 @@ export default ({
                 
             });
 
-            
+            this.actions = 0;
         },
 
         branchName(id){
@@ -1090,6 +1097,7 @@ export default ({
 
         axios.post('users?_batch=true',null,null).then(res=>{
             let list = [];
+            if(!res.data.success) return;
             res.data.result.forEach(el=>{
                 el.name = el.firstname + ' '+ el.lastname;
                 list.push(el);
@@ -1098,6 +1106,7 @@ export default ({
 
             axios.post('schedule?_batch=true',null,null).then(res=>{
                 this.dayMarks = {};
+                if(!res.data.success) return;
                 res.data.result.forEach(el=>{
                     let obj = {
                         index: el.id,

@@ -1,5 +1,8 @@
 <template>
     <LayoutView>
+        <div class="toast" >
+
+        </div>
         <div class="modal fade" id="modal-add-contact" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
@@ -12,8 +15,11 @@
                     <div class="form-group row mb-6">
                             <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
 
-                        <div class="col-sm-8 col-lg-6">
-                            <FileView></FileView>
+                        
+                            <div class="col-sm-8 col-lg-6">
+                                <div class="form-group">
+                                    <input type="file" id="uploadFile1" class="form-control-file form-control height-auto">
+                                </div>
                             </div>
                     </div>
                     <div class="row">
@@ -110,7 +116,7 @@
                         <div class="col-sm">
 							<div class="form-group">
 								<label for="fname">Address</label>
-								<input type="text" v-model="address" class="form-control" placeholder="">
+								<div id="geocoder1"></div>
                                 <div class="invalid-feedback feedback7">
 								   
 							    </div>
@@ -185,7 +191,7 @@
         </div>
 
         <div>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
+            <button @click="cleardata" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
             </button>
         </div>
         </div>
@@ -194,7 +200,7 @@
             <div class="col-lg-6 col-xl-4" v-for="u in users" :key = "u.id">
                 <div class="card card-default p-4">
                 <a href="javascript:0" class="media text-secondary" data-toggle="modal" data-target="#modal-contact" @click="ViewDetailsEmp(u.id)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                    <img :src="u.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
 
                     <div class="media-body">
                     <h5 class="mt-0 mb-2 text-dark">{{u.firstname}} {{u.lastname}}</h5>
@@ -233,9 +239,11 @@
                     <div class="modal-body px-4">
                     <div class="form-group row mb-6">
                             <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
-
-                        <div class="col-sm-8 col-lg-6">
-                            <FileView></FileView>
+                            
+                            <div class="col-sm-8 col-lg-6">
+                                <div class="form-group">
+                                    <input type="file" id="uploadFile2" class="form-control-file form-control height-auto">
+                                </div>
                             </div>
                     </div>
                     <div class="row">
@@ -332,7 +340,7 @@
                         <div class="col-sm">
 							<div class="form-group">
 								<label for="fname">Address</label>
-								<input type="text" v-model="address" class="form-control" placeholder="">
+								<div id="geocoder2"></div>
                                 <div class="invalid-feedback feedback21">
 								   
 							    </div>
@@ -354,6 +362,26 @@
 								<label for="fname">Email</label>
 								<input type="text" v-model="email" class="form-control" placeholder="">
                                 <div class="invalid-feedback feedback23">
+								   
+							    </div>
+							</div>
+						</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Password</label>
+								<input type="password" v-model="password" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback24">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Confirm Password</label>
+								<input type="password" v-model="confirmpassword" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback25">
 								   
 							    </div>
 							</div>
@@ -400,7 +428,7 @@
                         <div class="profile-content-left px-4">
                         <div class="card text-center widget-profile px-0 border-0">
                             <div class="card-img mx-auto rounded-circle">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                                <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
                             </div>
 
                             <div class="card-body">
@@ -455,6 +483,9 @@ import { axios,validateForm } from '@/functions';
 import 'chosen-js/chosen.jquery.min.js'
 import { elementLoad } from "../../functions";
 import toastr from 'toastr';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 export default ({
     name: "App",
@@ -483,9 +514,43 @@ export default ({
             role: "",
             userid: "",
             search: "",
+            filesrc: "",
+            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
         }
     }, 
     mounted() {
+        mapboxgl.accessToken = this.mapToken;
+
+        const geocoder1 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+        console.log(geocoder1);
+        const geocoder2 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+
+        elementLoad('#geocoder1').then(()=>{
+            geocoder1.addTo('#geocoder1');
+        });
+        elementLoad('#geocoder2').then(()=>{
+            if($('.mapboxgl-ctrl-geocoder').length == 1){
+                
+                geocoder2.addTo('#geocoder2');
+            }
+         });
+
+        geocoder1.on('result', e => {
+            console.log(e);
+            e.result.place_name = this.address;
+        });
+
+        geocoder2.on('result', e => {
+            console.log(e);
+            this.address = e.result.place_name;
+        });
+        document.querySelector(".toast").id = "toaster";
         axios.post("branches?_batch=true").catch(res=>{
         }).then(res=>{
             if(res.data.success){
@@ -616,6 +681,7 @@ export default ({
             this.role = "";
             this.userid = "";
             this.search = "";
+            this.filesrc = "";
         },
         EditEmployee(){
             this.cleardata();
@@ -801,16 +867,15 @@ export default ({
                 this.role = document.querySelector("#role").value;
 
                this.branch = this.branch;
-                console.log(this.phonenumber);
-
-                axios.post("users/create",null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+               if( document.getElementById("uploadFile1").files.length == 0 ){
+                axios.post("users/create",null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
                 username: this.username, password: this.password, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     console.log(res.data);
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right",1);
                         this.cleardata();
                         setTimeout(() => {
                             this.$router.go(0);
@@ -821,6 +886,42 @@ export default ({
                         this.callToaster("toast-top-right",2);
                     }
                 });
+                    return;
+                }
+
+                let fname = document.getElementById("uploadFile1").files[0].name
+
+                axios.post('files/upload?keep_filename=true',null,
+                {file:document.getElementById("uploadFile1").files[0]},
+                {onUploadProgress:progressEvent =>{
+                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
+                }}).catch(ress=>{
+                    console.log(ress.data);
+                }).then(ress=>{
+                    console.log(ress.data);
+                    if(!ress.data.success){
+                        alert('Error Uploading File!');
+                    }
+                    this.filesrc = ress.data.file_name;
+                    axios.post("users/create",null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                    username: this.username, password: this.password, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(res.data);
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            this.cleardata();
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                })
             }
             else
             {
@@ -829,7 +930,6 @@ export default ({
         },
         callToaster(positionClass, reserror) {
             if (document.getElementById("toaster")) {
-                console.log("aw");
                 toastr.options = {
                 closeButton: true,
                 debug: false,
@@ -974,17 +1074,18 @@ export default ({
                 this.role = document.querySelector("#erole").value;
 
                this.branch = this.branch;
-                console.log(this.phonenumber);
-
-                axios.post("users/update?id="+data,null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+               if( document.getElementById("uploadFile2").files.length == 0 ){
+                if(this.password == "")
+                {
+                    axios.post("users/update?id="+data,null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
                 username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     console.log(res.data);
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",2);
-
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
                         setTimeout(() => {
                             this.$router.go(0);
                         }, 2000);
@@ -992,6 +1093,88 @@ export default ({
                     else
                     {
                         this.callToaster("toast-top-right",2);
+                    }
+                });
+                    return;
+                }
+                else
+                {
+                    axios.post("users/update?id="+data,null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                username: this.username, address: this.address, password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.success)
+                    {
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+                    return;
+                }
+                }
+                let fname = document.getElementById("uploadFile2").files[0].name
+
+                axios.post('files/upload?keep_filename=true',null,
+                {file:document.getElementById("uploadFile2").files[0]},
+                {onUploadProgress:progressEvent =>{
+                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
+                }}).catch(ress=>{
+                    console.log(ress.data);
+                }).then(ress=>{
+                    console.log(ress.data);
+                    if(!ress.data.success){
+                        alert('Error Uploading File!');
+                    }
+                    this.filesrc = ress.data.file_name;
+                    if(this.password == "")
+                    {
+                        axios.post("users/update?id="+data,null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                    username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(res.data);
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            this.cleardata();
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                    }
+                    else
+                    {
+                        axios.post("users/update?id="+data,null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                    username: this.username, address: this.address,password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,branches: this.branch}).catch(res=>{
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(res.data);
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            this.cleardata();
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
                     }
                 });
             }
@@ -1011,7 +1194,6 @@ export default ({
 @import '../../assets/scss/_type.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
-@import '../../assets/scss/_todo.scss';
 .img-fluid{
     width: 100px;
     height: 100px !important;
@@ -1020,5 +1202,8 @@ export default ({
     display: none;
     margin: 0 auto;
     font-size: 20px;
+}
+.card {
+    overflow: hidden;
 }
 </style>

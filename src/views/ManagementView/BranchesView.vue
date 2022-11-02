@@ -34,12 +34,12 @@
 
                     <div class="modal-body px-4">
                     <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
+                        <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
 
-                            <div class="col-sm-8 col-lg-6">
-                                <FileView></FileView>
-                            </div>
+                        <div class="form-group">
+                            <input type="file" id="uploadFile2" class="form-control-file form-control height-auto">
                         </div>
+                    </div>
 
                         <div class="row mb-2">
                             <div class="col-lg-12">
@@ -56,7 +56,7 @@
                             <div class="col-lg-12">
                             <div class="form-group">
                                 <label for="firstName">Location </label>
-                                <input type="text" class="form-control" v-model="branchloc" placeholder="Location *">
+                                <div id="geocoder2"></div>
                                 <div class="invalid-feedback feedback3">
                                             
                                 </div>
@@ -82,11 +82,13 @@
 
                     <div class="modal-body px-4">
                     <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
+                        <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
 
                         <div class="col-sm-8 col-lg-6">
-                            <FileView></FileView>
+                            <div class="form-group">
+                                <input type="file" id="uploadFile1" class="form-control-file form-control height-auto">
                             </div>
+                        </div>
                     </div>
 
                         <div class="row mb-2">
@@ -95,7 +97,7 @@
                                 <label for="firstName">Facility name</label>
                                 <input type="text" class="form-control" v-model="branchname" placeholder="Branch Name *">
                                 <div class="invalid-feedback feedback5">
-                                            
+                                    
                                 </div>
                             </div>
                             </div>
@@ -104,7 +106,8 @@
                             <div class="col-lg-12">
                             <div class="form-group">
                                 <label for="firstName">Location</label>
-                                <input type="text" class="form-control" v-model="branchloc" placeholder="Location *">
+                                <div id="geocoder1">
+                                </div>
                                 <div class="invalid-feedback feedback6">
                                             
                                 </div>
@@ -157,8 +160,7 @@
                         </div>
                     </div>
                     <a href="javascript:0" class="media text-secondary" data-toggle="modal" data-target="#modal-contact">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg" class="mr-3 img-fluid rounded" alt="Avatar Image">
-
+                        <img :src = "a.branch_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
                         <div class="media-body">
                         <h5 class="mt-0 mb-2 text-dark">{{a.name}}</h5>
 
@@ -181,6 +183,10 @@ import { axios } from '@/functions';
 import toastr from 'toastr';
 import FileView from '../../views/FileManager.vue';
 import { elementLoad } from '../../functions';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+
 
 export default ({
     name: "App",
@@ -195,11 +201,27 @@ export default ({
             branchloc: "",
             branchid: "",
             search: "",
+            uploading: {},
+            filesrc: "",
+            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
         }
     },
     methods:{
+        fileType(filename){
+            if(typeof filename != 'string') return;
+            let fileSplit = filename.toLowerCase().split('.');
+            let ext = fileSplit[fileSplit.length - 1];
+            let image = ['gif','png','jpg','jpeg'];
+            let video = ['mp4','webm','ogv'];
+            let doc = ['doc','docx','xls','xlsx','csv','pdf'];
+            if(image.includes(ext)) return 'image'; 
+            if(video.includes(ext)) return 'video';
+            if(doc.includes(ext)) return 'document';
+            return '';
+        },
         DelBranch(data){
             this.branchid = data;
+
         },
         DeleteBranch(data){
             this.clearVariable();
@@ -243,49 +265,126 @@ export default ({
                 document.querySelector(".feedback5").style.display = "none";
                 document.querySelector(".feedback6").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
-                axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: ""}).catch(res=>{
-                    this.clearVariable();
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.clearVariable();
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector("#modal-add-contact").style.display = "none";
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
+                if( document.getElementById("uploadFile1").files.length == 0 ){
+                    axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",1);
+                            document.querySelector("#modal-add-contact").style.display = "none";
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                    return;
+                }
+
+                let fname = document.getElementById("uploadFile1").files[0].name
+
+                axios.post('files/upload?keep_filename=true',null,
+                {file:document.getElementById("uploadFile1").files[0]},
+                {onUploadProgress:progressEvent =>{
+                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
+                }}).catch(ress=>{
+                    console.log(ress.data);
+                }).then(ress=>{
+                    console.log(ress.data);
+                    if(!ress.data.success){
+                        alert('Error Uploading File!');
                     }
-                });
+                    this.filesrc = ress.data.file_name;
+                    axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+ this.filesrc}).catch(res=>{
+                        this.clearVariable();
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",1);
+                            document.querySelector("#modal-add-contact").style.display = "none";
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                })
             }
             if(this.checkError(2) === 0 && data != 0)
             {
                 document.querySelector(".feedback2").style.display = "none";
                 document.querySelector(".feedback3").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
-                axios.post("branches/update?id="+data,null,{name: this.branchname, address: this.branchloc, created_at: ""}).catch(res=>{
-                    this.clearVariable();
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.clearVariable();
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector("#modal-edit-contact").style.display = "none";
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
+                 if( document.getElementById("uploadFile2").files.length == 0 ){
+                    axios.post("branches/update?id="+data,null,{name: this.branchname, location: this.branchloc, created_at: ""}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(this.branchname)
+                        if(res.data.success)
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",1);
+                            document.querySelector("#modal-edit-contact").style.display = "none";
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                     return;
+                 }
+
+                let fname = document.getElementById("uploadFile2").files[0].name;
+
+                axios.post('files/upload?keep_filename=true',null,
+                {file:document.getElementById("uploadFile2").files[0]},
+                {onUploadProgress:progressEvent =>{
+                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
+                }}).catch(ress=>{
+                    console.log(ress.data);
+                }).then(ress=>{
+                    console.log(ress.data);
+                    if(!ress.data.success){
+                        alert('Error Uploading File!');
                     }
+                    this.filesrc = ress.data.file_name;
+                    axios.post("branches/update?id="+data,null,{name: this.branchname, location: this.branchloc, created_at: "",branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
+                        this.clearVariable();
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",1);
+                            document.querySelector("#modal-edit-contact").style.display = "none";
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.clearVariable();
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
                 });
             }
         },
@@ -387,9 +486,41 @@ export default ({
            this.branchname = "";
            this.branchloc = "";
            this.branchid = "";
+           this.filesrc = "";
         }
     },
     mounted() {
+        //mapbox Start
+        mapboxgl.accessToken = this.mapToken;
+
+        const geocoder1 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+        console.log(geocoder1);
+        const geocoder2 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+
+        elementLoad('#geocoder1').then(()=>{
+            geocoder1.addTo('#geocoder1');
+        });
+
+        elementLoad('#geocoder2').then(()=>{
+            geocoder2.addTo('#geocoder2');
+        });
+
+        geocoder1.on('result', e => {
+            console.log(e);
+            this.branchloc = e.result.place_name;
+        });
+
+        geocoder2.on('result', e => {
+            console.log(e);
+            this.branchloc = e.result.place_name;
+        });
+        //mapbox End
         document.querySelector(".toast").id = "";
         this.clearVariable();
         axios.post("branches?_batch=true").catch(res=>{
@@ -397,7 +528,6 @@ export default ({
         }).then(res=>{
             if(res.data.success){
                 this.branches = res.data.result;
-                console.log("test");
                 document.querySelector(".textcenter").style.display = "none";
             }
             else{
@@ -450,6 +580,7 @@ export default ({
 @import '../../assets/scss/_type.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
+@import '../../assets/base.css';
 .textcenter{
     display: block;
     margin: 0 auto;
@@ -466,5 +597,4 @@ export default ({
     right: -8px;
     font-size: 25px;
 }
-
 </style>
