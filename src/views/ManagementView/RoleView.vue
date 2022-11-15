@@ -394,4 +394,8 @@ export default ({
 @import '../../assets/scss/_card.scss';
 @import '../../assets/scss/_breadcrumb.scss';
 @import '../../assets/sleek.min.css';
+
+.responsive-data-table{
+    overflow: auto;
+}
 </style>

@@ -18,7 +18,7 @@
                         
                             <div class="col-sm-8 col-lg-6">
                                 <div class="form-group">
-                                    <input type="file" id="uploadFile1" class="form-control-file form-control height-auto">
+                                    <input type="file" id="uploadFile1" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
                                 </div>
                             </div>
                     </div>
@@ -242,7 +242,7 @@
                             
                             <div class="col-sm-8 col-lg-6">
                                 <div class="form-group">
-                                    <input type="file" id="uploadFile2" class="form-control-file form-control height-auto">
+                                    <input type="file" id="uploadFile2" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
                                 </div>
                             </div>
                     </div>
@@ -543,7 +543,7 @@ export default ({
 
         geocoder1.on('result', e => {
             console.log(e);
-            e.result.place_name = this.address;
+            this.address = e.result.place_name;
         });
 
         geocoder2.on('result', e => {
@@ -756,13 +756,11 @@ export default ({
                 confirmpassword:this.confirmpassword
             };
 
-
             const valid = validateForm(newUser,{
                 firstname:"required",
                 lastname:"required",
                 phonenumber: "required",
                 datehired: "required",
-                address: "required",
                 username: "required",
                 email: {
                     isEmail: true,
@@ -893,9 +891,7 @@ export default ({
 
                 axios.post('files/upload?keep_filename=true',null,
                 {file:document.getElementById("uploadFile1").files[0]},
-                {onUploadProgress:progressEvent =>{
-                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
-                }}).catch(ress=>{
+                ).catch(ress=>{
                     console.log(ress.data);
                 }).then(ress=>{
                     console.log(ress.data);
@@ -991,7 +987,6 @@ export default ({
                 lastname:"required",
                 phonenumber: "required",
                 datehired: "required",
-                address: "required",
                 username: "required",
                 email: {
                     isEmail: true,
@@ -1123,10 +1118,7 @@ export default ({
                 let fname = document.getElementById("uploadFile2").files[0].name
 
                 axios.post('files/upload?keep_filename=true',null,
-                {file:document.getElementById("uploadFile2").files[0]},
-                {onUploadProgress:progressEvent =>{
-                    this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
-                }}).catch(ress=>{
+                {file:document.getElementById("uploadFile2").files[0]}).catch(ress=>{
                     console.log(ress.data);
                 }).then(ress=>{
                     console.log(ress.data);

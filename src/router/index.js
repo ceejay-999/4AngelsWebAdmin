@@ -47,7 +47,6 @@ const router = createRouter({
       name: 'designation',
       component: DesignationView,
       beforeEnter: () => {
-        
         if (!lStore.isset('user_token')) return '/login';
       },
     },
@@ -65,7 +64,6 @@ const router = createRouter({
       name: 'jobschedule',
       component: JobScheduleView,
       beforeEnter: () => {
-        
         if (!lStore.isset('user_token')) return '/login';
       },
     },
@@ -74,7 +72,6 @@ const router = createRouter({
       name: 'timeclock',
       component: TimeclockView,
       beforeEnter: () => {
-        
         if (!lStore.isset('user_token')) return '/login';
       },
     },
@@ -83,7 +80,6 @@ const router = createRouter({
       name: 'timesheets',
       component: TimesheetsView,
       beforeEnter: () => {
-        
         if (!lStore.isset('user_token')) return '/login';
       },
     },

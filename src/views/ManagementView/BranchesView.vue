@@ -37,7 +37,7 @@
                         <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">Facility Image</label>
 
                         <div class="form-group">
-                            <input type="file" id="uploadFile2" class="form-control-file form-control height-auto">
+                            <input type="file" id="uploadFile2" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
                         </div>
                     </div>
 
@@ -86,7 +86,7 @@
 
                         <div class="col-sm-8 col-lg-6">
                             <div class="form-group">
-                                <input type="file" id="uploadFile1" class="form-control-file form-control height-auto">
+                                <input type="file" id="uploadFile1" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
                             </div>
                         </div>
                     </div>
@@ -203,6 +203,8 @@ export default ({
             search: "",
             uploading: {},
             filesrc: "",
+            long: "",
+            lat: "",
             mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
         }
     },
@@ -266,7 +268,7 @@ export default ({
                 document.querySelector(".feedback6").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
                 if( document.getElementById("uploadFile1").files.length == 0 ){
-                    axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
+                    axios.post("branches/create",null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
@@ -302,7 +304,7 @@ export default ({
                         alert('Error Uploading File!');
                     }
                     this.filesrc = ress.data.file_name;
-                    axios.post("branches/create",null,{name: this.branchname, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+ this.filesrc}).catch(res=>{
+                    axios.post("branches/create",null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+ this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
@@ -329,7 +331,7 @@ export default ({
                 document.querySelector(".feedback3").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
                  if( document.getElementById("uploadFile2").files.length == 0 ){
-                    axios.post("branches/update?id="+data,null,{name: this.branchname, location: this.branchloc, created_at: ""}).catch(res=>{
+                    axios.post("branches/update?id="+data,null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc, created_at: ""}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
@@ -366,7 +368,7 @@ export default ({
                         alert('Error Uploading File!');
                     }
                     this.filesrc = ress.data.file_name;
-                    axios.post("branches/update?id="+data,null,{name: this.branchname, location: this.branchloc, created_at: "",branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
+                    axios.post("branches/update?id="+data,null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc, created_at: "",branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
@@ -487,6 +489,8 @@ export default ({
            this.branchloc = "";
            this.branchid = "";
            this.filesrc = "";
+           this.long = "";
+           this.lat = "";
         }
     },
     mounted() {
@@ -514,11 +518,15 @@ export default ({
         geocoder1.on('result', e => {
             console.log(e);
             this.branchloc = e.result.place_name;
+            this.long = e.result.center[0];
+            this.lat = e.result.center[1];
         });
 
         geocoder2.on('result', e => {
             console.log(e);
             this.branchloc = e.result.place_name;
+            this.long = e.result.center[0];
+            this.lat = e.result.center[1];
         });
         //mapbox End
         document.querySelector(".toast").id = "";

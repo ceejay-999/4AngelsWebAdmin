@@ -535,11 +535,37 @@
               </li>
             </ul>
           </li>
-          <li class="right-sidebar-in right-sidebar-2-menu">
-            <i class="mdi mdi-settings mdi-spin"></i>
-          </li>
           <!-- User Account -->
-          
+          <li class="dropdown user-menu">
+                    <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+                      <img :src="infodata.profile_img" class="user-image" alt="User Image">
+                      <span class="d-none d-lg-inline-block">{{infodata.firstname}} {{infodata.lastname}}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                      <!-- User image -->
+                      <li class="dropdown-header">
+                        <img :src="infodata.profile_img" class="img-circle" alt="User Image">
+                        <div class="d-inline-block">
+                          {{infodata.firstname}} {{infodata.lastname}} <small class="pt-1">{{infodata.email_address}}</small>
+                        </div>
+                      </li>
+
+                      <li>
+                        <a href="user-profile.html">
+                          <i class="mdi mdi-account"></i> My Profile
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">
+                          <i class="mdi mdi-email"></i> Message
+                        </a>
+                      </li>
+
+                      <li class="dropdown-footer">
+                        <a href="#" @click="logoutAccount"> <i class="mdi mdi-logout"></i> Log Out </a>
+                      </li>
+                    </ul>
+                  </li>
         </ul>
       </div>
     </nav>
@@ -553,6 +579,7 @@
   </div>
 </template>
 <script>
+import { axios , validateForm,lStore } from '@/functions.js';
 export default ({
   name: "App",
   components: {
@@ -562,9 +589,11 @@ export default ({
     return{
       search: "",
       branches: "",
+      infodata: [],
     }
   },
   mounted(){
+    this.infodata = lStore.get("user_info");
     $(document).ready(function () {
 
     /*======== SCROLLBAR SIDEBAR ========*/
@@ -858,6 +887,10 @@ export default ({
             }
         }); 
     },
+    logoutAccount(){
+      localStorage.clear();
+      window.location.reload();
+    }
   },
 })
 </script>

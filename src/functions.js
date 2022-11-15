@@ -1,6 +1,7 @@
 /* Version 2.0 */
 
 import axiosA from 'axios';
+// import { encrypt } from './crypto';
 // import { ciapi } from './globals';
 const ciapi = '';
 
@@ -82,7 +83,7 @@ class AxiosR{
     get(endpoint){
         return axiosA({
             method:'get',
-            url: this.baseUrl+endpoint
+            url: endpoint
         });
     }
 
@@ -97,6 +98,30 @@ class AxiosR{
         params = {...params,...opts};
         return axiosA(params);
     }
+
+    // encrypt(getReq,headers=null,body={},opts={}){
+    //     let encryptParams = {};
+    //     let reqParams = '';
+    //     if(getReq.match(/\?.*/) != null) reqParams = getReq.match(/\?.*/)[0];
+    //     getReq = getReq.replace(/\?.*/,'');
+    //     let getParamsArray = getReq.split('\/',2);
+    //     if(getParamsArray.length == 2) encryptParams.mode = encrypt(getParamsArray[1]);
+    //     if(reqParams != '') encryptParams.params = encrypt(reqParams);
+    //     encryptParams.entity = encrypt(getParamsArray[0]);
+
+    //     let params = {
+    //         method:'post',
+    //         url: this.baseUrl+'encrypted'
+    //     };
+    //     if(headers == 'default') params[headers] = this.defHeaders
+    //     else if(headers!=null) params[headers] = headers;
+        
+    //     params["data"] = toFormData({...body,...encryptParams});
+        
+    //     params = {...params,...opts};
+    //     console.log(params);
+    //     return axiosA(params);
+    // }
 }
 
 export const axios = new AxiosR('https://www.4angelshc.com/mobile/');
@@ -289,7 +314,7 @@ export function dateFormat(stringFormat,dateString){
     let months = ['January','February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     let dateFormat = stringFormat.replaceAll('%y',date.getFullYear());
     dateFormat = dateFormat.replaceAll('%d',date.getDate());
-    dateFormat = dateFormat.replaceAll('%lm',months[date.getMonth() + 1]);
+    dateFormat = dateFormat.replaceAll('%lm',months[date.getMonth()]);
     dateFormat = dateFormat.replaceAll('%m',date.getMonth()+1);
     dateFormat = (date.getMinutes() >= 10) ?  dateFormat.replaceAll('%i',date.getMinutes()) : dateFormat.replaceAll('%i',"0"+date.getMinutes());
     dateFormat = (date.getSeconds() >= 10) ?  dateFormat.replaceAll('%s',date.getSeconds()) : dateFormat.replaceAll('%s',"0"+date.getSeconds());
@@ -364,3 +389,5 @@ function toRad(Value){
     return Value * Math.PI / 180;
 }
 // END OF COMP FUNCTIONS FOR calcFlyDist
+
+// axios.encrypt('common/users?id=10000051',null,null).then(res=>console.log(res.data));

@@ -59,30 +59,29 @@ export default({
       const valid = validateForm(input,rules);
         if(!valid.allValid) return;
 
-        console.log(this.loginInput);
         
-        this.formLoading = true;
 
         axios.post('users/login',null,{
             login: this.loginInput,
             password: this.password
         }).catch(err=>{
-            console.log(err.response);
             this.callToaster("toast-top-right",5);
         }).then(res=>{
             console.log(res.data);
-            if(res.data.msg === 'user not found') this.callToaster("toast-top-right",6);
-            if(res.data.msg === 'wrong password') this.callToaster("toast-top-right",6);
-            this.formLoading = false;
-            
-            if(res.data.success) {
+            if(res.data.msg === 'user not found')
+            {
+              this.callToaster("toast-top-right",6);
+            }
+            if(res.data.msg == 'wrong password'){
+              this.callToaster("toast-top-right",6);
+            }
+            if(res.data.success == true) {
                 if(res.data.result.role == "Admin"){
-
                   lStore.set('user_id',res.data.result.id);
                   lStore.set('user_token',res.data.token);
                   lStore.set('user_info', res.data.result);
-                  this.callToaster("toast-top-right",1)
-                  this.$router.replace('/dashboard');
+                  this.callToaster("toast-top-right",1);
+                  console.log(this.$router.replace('/jobschedule'));
                 }
                 else
                 {

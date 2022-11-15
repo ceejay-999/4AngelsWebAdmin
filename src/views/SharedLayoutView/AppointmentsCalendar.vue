@@ -40,10 +40,11 @@
                     </div>
                     <div class="employeeWeekView" v-if="view==1">
                         
-                        <h2><small>({{dateFormat('%lm %d, %y',computeDays(1)[2])}} to {{dateFormat('%lm %d, %y',computeDays(7)[2])}})</small></h2>
+                        <h2><small>({{dateFormat('%lm %d, %y',computeDays(1)[2]+'00:00:00')}} to {{dateFormat('%lm %d, %y',computeDays(7)[2]+'00:00:00')}})</small></h2>
                         <div class="but">
                             <button class="mb-1 btn btn-info" @click="weekStartChange(7,'dec')">&laquo; -1 Week</button>
                             <button class="mb-1 btn btn-info" @click="weekStartChange(1,'dec')">&#10094; -1 Day</button>
+                            <input class="form-control" type="date" v-model="queryDate.rcvrString">
                             <button class="mb-1 btn btn-info" @click="weekStartChange(1,'inc')">&#10095; +1 Day</button>
                             <button class="mb-1 btn btn-info" @click="weekStartChange(7,'inc')">&raquo; +1 Week</button>
                         </div>
@@ -73,7 +74,7 @@
                         </div>
                         <div class="weekgrid2 employeegrid" v-for="emp in empScheds" :key="emp">
                             <div><strong>{{emp.name}}</strong></div>
-                            <div class="schedBox empSchedBox" v-for="i in 7" :key="i" :data-day="'date-'+computeDays(i)[1]" :data-for="emp.id" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="dropSched">
+                            <div class="schedBox empSchedBox" v-for="i in 7" :key="i" :data-day="'date-'+computeDays(i)[1]" :data-dateString="computeDays(i)[2].replaceAll(' ','')" :data-for="emp.id" @dragenter.prevent="dragEnter" @dragover.prevent @dragleave="dragLeave" @drop="dropSched">
 
                                 <div class="dayMark" v-for="(d) in empSchedList('date-'+computeDays(i)[1],emp.id)" :key="d" :data-daymark="stringify(d)" :style="'background:'+d.color+';width:'+(this.topBoxes - 45)+'px'" @click="deleteThis(d.index,emp.id)">
                                     <strong>{{d.title}}</strong>
@@ -249,7 +250,7 @@ export default ({
 
             
             
-            let dateString = String(year)+'-'+String(month+1)+'-'+String(days);
+            let dateString = formatDateString(String(year)+'-'+String(month+1)+'-'+String(days)).replaceAll(' ','');
             return [days,c2,formatDateString(dateString)]; 
             
         },
@@ -415,8 +416,8 @@ export default ({
                 }
             }
                 
-            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start+':00');
-            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end+':00');
+            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start);
+            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end);
                 
             if(dateStart > dateEndDate){            
                 alert('Start time should be earlier than the end time!');
@@ -442,15 +443,20 @@ export default ({
             let conflicts = 0;
             let y = this.newMarkDetails;
             this.dayMarks[this.newMarkDetails.dateId].forEach(x=>{
-                let a1 = new Date(dateString+' '+x.time_start+':00').getTime();
-                let b1 = new Date(dateString+' '+x.time_end+':00').getTime();
-                let a2 = new Date(dateString+' '+y.time_start+':00').getTime();
-                let b2 = new Date(dateString+' '+y.time_end+':00').getTime();
+                let a1 = new Date(formatDateString(dateString+' '+x.time_start)).getTime();
+                let b1 = new Date(formatDateString(dateString+' '+x.time_end)).getTime();
+                let a2 = new Date(formatDateString(dateString+' '+y.time_start)).getTime();
+                let b2 = new Date(formatDateString(dateString+' '+y.time_end)).getTime();
                 
                 if(
-                    ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2))
+                    ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) && (y.index != x.index)
                 ){
-                    conflicts++;
+                    for(let e1 in x.employees){
+                        for(let e2 in y.employees){
+                            if(e1 == e2) conflicts++;
+                        }   
+                    }
+                    
                 }
 
             });
@@ -468,11 +474,10 @@ export default ({
             this.newMarkDetails.index = dateStringIndex;
             this.newMarkDetails.created = true;
             this.actions++,
-            console.log(this.newMarkDetails);
             this.dayMarks[this.newMarkDetails.dateId].push(JSON.parse(JSON.stringify(this.newMarkDetails)));
             this.dayMarks[this.newMarkDetails.dateId].sort((e,f)=>{
-                let a = new Date(dateString+' '+e.time_start+':00').getTime();
-                let b = new Date(dateString+' '+f.time_start+':00').getTime();
+                let a = new Date(dateString+' '+e.time_start).getTime();
+                let b = new Date(dateString+' '+f.time_start).getTime();
                 return a - b;
             });
             this.buildCalendar();
@@ -483,7 +488,7 @@ export default ({
             
         },
 
-        duplicateMarker(markDet){
+        duplicateMarker(markDet,isUpdate=false){
             markDet = JSON.parse(JSON.stringify(markDet));
             
             let dateStart = new Date(markDet.start_date);
@@ -507,22 +512,28 @@ export default ({
 
                 let conflicts = 0;
                 this.dayMarks[newDateId].forEach(x=>{
-                    let a1 = new Date(newDateString+x.time_start).getTime();
-                    let b1 = new Date(newDateString+x.time_end).getTime();
-                    let a2 = new Date(newDateString+sched.time_start).getTime();
-                    let b2 = new Date(newDateString+sched.time_end).getTime();
+                    let a1 = new Date(formatDateString(newDateString+x.time_start)).getTime();
+                    let b1 = new Date(formatDateString(newDateString+x.time_end)).getTime();
+                    let a2 = new Date(formatDateString(newDateString+sched.time_start)).getTime();
+                    let b2 = new Date(formatDateString(newDateString+sched.time_end)).getTime();
                     
                     if(
-                        ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2))
+                        ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2))  && (sched.index != x.index)
                     ){
-                        conflicts++;
+                        for(let e1 in x.employees){
+                            
+                            for(let e2 in sched.employees){
+                                if(e1 == e2) conflicts++;
+                            }   
+                        }
+                        
                     }
 
                 });
 
                 if(conflicts > 0){
                     alert('Schedule Conflict!');
-                    this.deleteSched(sched.index,true);
+                    if(!isUpdate) this.deleteSched(sched.index,true);
                     this.hasSelected = false;
                     return;
                 }
@@ -576,8 +587,8 @@ export default ({
                 }
             }
                 
-            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start+':00');
-            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end+':00');
+            let dateStart = new Date(formatDateString(dateString)+this.newMarkDetails.time_start);
+            let dateEndDate = new Date(formatDateString(dateString)+this.newMarkDetails.time_end);
                 
             if(dateStart > dateEndDate){            
                 alert('Start time should be earlier than the end time!');
@@ -592,19 +603,49 @@ export default ({
             let index = this.dayMarks[mark.dateId].indexOf(this.dayMarks[mark.dateId].find(el=> el.index == this.newMarkDetails.index));
             
             let y = this.newMarkDetails;
+            let generatedKeys = [];
+            let first = new Date(formatDateString(this.newMarkDetails.start_date).replaceAll(' ',''));
+            let second = new Date(formatDateString(this.newMarkDetails.end_date).replaceAll(' ',''));
+            let diff =  Math.round((second - first) / (1000 * 60 * 60 * 24));
+            first = new Date(formatDateString(y.dateString).replaceAll(' ',''));
+            second = new Date(formatDateString(y.dateString).replaceAll(' ',''));
+            second.setDate(second.getDate()+diff);
 
-            this.dayMarks[mark.dateId].forEach(x=>{
-                let a1 = new Date(x.dateString+' '+x.time_start+':00').getTime();
-                let b1 = new Date(x.dateString+' '+x.time_end+':00').getTime();
-                let a2 = new Date(y.dateString+' '+y.time_start+':00').getTime();
-                let b2 = new Date(y.dateString+' '+y.time_end+':00').getTime();
+            for(let i = 0; i <= diff; i++){
+                let genKey = String(first.getFullYear()) + String(first.getMonth()) + String(first.getDate());
+                generatedKeys.push(genKey);
+                first.setDate(first.getDate()+1);
+            }
 
-                if(
-                    ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) &&
-                    x.index != y.index
-                ){
-                    conflicts++;
-                }
+            generatedKeys.forEach(nk=>{
+                if(this.dayMarks['date-'+nk]==null) return;
+                
+                this.dayMarks['date-'+nk].forEach(x=>{
+                    
+                    let a1 = new Date(formatDateString(y.dateString+' '+x.time_start)).getTime();
+                    let b1 = new Date(formatDateString(y.dateString+' '+x.time_end)).getTime();
+                    let a2 = new Date(formatDateString(y.dateString+' '+y.time_start)).getTime();
+                    let b2 = new Date(formatDateString(y.dateString+' '+y.time_end)).getTime();
+
+                    let c1 = new Date(formatDateString(x.start_date).replaceAll(' ','')).getTime();
+                    let c2 = new Date(formatDateString(y.dateString).replaceAll(' ','')).getTime();
+                    let d1 = new Date(formatDateString(x.end_date).replaceAll(' ','')).getTime();
+                    let d2 = second.getTime();
+                    
+                    
+                    if(
+                        ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) && (((c1 <= c2) && (d1 >= c2)) || ((c1 >= c2) && (c1 <= d2))) &&
+                        (y.index != x.index)
+                    ){
+                        for(let e1 in x.employees){
+                            for(let e2 in y.employees){
+                                if(e1 == e2) conflicts++;
+                            }   
+                        }
+                        
+                    }
+
+                });
             });
 
             if(conflicts > 0){
@@ -622,7 +663,6 @@ export default ({
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].index === mark.index) { 
-                        // console.log(this.dayMarks[dayMark][i].dateString,this.dayMarks[dayMark][i].index, mark.index, this.dayMarks[dayMark][i].index === mark.index);
                         this.dayMarks[dayMark].splice(i,1);
                         
                     }
@@ -630,7 +670,7 @@ export default ({
             }
             
 
-            this.duplicateMarker(this.newMarkDetails);
+            this.duplicateMarker(this.newMarkDetails,true);
             delete this.newMarkDetails.refMarker;
             let newDate = new Date(formatDateString(mark.start_date).replaceAll(' ',''));
             let newDateId = 'date-'+String(newDate.getFullYear()) + String(newDate.getMonth()) + String(newDate.getDate());
@@ -718,20 +758,52 @@ export default ({
             
             if(this.dayMarks[newKey] == null) this.dayMarks[newKey] = new Array();
             let conflicts = 0;
-            this.dayMarks[newKey].forEach(x=>{
-                let a1 = new Date(formatDateString(newDate+' '+x.time_start+':00')).getTime();
-                let b1 = new Date(formatDateString(newDate+' '+x.time_end+':00')).getTime();
-                let a2 = new Date(formatDateString(newDate+' '+obj.time_start+':00')).getTime();
-                let b2 = new Date(formatDateString(newDate+' '+obj.time_end+':00')).getTime();
-                
-                if(
-                    ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) &&
-                    x.index != obj.index
-                ){
-                    conflicts++;
-                }
 
+            let generatedKeys = [];
+            let first = new Date(formatDateString(obj.start_date).replaceAll(' ',''));
+            let second = new Date(formatDateString(obj.end_date).replaceAll(' ',''));
+            let diff =  Math.round((second - first) / (1000 * 60 * 60 * 24));
+            first = new Date(formatDateString(newDate).replaceAll(' ',''));
+            second = new Date(formatDateString(newDate).replaceAll(' ',''));
+            second.setDate(second.getDate()+diff);
+
+            for(let i = 0; i <= diff; i++){
+                let genKey = String(first.getFullYear()) + String(first.getMonth()) + String(first.getDate());
+                generatedKeys.push(genKey);
+                first.setDate(first.getDate()+1);
+            }
+            generatedKeys.forEach(nk=>{
+                if(this.dayMarks['date-'+nk]==null) return;
+                
+                this.dayMarks['date-'+nk].forEach(x=>{
+                    
+                    let a1 = new Date(formatDateString(newDate+' '+x.time_start)).getTime();
+                    let b1 = new Date(formatDateString(newDate+' '+x.time_end)).getTime();
+                    let a2 = new Date(formatDateString(newDate+' '+obj.time_start)).getTime();
+                    let b2 = new Date(formatDateString(newDate+' '+obj.time_end)).getTime();
+
+                    let c1 = new Date(formatDateString(x.start_date).replaceAll(' ','')).getTime();
+                    let c2 = new Date(formatDateString(newDate).replaceAll(' ','')).getTime();
+                    let d1 = new Date(formatDateString(x.end_date).replaceAll(' ','')).getTime();
+                    let d2 = second.getTime();
+                    
+                    if(
+                        ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) && (((c1 <= c2) && (d1 >= c2)) || ((c1 >= c2) && (c1 <= d2))) &&
+                        (obj.index != x.index)
+                    ){
+                        for(let e1 in x.employees){
+                            for(let e2 in obj.employees){
+                                if(e1 == e2) conflicts++;
+                            }   
+                        }
+                        
+                    }
+
+                });
             });
+            
+            
+            
 
             if(conflicts > 0){
                 alert('Schedule Conflict!');
@@ -781,8 +853,8 @@ export default ({
             
             this.dayMarks[newKey].push(JSON.parse(JSON.stringify(obj)));
             this.dayMarks[newKey].sort((e,f)=>{
-                let a = new Date(e.dateString+' '+e.time_start+':00').getTime();
-                let b = new Date(f.dateString+' '+f.time_start+':00').getTime();
+                let a = new Date(e.dateString+' '+e.time_start).getTime();
+                let b = new Date(f.dateString+' '+f.time_start).getTime();
                 return a - b;
             });
 
@@ -803,6 +875,56 @@ export default ({
             try{test = JSON.parse(e.dataTransfer.getData('daymarkData'));}
             catch(err){return;}
             let obj = JSON.parse(e.dataTransfer.getData('daymarkData'));
+
+
+            let generatedKeys = [];
+            let conflicts = 0;
+            let first = new Date(formatDateString(obj.start_date).replaceAll(' ',''));
+            let second = new Date(formatDateString(obj.end_date).replaceAll(' ',''));
+            let diff =  Math.round((second - first) / (1000 * 60 * 60 * 24));
+
+            for(let i = 0; i <= diff; i++){
+                let genKey = String(first.getFullYear()) + String(first.getMonth()) + String(first.getDate());
+                generatedKeys.push(genKey);
+                first.setDate(first.getDate()+1);
+            }
+            
+            
+            generatedKeys.forEach(nk=>{
+                if(this.dayMarks['date-'+nk]==null) return;
+                
+                this.dayMarks['date-'+nk].forEach(x=>{
+                    
+                    let a1 = new Date(formatDateString(obj.dateString+' '+x.time_start)).getTime();
+                    let b1 = new Date(formatDateString(obj.dateString+' '+x.time_end)).getTime();
+                    let a2 = new Date(formatDateString(obj.dateString+' '+obj.time_start)).getTime();
+                    let b2 = new Date(formatDateString(obj.dateString+' '+obj.time_end)).getTime();
+
+                    let c1 = new Date(formatDateString(x.start_date).replaceAll(' ','')).getTime();
+                    let c2 = new Date(formatDateString(obj.dateString).replaceAll(' ','')).getTime();
+                    let d1 = new Date(formatDateString(x.end_date).replaceAll(' ','')).getTime();
+                    let d2 = second.getTime();
+                    
+                    if(
+                        ((a1 >= a2 && a1 < b2) || (a1 <= a2 && b1 > a2)) && (((c1 <= c2) && (d1 >= c2)) || ((c1 >= c2) && (c1 <= d2))) &&
+                        (obj.index != x.index)
+                    ){
+                        for(let e1 in x.employees){
+                                if(e1 == e.target.closest('.schedBox').dataset.for) conflicts++;
+                        }
+                        
+                    }
+
+                });
+            });
+
+            if(conflicts > 0){
+                alert('Schedule Conflict!');
+                this.hasSelected = false;
+
+                return;
+            }
+
             let index = this.dayMarks[obj.dateId].indexOf(this.dayMarks[obj.dateId].find(el => el.index == obj.index));
             if(Object.keys(this.dayMarks[obj.dateId][index].employees).length >= this.dayMarks[obj.dateId][index].max_emp){
                 alert('Maximum Employees exceeded!');
@@ -977,7 +1099,6 @@ export default ({
                     let assigned = {};
                     assigned.user_id =  this.empScheds.find(el=>el.id == e).id;
                     assigned.schedule_id = el.index;
-                    console.log(assigned);
                     obj.assigns.push(assigned);
                 }
 
@@ -1004,7 +1125,6 @@ export default ({
                     let assigned = {};
                     assigned.user_id =  this.empScheds.find(el=>el.id == e).id;
                     assigned.schedule_id = el.index;
-                    console.log(assigned);
                     obj.assigns.push(assigned);
                 }
             
@@ -1028,7 +1148,6 @@ export default ({
             parsedUpdated.forEach(el=>{
                 let assigns = el.assigns;
                 delete el.assigns;
-                console.log(assigns);
                 axios.post('schedule/update?id='+el.id,null,el).then(res=>console.log(res));
                 axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
                     assigns.forEach(el=>{
@@ -1057,14 +1176,21 @@ export default ({
                     month: 'long'
                 });
         },
-        'queryDate.rcvrString' : function(){
+        'queryDate.rcvrString' : function(to){
+            
+            if(to == '' ) return;
             this.queryDate.year = parseInt(this.queryDate.rcvrString.split("-")[0]);
             this.queryDate.month = parseInt(this.queryDate.rcvrString.split("-")[1]) -1;
             this.queryDate.day = parseInt(this.queryDate.rcvrString.split("-")[2]);
             const d = new Date(this.queryDate.year,this.queryDate.month,1);
             this.queryDate.monthString = d.toLocaleDateString('en-us',{
                     month: 'long'
-            });            
+            });       
+            this.currentCalendar.year = this.queryDate.year;
+            this.currentCalendar.month = this.queryDate.month;
+            this.weekStart = this.queryDate.day;
+            this.buildCalendar();
+            
         },
     },
     created(){
