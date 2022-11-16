@@ -159,7 +159,7 @@
                             <a class="dropdown-item" data-toggle="modal" data-target="#modal-edit-contact" @click="EditBranch(a.id)" href="#">Edit</a>
                         </div>
                     </div>
-                    <a href="javascript:0" class="media text-secondary" data-toggle="modal" data-target="#modal-contact">
+                    <a href="#" class="media text-secondary" @click="Viewbranchemployee(a.id)" >
                         <img :src = "a.branch_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
                         <div class="media-body">
                         <h5 class="mt-0 mb-2 text-dark">{{a.name}}</h5>
@@ -182,7 +182,7 @@ import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios } from '@/functions';
 import toastr from 'toastr';
 import FileView from '../../views/FileManager.vue';
-import { elementLoad } from '../../functions';
+import { elementLoad, lStore } from '../../functions';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -209,6 +209,10 @@ export default ({
         }
     },
     methods:{
+        Viewbranchemployee(data){
+            lStore.set('branchidemp',data);
+            this.$router.replace('/branch/assignedemployee');
+        },
         fileType(filename){
             if(typeof filename != 'string') return;
             let fileSplit = filename.toLowerCase().split('.');

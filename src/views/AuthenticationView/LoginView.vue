@@ -81,7 +81,7 @@ export default({
                   lStore.set('user_token',res.data.token);
                   lStore.set('user_info', res.data.result);
                   this.callToaster("toast-top-right",1);
-                  console.log(this.$router.replace('/jobschedule'));
+                  this.$router.replace('/jobschedule');
                 }
                 else
                 {

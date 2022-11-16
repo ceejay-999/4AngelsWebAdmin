@@ -7,6 +7,8 @@ import EmployeeView from '../views/ManagementView/EmployeeView.vue'
 import JobScheduleView from '../views/ManagementView/JobSchedulingView.vue'
 import TimeclockView from '../views/ManagementView/TimeclockView.vue'
 import TimesheetsView from '../views/ManagementView/TimesheetsView.vue'
+import EmployeeProfileView from '../views/ManagementView/EmployeeProfileView.vue'
+import BranchesEmployView from '../views/ManagementView/BranchesEmployView.vue'
 import { lStore } from '../functions'
 
 const router = createRouter({
@@ -43,6 +45,15 @@ const router = createRouter({
       },
     },
     {
+      path:'/branch/assignedemployee',
+      name:'branchemployee',
+      component: BranchesEmployView,
+      beforeEnter: () => {
+        
+        if (!lStore.isset('user_token')) return '/login';
+      },
+    },
+    {
       path: '/designation',
       name: 'designation',
       component: DesignationView,
@@ -54,6 +65,15 @@ const router = createRouter({
       path: '/employee',
       name: 'employee',
       component: EmployeeView,
+      beforeEnter: () => {
+        console.log(lStore.isset('user_token'));
+        if (!lStore.isset('user_token')) return '/login';
+      },
+    },
+    {
+      path: '/employee/profile',
+      name: 'employeeprofile',
+      component: EmployeeProfileView,
       beforeEnter: () => {
         console.log(lStore.isset('user_token'));
         if (!lStore.isset('user_token')) return '/login';

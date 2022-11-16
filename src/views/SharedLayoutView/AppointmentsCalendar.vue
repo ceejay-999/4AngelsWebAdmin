@@ -112,6 +112,21 @@
                                     <input class="form-control" placeholder="Add Title" v-model="newMarkDetails.title">
                                     <textarea class="form-control" placeholder="Add Description" v-model="newMarkDetails.description"></textarea>
 
+                                    <div class="designation_select">
+                                        <div class="designation_select_inputlist">
+                                            <input class="form-control" placeholder="Designation" v-model="designationSelect">
+                                            <ul id="designation_select_datalist" v-if="designationSelect != ''">
+                                                <li v-for="e in designationsResult" :key="e.id" :data-id="e.id" @click="newMarkDetails.designations[e.id] = e.position;designationSelect='';updateEmpList()">{{e.position}}</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <ul id="designation_select_emplist">
+                                            <li v-for="e,i in newMarkDetails.designations" :key="e" :data-id="e">{{e}}
+                                                <a href="javascript:;" @click="delete newMarkDetails.designations[i];updateEmpList()">&#10005;</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
                                     <div class="branch_inputlist">
                                             <input class="form-control" placeholder="Branch" :value="branchName(newMarkDetails.branch)" readonly>
                                             <ul>
@@ -124,7 +139,7 @@
                                         <div class="selected_emps_inputlist">
                                             <input class="form-control" placeholder="Assign Schedule to Employees" v-model="searchEmpBox">
                                             <ul id="selected_emps_datalist" v-if="searchEmpBox != ''">
-                                                <li v-for="e in searchEmpResult" :key="e.id" :data-id="e.id" @click="selectEmpSched(e.id);searchEmpBox = ''">{{e.name}}</li>
+                                                <li v-for="e in searchEmpResult" :key="e.id" :data-id="e.id" @click="selectEmpSched(e.id);searchEmpBox = '';">{{e.name}}</li>
                                             </ul>
                                         </div>
                                         
@@ -202,7 +217,9 @@ export default ({
             ],
             actions:0,
             searchEmpBox:'',
-            newMarkDetails:{employees:{}},
+            designations:[],
+            designationSelect:'',
+            newMarkDetails:{employees:{},designations:{}},
             deletedIndexes:[],
             topBoxes:0,       
             topBoxes2:0,     
@@ -347,7 +364,7 @@ export default ({
         },
         selectDay(e,dNum){
             this.hasSelected = true;          
-            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{}}}
+            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{},designations:{}}}
         	if(document.querySelector(".selected") != null)
                 document.querySelector(".selected").classList.remove("selected");
             this.queryDate.year = this.currentCalendar.year;
@@ -364,7 +381,7 @@ export default ({
         },
         selectDate(e,dateString){
             this.hasSelected = true;
-            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{}}}
+            if(!e.target.classList.contains('dayMark')) {this.selectedDayMark = null;this.newMarkDetails = {index:0,employees:{},designations:{}}}
         	if(document.querySelector(".selected") != null)
                 document.querySelector(".selected").classList.remove("selected");
             let dateParse = new Date(dateString.match('[0-9]+-[0-9]+-[0-9]+')[0]);
@@ -483,7 +500,7 @@ export default ({
             this.buildCalendar();
             this.duplicateMarker(this.newMarkDetails);
             
-            this.newMarkDetails = {index:0,employees:{}};
+            this.newMarkDetails = {index:0,employees:{}, designations:{}};
             this.hasSelected = false;
             
         },
@@ -533,7 +550,7 @@ export default ({
 
                 if(conflicts > 0){
                     alert('Schedule Conflict!');
-                    if(!isUpdate) this.deleteSched(sched.index,true);
+                    if(!isUpdate) this.deleteSched(sched.index,false);
                     this.hasSelected = false;
                     return;
                 }
@@ -685,7 +702,7 @@ export default ({
 
             this.buildCalendar();
             this.buildTimeView();
-            this.newMarkDetails = {index:0,employees:{}};
+            this.newMarkDetails = {index:0,employees:{}, designations:{}};
             this.selectedDayMark = null;
             this.hasSelected = false;
             
@@ -724,7 +741,7 @@ export default ({
         },
         dragStart(e){
             this.selectedDayMark = null;
-            this.newMarkDetails = {index:0,employees:{}};
+            this.newMarkDetails = {index:0,employees:{}, designations:{}};
             if(e.target.parentElement.classList.contains('empSchedBox')) return;
             try{
                 e.dataTransfer.setData('daymarkData',e.target.dataset.daymark);
@@ -870,7 +887,7 @@ export default ({
 
         dropSched(e){
             this.selectedDayMark = null;
-            this.newMarkDetails = {index:0,employees:{}};
+            this.newMarkDetails = {index:0,employees:{}, designations:{}};
             let test = '';
             try{test = JSON.parse(e.dataTransfer.getData('daymarkData'));}
             catch(err){return;}
@@ -938,6 +955,11 @@ export default ({
             else empid = e.target.closest('.schedBox').dataset.for;
             let emp = this.empScheds.find(el => el.id == empid);
 
+            
+            let designations = [];
+            for(let d in obj.designations) designations.push(d);
+            if(!designations.includes(emp.designation_id)) return;
+
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].index === obj.index) { 
@@ -948,7 +970,7 @@ export default ({
                 }
             }
             
-            this.newMarkDetails = {index:0,employees:{}};
+            this.newMarkDetails = {index:0,employees:{}, designations:{}};
         },
 
         selectEmpSched(id){
@@ -1007,7 +1029,7 @@ export default ({
                     }
                 }
             }
-            if(isReverted) this.deletedIndexes.push(index);
+            if(!isReverted) this.deletedIndexes.push(index);
             this.newMarkDetails = {index:0};
             this.selectedDayMark=null;
             this.hasSelected = false;
@@ -1063,10 +1085,20 @@ export default ({
             }
         },
 
+        updateEmpList(){
+            let designations = [];
+            for(let d in this.newMarkDetails.designations) designations.push(d);
+
+            for(let e in this.newMarkDetails.employees){
+                let emp = this.empScheds.find(el=>el.id == e);
+                if(!designations.includes(emp.designation_id)) delete this.newMarkDetails.employees[e];
+            }
+        },
+
         saveChanges(){
             let created = [];
             let updated = [];
-            
+
             for(let dayMark in this.dayMarks){
                 for(let i = this.dayMarks[dayMark].length - 1; i >= 0; i--  ){
                     if(this.dayMarks[dayMark][i].refMarker == null) {
@@ -1093,7 +1125,8 @@ export default ({
                     shift_date_end: el.end_date,
                     status: 0,
                     branch_id: el.branch,
-                    assigns:[]
+                    assigns:[],
+                    designations:el.designations
                 };
                 for(let e in el.employees){
                     let assigned = {};
@@ -1118,7 +1151,8 @@ export default ({
                     color: el.color,
                     status: 0,
                     branch_id: el.branch,
-                    assigns:[]
+                    assigns:[],
+                    designations:el.designations
                 };
                 
                 for(let e in el.employees){
@@ -1134,12 +1168,22 @@ export default ({
 
             parsedCreated.forEach(el=>{
                 let assigns = el.assigns;
+                let designations = el.designations;
                 delete el.assigns;
+                delete el.designations;
                 axios.post('schedule/create',null,el).then(res=>console.log(res));
                 axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
                     assigns.forEach(el=>{
                         axios.post('assigned/create',null,el).then(res=>console.log(res));
                     })
+                });
+                axios.post('scheduleDesignations/delete?schedule_id='+el.id).then(()=>{
+                    for(let d in designations){
+                        axios.post('scheduleDesignations/create',null,{
+                            schedule_id: el.id,
+                            designation_id: d
+                        }).then(res=>console.log(res));
+                    }
                 });
             });
 
@@ -1147,14 +1191,27 @@ export default ({
 
             parsedUpdated.forEach(el=>{
                 let assigns = el.assigns;
+                let designations = el.designations;
                 delete el.assigns;
+                delete el.designations;
                 axios.post('schedule/update?id='+el.id,null,el).then(res=>console.log(res));
                 axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
                     assigns.forEach(el=>{
                         axios.post('assigned/create',null,el).then(res=>console.log(res));
                     })
                 });
-                
+                axios.post('scheduleDesignations/delete?schedule_id='+el.id).then(()=>{
+                    for(let d in designations){
+                        axios.post('scheduleDesignations/create',null,{
+                            schedule_id: el.id,
+                            designation_id: d
+                        }).then(res=>console.log(res));
+                    }
+                });
+            });
+
+            this.deletedIndexes.forEach(el=>{
+                axios.post('schedule/delete?id='+el).then(res=>console.log(res));
             });
 
             this.actions = 0;
@@ -1216,6 +1273,10 @@ export default ({
     },
     mounted()
     {
+        axios.post('designation?_batch=true',null,null).then(res=>{
+
+            this.designations = res.data.result;
+        });
 
         axios.post('branches?_batch=true',null,null).then(res=>{
             this.branches = res.data.result;
@@ -1229,6 +1290,7 @@ export default ({
                 list.push(el);
             })
             this.empScheds = list;
+            
 
             axios.post('schedule?_batch=true',null,null).then(res=>{
                 this.dayMarks = {};
@@ -1245,25 +1307,36 @@ export default ({
                         max_emp:el.max_employees,
                         title: el.title,
                         description: el.description,
-                        employees:{}
+                        employees:{},
+                        designations:{}
                     };
                     obj.dateString = el.shift_date;
                     let newDate = new Date(el.shift_date.replaceAll(' ',''));
                     obj.dateId = 'date-'+String(newDate.getFullYear()) + String(newDate.getMonth()) + String(newDate.getDate());
 
                     if(this.dayMarks[obj.dateId] == null) this.dayMarks[obj.dateId] = new Array();
-                    
 
-                    axios.post('assigned?_batch=true,schedule_id='+obj.index,null,null).then(res2=>{
+                    axios.post('scheduleDesignations?_batch=true&schedule_id='+obj.index,null,null).then(res2=>{
                         if(res2.data.result != null){
                             res2.data.result.forEach(el=>{
-                                obj.employees[el.user_id] =  this.empScheds.find(el2=>el.user_id == el2.id).name;
+                                obj.designations[el.designation_id] =  this.designations.find(el2=>el.designation_id == el2.id).position;
                             });
                         }
 
-                        this.dayMarks[obj.dateId].push(obj);
-                        this.duplicateMarker(obj);
+                        axios.post('assigned?_batch=true,schedule_id='+obj.index,null,null).then(res2=>{
+                            if(res2.data.result != null){
+                                res2.data.result.forEach(el=>{
+                                    obj.employees[el.user_id] =  this.empScheds.find(el2=>el.user_id == el2.id).name;
+                                });
+                            }
+
+                            this.dayMarks[obj.dateId].push(obj);
+                            this.duplicateMarker(obj);
+                        });
                     });
+                    
+
+                    
                 })
 
                 this.buildCalendar();
@@ -1308,7 +1381,16 @@ export default ({
             return this.empScheds.filter(el=>(
                 (this.searchEmpBox.toLowerCase().includes(el.name.toLowerCase()) || el.name.toLowerCase().includes(this.searchEmpBox.toLowerCase())) &&
                 (this.newMarkDetails.employees[el.id] == null) &&
-                this.searchEmpBox != ''
+                this.searchEmpBox != '' && this.newMarkDetails.designations[el.designation_id] != null
+            ));
+
+            
+        },
+
+        designationsResult(){
+            return this.designations.filter(el=>(
+                (this.designationSelect.toLowerCase().includes(el.position.toLowerCase()) || el.position.toLowerCase().includes(this.designationSelect.toLowerCase())) &&
+                this.designationSelect != ''
             ));
         }
 
@@ -1407,5 +1489,19 @@ export default ({
     .branch_inputlist ul {display:none;margin: 0;list-style: none;padding-left: 0;border:1px solid #ccc;position: absolute;top:100%;width: 100%;background: #fff;}
     .branch_inputlist ul li{margin: 0;padding:5px;transition:0.4s}
     .branch_inputlist ul li:hover{background: #ccc;}
+
+
+    .designation_select{margin: 20px 0;position: relative;}
+    .designation_select input {margin:0 !important}
+    .designation_select_inputlist{position: relative;}
+    .designation_select #designation_select_datalist {margin: 0;list-style: none;padding-left: 0;border:1px solid #ccc;position: absolute;top:100%;width: 100%;background: #fff;z-index:99}
+    .designation_select #designation_select_datalist li{margin: 0;padding:5px;transition:0.4s}
+    .designation_select #designation_select_datalist li:hover{background: #ccc;}
+    #designation_select_emplist{display: flex;list-style: none;padding-left: 0;gap:5px}
+    #designation_select_emplist li{padding: 5px 10px;border: 1px solid #aaa;border-radius: 22px;}
+    #designation_select_emplist li a{text-decoration: none;text-decoration: none;color: #fff;border-radius: 50%;background: #aaa;padding: 2px;width: 15px;height: 15px;display: inline-block;text-align: center;font-size: 7px;vertical-align: middle;margin: 0 0 2px 5px;}
+    #designation_select_emplist li a:hover{background: #222;color:#fff}
+
+    
     
 </style>
