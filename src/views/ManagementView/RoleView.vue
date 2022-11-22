@@ -7,7 +7,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Position ID: {{roleid}}</h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Role ID: {{roleid}}</h5>
                         <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -15,7 +15,7 @@
 
                     <div class="modal-body">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Position</label>
+                                <label for="exampleInputEmail1">Role</label>
                                 <input type="text" class="form-control" v-model="position"  placeholder="Position *">
                                 <div class="invalid-feedback feedback1">
 								   
@@ -34,7 +34,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Add Position</h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">Add Role</h5>
                         <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -42,7 +42,7 @@
 
                     <div class="modal-body">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Position</label>
+                                <label for="exampleInputEmail1">Role</label>
                                 <input type="text" class="form-control" v-model="position" placeholder="Position *">
                                 <div class="invalid-feedback feedback3">
 								   
@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="modal-body">
-                        Are you sure you want to delete this? {{roleid}}
+                        Are you sure you want to delete this role? {{roleid}}
                     </div>
 
                     <div class="modal-footer">
@@ -89,7 +89,7 @@
                     </div>
 
                     <div class="modal-body">
-                        <h5>Position: {{position}}</h5>
+                        <h5>Role: {{position}}</h5>
                     </div>
 
                     <div class="modal-footer">
@@ -101,7 +101,7 @@
         </div>
         <!--Modal-->
         <div class="breadcrumb-wrapper">
-            <h1>Designation</h1>
+            <h1>Role</h1>
                 <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0">
                     <li class="breadcrumb-item">
@@ -109,7 +109,7 @@
                         <span class="mdi mdi-home"></span>                
                     </RouterLink>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page">Designation</li>
+                    <li class="breadcrumb-item" aria-current="page">Role</li>
                 </ol>
                 </nav>
         </div>
@@ -117,10 +117,10 @@
             <div class="col-12">
                 <div class="card card-default">
                     <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
-                        <h2>Designation Table</h2>
+                        <h2>Role Table</h2>
 
                         <a @click="clearVariable" data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
-                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Designation
+                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
                         </a>
                     </div>
 
@@ -130,7 +130,7 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Position</th>
+                                        <th>Role</th>
                                         <th>Date Created</th>
                                         <th>Action</th>
                                     </tr>
@@ -339,6 +339,7 @@ export default ({
         document.querySelector(".toast").id = "";
             $('#hoverable-data-table').dataTable({
               aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],
+              emptyTable:     "No data available in table",
               rowReorder: {
                 selector: 'td:nth-child(2)'
               },

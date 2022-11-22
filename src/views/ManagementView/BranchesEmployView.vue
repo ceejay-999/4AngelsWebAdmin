@@ -54,7 +54,6 @@
                                         <th>Name</th>
                                         <th>Email</th>
                                         <th>Position</th>
-                                        <th>Schedule</th>
                                         <th>Clock In</th>
                                         <th>Clock Out</th>
                                         <th>Clock In Location</th>
@@ -72,49 +71,95 @@
     </LayoutView>
 </template>
 <script>
-
-import { lStore,axios } from '../../functions';
+import { lStore,axios,QueryBuilder, formatDateString } from '../../functions';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 export default({
   name: 'LoginPage',
   data() {
       return{
         branches: {},
+        mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
       };
   },
   mounted() {
+    let q = new QueryBuilder('https://www.4angelshc.com/mobile/assigned');
+    let dateToday = new Date();
+    let dateTomm = new Date();
+    dateTomm.setDate(dateTomm.getDate() + 1);
+    let dateTodayString = formatDateString(String(dateToday.getFullYear())+'-'+String(dateToday.getMonth()+1)+'-'+String(String(dateToday.getDate()))).replaceAll(' ','');
+    let dateTommString = formatDateString(String(dateTomm.getFullYear())+'-'+String(dateTomm.getMonth()+1)+'-'+String(String(dateTomm.getDate()))).replaceAll(' ','');
+
+    q
+    .select({
+        mobile_schedule: ['id','title','shift_start','shift_end','shift_date','shift_date_end'],
+        mobile_branches: ['name'],
+        mobile_users: ['lastname','firstname','email_address'],
+        mobile_designation:['position'],
+        mobile_timerecord: ['location','time_in','time_out','location_out']
+    })
+    .join({
+        mobile_schedule: ['mobile_assignedusers.schedule_id','mobile_schedule.id'],
+        mobile_branches:['mobile_schedule.branch_id','mobile_branches.id'],
+        mobile_users:['mobile_assignedusers.user_id','mobile_users.id'],
+        mobile_designation:['mobile_users.designation_id','mobile_designation.id'],
+        mobile_timerecord: ['mobile_assignedusers.schedule_id','mobile_timerecord.schedule_id'],
+    })
+    .compare({
+        'mobile_schedule:shift_date': ['<=', dateTodayString]
+    })
+    .compare({
+        'mobile_schedule:shift_date_end': ['>=', dateTodayString]
+    })
+    .where({
+        'mobile_schedule:branch_id': 20
+    })
+    .order('mobile__schedule.shift__start','ASC')
+    .batch()
+
+
+    let ajax_url = q.toString();
+    mapboxgl.accessToken = this.mapToken;
     axios.post("branches?id="+lStore.get('branchidemp')).catch(res=>{
 
     }).then(res=>{
-        if(res.data.success){
             this.branches = res.data.result;
-
-        }
-
+            console.log(this.branches)
+        
     });
+    
     document.querySelector(".toast").id = "";
-            $('#hoverable-data-table').dataTable({
-              aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],
-              rowReorder: {
-                selector: 'td:nth-child(2)'
-              },
-              responsive: true,
-              ajax : {
-                url: 'https://www.4angelshc.com/mobile/timerecord?mobile_schedule:branch_id=20&_joins=mobile_schedule&_on=mobile_timerecord.schedule_id=mobile_schedule.id&_GTE_time_in=2022-11-16&_LSE_time_in=2022-11-17&_batch=true',
-                dataSrc: 'result'
-              },
-              columns : [
-                { data : "id" },
-                { data : "position" },
-                { data : "created_at" },
-                { data : "id",
-                    render: function(data){
-                        return '<a class="actionb" data-toggle="modal" data-target="#exampleEditModalForm" target="_blank"><span id="editrow" data-value='+data+' class="mdi mdi-square-edit-outline"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModalTooltip" target="_blank"><span id="viewrow" data-value='+data+' class="mdi mdi-eye"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
-                    }
-                }
-              ],
-          });
-  }
+        $('#hoverable-data-table').dataTable({
+            aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],
+            emptyTable:     "No data available in table",
+            rowReorder: {
+            selector: 'td:nth-child(2)'
+            },
+            responsive: true,
+            ajax : {
+            url: ajax_url,
+            dataSrc: 'result'
+            },
+            columns : [
+            { data : "id" },
+            { data : "firstname" },
+            { data : "email_address" },
+            { data : "position" },
+            { data : "time_in"},
+            { data : "time_out"},
+            { data : "location"},
+            { data : "location_out"},                                                
+            ]
+        });
+    },
+    methods : {
+        async GetLocationOnGivenLatLong(lat,long){
+            let data = await axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${long},${lat}.json?access_token=${mapboxgl.accessToken}`);
+            let retdata = data.data.features[0].place_name;
+            return " " + retdata;
+        }
+    }
 });
 </script>
 <style scoped>
@@ -141,5 +186,8 @@ export default({
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+}
+.responsive-data-table{
+    overflow: auto;
 }
 </style>

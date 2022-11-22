@@ -12,155 +12,166 @@
                     </div>
 
                     <div class="modal-body px-4">
-                    <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
-
-                        
-                            <div class="col-sm-8 col-lg-6">
+                        <div class="form-group row">
+                                <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
+                                <div class="col-sm-8 col-lg-6">
+                                    <div class="form-group">
+                                        <input type="file" id="uploadFile1" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
+                                    </div>
+                                </div>
+                        </div>
+                        <h4 class="mt-4">General Information</h4>
+                        <div class="row mt-4">
+                            <div class="col-sm-6">
                                 <div class="form-group">
-                                    <input type="file" id="uploadFile1" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
+                                    <label for="fname">First name</label>
+                                    <input type="text" v-model="firstname" class="form-control" placeholder="John">
+                                    <div class="invalid-feedback feedback1">
+                                    
+                                    </div>
                                 </div>
                             </div>
-                    </div>
-                    <div class="row">
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">First name</label>
-								<input type="text" v-model="firstname" class="form-control" placeholder="John">
-                                <div class="invalid-feedback feedback1">
-								   
-							    </div>
-							</div>
-						</div>
 
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="lname">Last name</label>
-								<input type="text" v-model="lastname" class="form-control" placeholder="Smith">
-                                <div class="invalid-feedback feedback2">
-								   
-							    </div>
-							</div>
-						</div>
-
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Phone number</label>
-								<input type="text" v-model="phonenumber" class="form-control" placeholder="+63">
-                                <div class="invalid-feedback feedback3">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Designation</label>
-								<select class="form-control" id="des">
-                                    <option value="">Please Select Designation</option>
-                                    <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
-                                </select>
-                                <div class="invalid-feedback feedback4">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Gender</label>
-								<select class="form-control" id="gender">
-                                    <option value="">Please select gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                                <div class="invalid-feedback feedback5">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Role</label>
-								<select class="form-control" id="role">
-                                    <option value="">Please select role</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="Supervisor">Supervisor</option>
-                                    <option value="Employee">Employee</option>
-                                </select>
-                                <div class="invalid-feedback feedback12">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Date Hired</label>
-								<input type="date" v-model="datehired" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback6">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Rate $ (per hour)</label>
-								<input type="text" v-model="rate" class="form-control" placeholder="$">
-                                <div class="invalid-feedback feedback3">
-								   
-							    </div>
-							</div>
-						</div>
-					</div>
-                    <div class="row">
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Address</label>
-								<div id="geocoder1"></div>
-                                <div class="invalid-feedback feedback7">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Username</label>
-								<input type="text" v-model="username" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback9">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Email</label>
-								<input type="text" v-model="email" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback10">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
-                    <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="lname">Last name</label>
+                                    <input type="text" v-model="lastname" class="form-control" placeholder="Smith">
+                                    <div class="invalid-feedback feedback2">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Gender</label>
+                                    <select class="form-control" id="gender">
+                                        <option value="">Please select gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                    <div class="invalid-feedback feedback5">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Date Hired</label>
+                                    <input type="date" v-model="datehired" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback6">
+                                    
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Password</label>
-								<input type="password" v-model="password" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback11">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Confirm Password</label>
-								<input type="password" v-model="confirmpassword" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback12">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
+                                <div class="form-group">
+                                    <label for="fname">Address</label>
+                                    <div id="geocoder1"></div>
+                                    <div class="invalid-feedback feedback7">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="mt-4">Contact Information</h4>
+                        <div class="row mt-4">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Phone number</label>
+                                    <input type="text" v-model="phonenumber" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback3">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Access Level</label>
+                                    <select class="form-control" id="role">
+                                        <option value="">Please select Access Level</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Supervisor">Supervisor</option>
+                                        <option value="Employee">Employee</option>
+                                    </select>
+                                    <div class="invalid-feedback feedback4">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Username</label>
+                                    <input type="text" v-model="username" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback9">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="fname">Email</label>
+                                    <input type="email" v-model="email" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback10">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="form-group">
+                                    <label for="fname">Password</label>
+                                    <input type="password" v-model="password" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback11">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="form-group">
+                                    <label for="fname">Confirm Password</label>
+                                    <input type="password" v-model="confirmpassword" class="form-control" placeholder="">
+                                    <div class="invalid-feedback feedback12">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="mt-4">Roles Manangement</h4>
+                            <div class="invalid-feedback feedback13">
+                                                
+                            </div>
+                            <div id="phone_number_form">
+                                <div class="row mt-4">
+                                    <div class="col-sm-3">
+
+                                            <label for="fname">Role</label>
+                                            <select class="form-control" id="des">
+                                                <option value="">Please Select Role</option>
+                                                <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
+                                            </select>
+
+                                    </div>
+                                    <div class="col-sm-3">
+
+                                            <label for="fname">Rate $ (per hour)</label>
+                                            <input id="rates" type="text" class="form-control" placeholder="$">
+
+                                    </div>
+                                    <div class="col-sm-4">
+
+                                            <label for="fname">Facilities</label>
+                                            <select class="form-control" id="bran">
+                                                <option value="">Please Select Facilities</option>
+                                                <option v-for="br in branches" :value="br.id">{{br.name}}</option>
+                                            </select>
+
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label></label>
+                                        <input type="button" id="remove_phone_number" class="adrole mt-2 btn btn-danger" value="X">
+                                    </div>
+                                </div>
+                            </div>
+                            <a id="add_role" class="adrole ml-2">Add Role</a>
                     </div>
                     <div class="modal-footer px-4">
                     <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
@@ -243,6 +254,7 @@ export default ({
     },
     data(){
         return{
+            rolenumberformindex: 0,
             branches: [],
             designation: [],
             firstname: "",
@@ -268,6 +280,33 @@ export default ({
         }
     }, 
     mounted() {
+        axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
+
+        }).then(res=>{
+                if(res.data.success){
+                    this.branches = res.data.result;
+                    console.log(this.branches);
+                }
+        });
+        //Start of Adding Multiple Role
+            $("#add_role").click(()=>{
+                this.rolenumberformindex++;
+                $("#phone_number_form").after($("#phone_number_form").clone().attr("id","phone_number_form" + this.rolenumberformindex));
+                $("#phone_number_form" + this.rolenumberformindex).css("display","inline");
+                var a = this.rolenumberformindex;
+                $("#phone_number_form" + this.rolenumberformindex + " :input").each(function(){
+                    $(this).attr("name",$(this).attr("name") + a);
+                    $(this).attr("id",$(this).attr("id") + a);
+                    });
+                
+                $("#remove_phone_number" + this.rolenumberformindex).click(()=>{
+                    this.rolenumberformindex--;
+                })
+                $("#remove_phone_number" + this.rolenumberformindex).click(function(){
+                    $("#phone_number_form"+ a).remove();
+                });
+            });
+        //End Adding multiple role
         mapboxgl.accessToken = this.mapToken;
 
         const geocoder1 = new MapboxGeocoder({
@@ -281,7 +320,7 @@ export default ({
         });
 
         elementLoad('#geocoder1').then(()=>{
-            geocoder1.addTo('#geocoder1');
+            geocoder2.addTo('#geocoder1');
         });
         elementLoad('#geocoder2').then(()=>{
             if($('.mapboxgl-ctrl-geocoder').length == 1){
@@ -291,12 +330,10 @@ export default ({
          });
 
         geocoder1.on('result', e => {
-            console.log(e);
             this.address = e.result.place_name;
         });
 
         geocoder2.on('result', e => {
-            console.log(e);
             this.address = e.result.place_name;
         });
         document.querySelector(".toast").id = "toaster";
@@ -350,7 +387,7 @@ export default ({
                         }
                         else
                         {
-                            
+                            this.callToaster("toast-top-right",2);
                         }
                     });
                 }
@@ -401,51 +438,6 @@ export default ({
         };
     },
     methods : {
-        cleardata(){
-            this.firstname = "";
-            this.lastname = "";
-            this.phonenumber = "";
-            this.gender = "";
-            this.datehired = "";
-            this.address = "";
-            this.username = "";
-            this.email = "";
-            this.password = "";
-            this.confirmpassword = "";
-            this.designations = "";
-            this.role = "";
-            this.userid = "";
-            this.search = "";
-            this.filesrc = "";
-            this.rate = "";
-        },
-        EditEmployee(){
-            this.cleardata();
-            this.role = this.viewusers.role;
-            this.firstname = this.viewusers.firstname;
-            this.lastname = this.viewusers.lastname;
-            this.phonenumber = this.viewusers.phonenumber;
-            this.gender = this.viewusers.gender;
-            this.datehired = this.viewusers.date_hired;
-            this.address = this.viewusers.address;
-            this.username = this.viewusers.username;
-            this.email = this.viewusers.email_address;
-            this.userid = this.viewusers.user_id;
-            document.querySelector('#edes').value = this.viewusers.designation_id;
-            document.querySelector('#egender').value = this.viewusers.gender;
-            document.querySelector('#erole').value = this.viewusers.role;
-            document.querySelector('#egender').value = this.viewusers.gender;
-            document.querySelector('#edate').value = this.viewusers.date_hired;
-            
-            setTimeout(()=>{
-                document.querySelector('#body').classList.add('modal-open');
-            },500);
-        },
-        ViewDetailsEmp(data){
-           lStore.set("userdetails", data)
-           this.$router.replace('/employee/profile');
-        },
-
         SaveEmployee(){
             document.querySelector('.feedback1').style.display = "none";
             document.querySelector('.feedback2').style.display = "none";
@@ -454,32 +446,105 @@ export default ({
             document.querySelector('.feedback5').style.display = "none";
             document.querySelector('.feedback6').style.display = "none";
             document.querySelector('.feedback7').style.display = "none";
-            document.querySelector('.feedback8').style.display = "none";
             document.querySelector('.feedback9').style.display = "none";
             document.querySelector('.feedback10').style.display = "none";
             document.querySelector('.feedback11').style.display = "none";
             document.querySelector('.feedback12').style.display = "none";
+            document.querySelector('.feedback13').style.display = "none";
             let newUser = {
                 firstname: this.firstname,
                 lastname:this.lastname,
                 phonenumber:this.phonenumber,
                 datehired:this.datehired,
-                address:this.address,
+                gender: document.querySelector("#gender").value,
                 username:this.username,
                 email:this.email,
                 password:this.password,
                 confirmpassword:this.confirmpassword,
-                rate: this.rate
-
+                access: document.querySelector("#role").value,
             };
-
+            let check = 0;
+            if(this.rolenumberformindex > 0)
+            {
+                
+                for(let i = 1; i <= this.rolenumberformindex; i++)
+                {
+                    let newRole = {
+                        role: document.querySelector("#des"+ i).value,
+                        branch: document.querySelector("#bran"+ i).value,
+                        rate: document.querySelector("#rates"+ i).value,
+                    }
+                    let roleval = validateForm(newRole,{
+                        role: "required",
+                        branch: "required",
+                        rate: "required",
+                        callback: (a)=>{
+                            if(a == "role")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "branch")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "rate")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                        }
+                    });
+                    if(!roleval.allValid)
+                    {
+                        check++;
+                    }
+                }
+            }
+            else{
+                console.log("last: "+this.rolenumberformindex);
+                let newRole = {
+                        role: document.querySelector("#des").value,
+                        branch: document.querySelector("#bran").value,
+                        rate: document.querySelector("#rates").value,
+                    }
+                    let rolevalid = validateForm(newRole,{
+                        role: "required",
+                        branch: "required",
+                        rate: "required",
+                        callback: (a)=>{
+                            if(a == "role")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "branch")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "rate")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                        }
+                    });
+                    if(!rolevalid.allValid)
+                    {
+                        check++;
+                    }
+            }
             const valid = validateForm(newUser,{
                 firstname:"required",
                 lastname:"required",
                 phonenumber: "required",
                 datehired: "required",
                 username: "required",
+                gender: "required",
                 rate: "required",
+                access: "required",
                 email: {
                     isEmail: true,
                     isRequired:true,
@@ -501,9 +566,6 @@ export default ({
                         }
                     }
                 },
-
-
-
                 callback: (a)=>{
                     if(a == "firstname")
                     {
@@ -530,114 +592,77 @@ export default ({
                         document.querySelector('.feedback7').textContent = "Address is required";
                         document.querySelector('.feedback7').style.display = "block";
                     }
-                    if(a == "username")
-                    {
-                        document.querySelector('.feedback9').textContent = "Username is required";
-                        document.querySelector('.feedback9').style.display = "block";
-                    }
                     if(a == "email")
                     {
                         document.querySelector('.feedback10').textContent = "Email is required";
                         document.querySelector('.feedback10').style.display = "block";
                     }
-                    if(a == "rate")
-                    {
-                        document.querySelector('.feedback10').textContent = "rate is required";
-                        document.querySelector('.feedback10').style.display = "block";
-                    }
                     if(a == "password")
                     {
-                        document.querySelector('.feedback10').textContent = "Password is required";
-                        document.querySelector('.feedback10').style.display = "block";
+                        document.querySelector('.feedback11').textContent = "Password is required";
+                        document.querySelector('.feedback11').style.display = "block";
                     }
                     if(a == "confirmpassword")
                     {
-                        document.querySelector('.feedback11').textContent = "Confirm Password is required";
-                        document.querySelector('.feedback11').style.display = "block";
+                        document.querySelector('.feedback12').textContent = "Confirm Password is required";
+                        document.querySelector('.feedback12').style.display = "block";
                     }
-                }   
-                
-            });
-            if(document.querySelector("#gender").value == ""){
-                valid.allValid = false;
-                document.querySelector('.feedback5').textContent = "Gender is required";
-                document.querySelector('.feedback5').style.display = "block";
-            }
-            if(document.querySelector("#des").value == "")
-            {
-                valid.allValid = false;
-                document.querySelector('.feedback4').textContent = "Designation is required";
-                document.querySelector('.feedback4').style.display = "block";
-            }
-            if(document.querySelector('#role').value == "")
-            {
-                valid.allValid = false;
-                document.querySelector('.feedback12').textContent = "Role is required";
-                document.querySelector('.feedback12').style.display = "block";
-            }
-            if(valid.allValid) {
-                this.designations = document.querySelector("#des").value;
-                this.gender = document.querySelector("#gender").value;
-                this.role = document.querySelector("#role").value;
-
-               if( document.getElementById("uploadFile1").files.length == 0 ){
-                axios.post("users/create",null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                username: this.username, password: this.password, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    console.log(res.data);
-                    if(res.data.success)
+                    if(a == "gender")
                     {
-                        this.callToaster("toast-top-right",1);
-                        this.cleardata();
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
+                        document.querySelector('.feedback5').textContent = "Gender is required";
+                        document.querySelector('.feedback5').style.display = "block";
                     }
-                    else
+                    if(a == "username")
                     {
-                        this.callToaster("toast-top-right",2);
+                        document.querySelector('.feedback9').textContent = "Username is required";
+                        document.querySelector('.feedback9').style.display = "block";
                     }
-                });
-                    return;
+                    if(a == "access")
+                    {
+                        document.querySelector('.feedback4').textContent = "Access Level is required";
+                        document.querySelector('.feedback4').style.display = "block";
+                    }
                 }
+            });
 
-                let fname = document.getElementById("uploadFile1").files[0].name
+            if(valid.allValid && check == 0){
+                console.log("aw");
+            }
 
-                axios.post('files/upload?keep_filename=true',null,
-                {file:document.getElementById("uploadFile1").files[0]},
-                ).catch(ress=>{
-                    console.log(ress.data);
-                }).then(ress=>{
-                    console.log(ress.data);
-                    if(!ress.data.success){
-                        alert('Error Uploading File!');
-                    }
-                    this.filesrc = ress.data.file_name;
-                    axios.post("users/create",null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                    username: this.username, password: this.password, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                        this.callToaster("toast-top-right",2);
-                    }).then(res=>{
-                        console.log(res.data);
-                        if(res.data.success)
-                        {
-                            this.callToaster("toast-top-right",1);
-                            this.cleardata();
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                        }
-                        else
-                        {
-                            this.callToaster("toast-top-right",2);
-                        }
-                    });
-                })
-            }
-            else
-            {
-                return;
-            }
+        },
+        ViewDetailsEmp(data){
+           lStore.set("userdetails", data)
+           this.$router.replace('/employee/profile');
+        },
+        cleardata(){
+            this.firstname = "";
+            this.lastname = "";
+            this.phonenumber = "";
+            this.gender = "";
+            this.datehired = "";
+            this.address = "";
+            this.username = "";
+            this.email = "";
+            this.password = "";
+            this.confirmpassword = "";
+            this.designations = "";
+            this.role = "";
+            this.userid = "";
+            this.search = "";
+            this.filesrc = "";
+            this.rate = "";
+            document.querySelector('.feedback1').style.display = "none";
+            document.querySelector('.feedback2').style.display = "none";
+            document.querySelector('.feedback3').style.display = "none";
+            document.querySelector('.feedback4').style.display = "none";
+            document.querySelector('.feedback5').style.display = "none";
+            document.querySelector('.feedback6').style.display = "none";
+            document.querySelector('.feedback7').style.display = "none";
+            document.querySelector('.feedback9').style.display = "none";
+            document.querySelector('.feedback10').style.display = "none";
+            document.querySelector('.feedback11').style.display = "none";
+            document.querySelector('.feedback12').style.display = "none";
+            document.querySelector('.feedback13').style.display = "none";
         },
         callToaster(positionClass, reserror) {
             if (document.getElementById("toaster")) {
@@ -672,224 +697,6 @@ export default ({
                 }
             }
         },
-        UpdateData(data){
-            document.querySelector('.feedback13').style.display = "none";
-            document.querySelector('.feedback14').style.display = "none";
-            document.querySelector('.feedback15').style.display = "none";
-            document.querySelector('.feedback16').style.display = "none";
-            document.querySelector('.feedback17').style.display = "none";
-            document.querySelector('.feedback18').style.display = "none";
-            document.querySelector('.feedback19').style.display = "none";
-            document.querySelector('.feedback20').style.display = "none";
-            document.querySelector('.feedback21').style.display = "none";
-            document.querySelector('.feedback22').style.display = "none";
-            document.querySelector('.feedback23').style.display = "none";
-            let newUser = {
-                firstname: this.firstname,
-                lastname:this.lastname,
-                phonenumber:this.phonenumber,
-                datehired:this.datehired,
-                address:this.address,
-                username:this.username,
-                email:this.email,
-                password:this.password,
-                confirmpassword:this.confirmpassword
-            };
-
-
-            const valid = validateForm(newUser,{
-                firstname:"required",
-                lastname:"required",
-                phonenumber: "required",
-                datehired: "required",
-                username: "required",
-                email: {
-                    isEmail: true,
-                    isRequired:true,
-                    callback: res=>{
-                        if(res!='invalid_email') return;
-                        document.querySelector('.feedback23').textContent = "Email is not valid!";
-                        document.querySelector('.feedback23').style.display = "block";
-                    }
-                },
-
-
-
-                callback: (a)=>{
-                    if(a == "firstname")
-                    {
-                        document.querySelector('.feedback13').textContent = "Firstname is required";
-                        document.querySelector('.feedback13').style.display = "block";
-                    }
-                    if(a == "lastname")
-                    {
-                        document.querySelector('.feedback14').textContent = "Lastname is required";
-                        document.querySelector('.feedback14').style.display = "block";
-                    }
-                    if(a == "phonenumber")
-                    {
-                        document.querySelector('.feedback15').textContent = "Phone number is required";
-                        document.querySelector('.feedback15').style.display = "block";
-                    }
-                    if(a == "datehired")
-                    {
-                        document.querySelector('.feedback19').textContent = "Date Hired is required";
-                        document.querySelector('.feedback19').style.display = "block";
-                    }
-                    if(a == "address")
-                    {
-                        document.querySelector('.feedback21').textContent = "Address is required";
-                        document.querySelector('.feedback21').style.display = "block";
-                    }
-                    if(a == "username")
-                    {
-                        document.querySelector('.feedback22').textContent = "Username is required";
-                        document.querySelector('.feedback22').style.display = "block";
-                    }
-                    if(a == "email")
-                    {
-                        document.querySelector('.feedback23').textContent = "Email is required";
-                        document.querySelector('.feedback23').style.display = "block";
-                    }
-                }   
-                
-            });
-            if(document.querySelector("#egender").value == ""){
-                valid.allValid = false;
-                document.querySelector('.feedback17').textContent = "Gender is required";
-                document.querySelector('.feedback17').style.display = "block";
-            }
-            if(document.querySelector("#edes").value == "")
-            {
-                valid.allValid = false;
-                document.querySelector('.feedback16').textContent = "Designation is required";
-                document.querySelector('.feedback16').style.display = "block";
-            }
-            if(document.querySelector("#ebranc").value == "")
-            {
-                valid.allValid = false;
-                document.querySelector('.feedback20').textContent = "Branch is required";
-                document.querySelector('.feedback20').style.display = "block";
-            }
-            if(document.querySelector('#erole').value == "")
-            {
-                valid.allValid = false;
-                document.querySelector('.feedback18').textContent = "Role is required";
-                document.querySelector('.feedback18').style.display = "block";
-            }
-            if(valid.allValid) {
-                this.designations = document.querySelector("#edes").value;
-                this.branch = $("#ebranc").chosen().val();
-                this.gender = document.querySelector("#egender").value;
-                this.role = document.querySelector("#erole").value;
-
-               this.branch = this.branch;
-               if( document.getElementById("uploadFile2").files.length == 0 ){
-                if(this.password == "")
-                {
-                    axios.post("users/update?id="+data,null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    console.log(res.data);
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",1);
-                        this.cleardata();
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-                    return;
-                }
-                else
-                {
-                    axios.post("users/update?id="+data,null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                username: this.username, address: this.address, password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    console.log(res.data);
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",1);
-                        this.cleardata();
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-                    return;
-                }
-                }
-                let fname = document.getElementById("uploadFile2").files[0].name
-
-                axios.post('files/upload?keep_filename=true',null,
-                {file:document.getElementById("uploadFile2").files[0]}).catch(ress=>{
-                    console.log(ress.data);
-                }).then(ress=>{
-                    console.log(ress.data);
-                    if(!ress.data.success){
-                        alert('Error Uploading File!');
-                    }
-                    this.filesrc = ress.data.file_name;
-                    if(this.password == "")
-                    {
-                        axios.post("users/update?id="+data,null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                    username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                        this.callToaster("toast-top-right",2);
-                    }).then(res=>{
-                        console.log(res.data);
-                        if(res.data.success)
-                        {
-                            this.callToaster("toast-top-right",1);
-                            this.cleardata();
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                        }
-                        else
-                        {
-                            this.callToaster("toast-top-right",2);
-                        }
-                    });
-                    }
-                    else
-                    {
-                        axios.post("users/update?id="+data,null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
-                    username: this.username, address: this.address,password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations}).catch(res=>{
-                        this.callToaster("toast-top-right",2);
-                    }).then(res=>{
-                        console.log(res.data);
-                        if(res.data.success)
-                        {
-                            this.callToaster("toast-top-right",1);
-                            this.cleardata();
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                        }
-                        else
-                        {
-                            this.callToaster("toast-top-right",2);
-                        }
-                    });
-                    }
-                });
-            }
-            else
-            {
-                return;
-            }
-        }
     },
 })
 
@@ -912,5 +719,11 @@ export default ({
 }
 .card {
     overflow: hidden;
+}
+.adrole{
+    cursor: pointer;
+}
+#remove_phone_number{
+    display: none;
 }
 </style>

@@ -13,6 +13,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import LayoutView from '../src/views/SharedLayoutView/LayoutView.vue';
 import FileView from '../src/views/FileManager.vue';
 import AppointView from '../src/views/SharedLayoutView/AppointmentsCalendar.vue';
+import FileMngr2 from '../src/views/SharedLayoutView/FileMngr2.vue';
 
 
 
@@ -26,5 +27,6 @@ app.mount('#app')
 app.component('LayoutView', LayoutView)
 app.component('FileView', FileView)
 app.component('AppointView', AppointView)
+app.component('FileMngr2', FileMngr2)
 
 

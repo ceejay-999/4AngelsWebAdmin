@@ -18,6 +18,7 @@
                                         <th>Total hours</th>
                                         <th>Clock in Location</th>
                                         <th>Clock out Location</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                             </table>

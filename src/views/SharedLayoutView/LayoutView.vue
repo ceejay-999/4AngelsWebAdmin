@@ -38,7 +38,7 @@
                 </li>
 
                 <li class="">
-                  <a href="button-group.html">Request</a>
+                  <RouterLink class="sidenav-item-link" to="/request">Request</RouterLink>
                 </li>
 
               </div>
@@ -57,17 +57,17 @@
             </RouterLink>
           </li>
 
-          <li class="has-sub" data-url="/designation">
-            <RouterLink class="sidenav-item-link" to="/designation">
-              <i class="mdi mdi-settings"></i>
-              <span class="nav-text">Designation</span>
-            </RouterLink>
-          </li>
-
           <li class="has-sub" data-url="/branch">
             <RouterLink class="sidenav-item-link" to="/branch">
               <i class="mdi mdi-hospital-building"></i>
               <span class="nav-text">Facilities</span>
+            </RouterLink>
+          </li>
+
+          <li class="has-sub" data-url="/designation">
+            <RouterLink class="sidenav-item-link" to="/designation">
+              <i class="mdi mdi-settings"></i>
+              <span class="nav-text">Designation</span>
             </RouterLink>
           </li>
         </ul>

@@ -3,24 +3,219 @@
         <div class="toast" >
 
         </div>
-        <div class="breadcrumb-wrapper breadcrumb-contacts">
-        <div>
-            <h1>Employee</h1>    
-            <nav aria-label="breadcrumb">
-            <ol class="breadcrumb p-0">
-                <li class="breadcrumb-item">
-                    <RouterLink to="/dashboard">
-                    <span class="mdi mdi-home"></span>                
-                    </RouterLink>
-                </li>
-                <li class="breadcrumb-item" aria-current="page"><RouterLink to="/employee">Employee</RouterLink></li>
-                <li class="breadcrumb-item" aria-current="page">Profile</li>
-            </ol>
-            </nav>
+        <div class="modal fade" id="modal-add-contact" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <form >
+                    <div class="modal-header px-4">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Edit Employee</h5>
+                    </div>
+
+                    <div class="modal-body px-4">
+                    <div class="form-group row mb-6">
+                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
+                            <div class="col-sm-8 col-lg-6">
+                                <div class="form-group">
+                                    <input type="file" id="uploadFile2" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
+                                </div>
+                            </div>
+                    </div>
+                    <div class="row">
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">First name</label>
+								<input type="text" v-model="firstname" class="form-control" placeholder="John">
+                                <div class="invalid-feedback feedback13">
+								   
+							    </div>
+							</div>
+						</div>
+
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label for="lname">Last name</label>
+								<input type="text" v-model="lastname" class="form-control" placeholder="Smith">
+                                <div class="invalid-feedback feedback14">
+								   
+							    </div>
+							</div>
+						</div>
+
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Phone number</label>
+								<input type="text" v-model="phonenumber" class="form-control" placeholder="+63">
+                                <div class="invalid-feedback feedback15">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Designation</label>
+								<select class="form-control" id="edes">
+                                    <option value="">Please Select Designation</option>
+                                    <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
+                                </select>
+                                <div class="invalid-feedback feedback16">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Gender</label>
+								<select class="form-control" id="egender">
+                                    <option value="">Please select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <div class="invalid-feedback feedback17">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Role</label>
+								<select class="form-control" id="erole">
+                                    <option value="">Please select role</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                    <option value="Employee">Employee</option>
+                                </select>
+                                <div class="invalid-feedback feedback18">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Date Hired</label>
+								<input type="date" id="edate" v-model="edate" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback19">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm-6">
+							<div class="form-group">
+								<label for="fname">Rate $ (per hour)</label>
+								<input type="text" v-model="rate" class="form-control" placeholder="$">
+                                <div class="invalid-feedback feedback20">
+								   
+							    </div>
+							</div>
+						</div>
+					</div>
+                    <div class="row">
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Address</label>
+								<div id="geocoder3"></div>
+                                <div class="invalid-feedback feedback21">
+								   
+							    </div>
+							</div>
+						</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Username</label>
+								<input type="text" v-model="username" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback22">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Email</label>
+								<input type="text" v-model="email" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback23">
+								   
+							    </div>
+							</div>
+						</div>
+                    </div>
+                    <div class="row">
+                            <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Password</label>
+								<input type="password" v-model="password" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback24">
+								   
+							    </div>
+							</div>
+						</div>
+                        <div class="col-sm">
+							<div class="form-group">
+								<label for="fname">Confirm Password</label>
+								<input type="password" v-model="confirmpassword" class="form-control" placeholder="">
+                                <div class="invalid-feedback feedback25">
+								   
+							    </div>
+							</div>
+						</div>
+                    </div>
+                    </div>
+                    <div class="modal-footer px-4">
+                    <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-pill savedB" @click="SaveEmployee">Update</button>
+                    </div>
+                </form>
+                </div>
+            </div>
         </div>
+        <div class="modal fade" id="modal-add-contact-term" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                <form >
+                    <div class="modal-header px-4">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Terminate Employee</h5>
+                    </div>
+
+                    <div class="modal-body px-4">
+                    
+                      <div class="col-sm-12">
+                        <div class="form-group">
+                          <label for="fname">Reason</label>
+                          <textarea v-model="comment" class="form-control"></textarea>
+                          <div class="invalid-feedback feedback13"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer px-4">
+                    <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-pill savedB" @click="TermEmployee">Update</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+        <div class="breadcrumb-wrapper breadcrumb-contacts">
+            <div>
+                <h1>Employee</h1>    
+                <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0">
+                    <li class="breadcrumb-item">
+                        <RouterLink to="/dashboard">
+                        <span class="mdi mdi-home"></span>                
+                        </RouterLink>
+                    </li>
+                    <li class="breadcrumb-item" aria-current="page"><RouterLink to="/employee">Employee</RouterLink></li>
+                    <li class="breadcrumb-item" aria-current="page">Profile</li>
+                </ol>
+                </nav>
+            </div>
         </div>
         <div class="content-wrapper">
             <div class="content">
+                <div class="alert alert-danger" role="alert">
+            Reason of Termination: 
+            {{viewusers.comments}}
+          </div>
                 <div class="bg-white border rounded">
   <div class="row no-gutters">
     <div class="col-lg-4 col-xl-3">
@@ -29,10 +224,10 @@
           <div class="card-img mx-auto rounded-circle">
             <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="user image">
           </div>
-
           <div class="card-body">
             <h4 class="py-2 text-dark">{{viewusers.firstname}} {{viewusers.lastname}}</h4>
             <p>{{viewusers.email_address}}</p>
+            <a class="btn btn-primary btn-pill btn-lg my-4" href="#" data-toggle="modal" data-target="#modal-add-contact" @click="EditEmployee">Edit</a>
           </div>
         </div>
 
@@ -49,6 +244,7 @@
 
           <div class="text-center pb-4">
             <h6 class="text-dark pb-2" v-if="viewusers.status == 0">Hired</h6>
+            <h6 class="text-dark pb-2" v-if="viewusers.status == 1">Terminate</h6>
             <p>Status</p>
           </div>
         </div>
@@ -70,666 +266,109 @@
           <p class="text-dark font-weight-medium pt-4 mb-2">Rate(per hour)</p>
           <p>${{viewusers.hourly_rate}}</p>
           <p class="text-dark font-weight-medium pt-4 mb-2"></p>
-          <p></p>
         </div>
       </div>
     </div>
 
     <div class="col-lg-8 col-xl-9">
       <div class="profile-content-right profile-right-spacing py-5">
+        <a class="btn btn-primary btn-pill btn-lg my-4" id = "empterm" href="#" @click="RehireEmployee"  v-if="viewusers.status == 1">Rehire</a>
+        <a class="btn btn-danger btn-pill btn-lg my-4" id = "empterm" href="#" data-toggle="modal" data-target="#modal-add-contact-term" v-if="viewusers.status == 0 ">Terminate</a>
         <ul class="nav nav-tabs px-3 px-xl-5 nav-style-border" id="myTab" role="tablist">
           <li class="nav-item">
-            <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="true">Uploaded Documents</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Employee Discipline</a>
+            <a class="nav-link active" id="timeline-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="true">Uploaded Documents</a>
           </li>
         </ul>
+        <FileMngr2>
 
-        <div class="tab-content px-3 px-xl-5" id="myTabContent">
-          <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
-            <div class="media mt-5 profile-timeline-media timeline-media-spacing">
-              <div class="align-self-start iconbox-45 overflow-hidden mr-3">
-                <img  src="assets/img/user/u3.jpg" alt="Generic placeholder image">
-              </div>
-
-              <div class="media-body">
-                <h6 class="mt-0 text-dark">Larissa Gebhardt</h6>
-                <span>Designer</span>
-                <span class="float-right">5 mins ago</span>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua. ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa1.jpg" alt="Product">
-                </div>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa2.jpg" alt="Product">
-                </div>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa3.jpg" alt="Product">
-                </div>
-              </div>
-            </div>
-
-            <div class="media mt-5 profile-timeline-media">
-              <div class="align-self-start iconbox-45 overflow-hidden mr-3">
-                <img  src="assets/img/user/u4.jpg" alt="Generic placeholder image">
-              </div>
-
-              <div class="media-body">
-                <h6 class="mt-0 text-dark">Walter Reuter</h6>
-                <span>Designer</span>
-                <span class="float-right">2 hrs ago</span>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua. ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
-              </div>
-            </div>
-
-            <div class="media mt-5 profile-timeline-media">
-              <div class="align-self-start iconbox-45 overflow-hidden mr-3">
-                <img  src="assets/img/user/u7.jpg" alt="Generic placeholder image">
-              </div>
-
-              <div class="media-body">
-                <h6 class="mt-0 text-dark">Albrecht Straub</h6>
-                <span>Designer</span>
-                <span class="float-right">5 days ago</span>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua. ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa4.jpg" alt="Product">
-                </div>
-              </div>
-            </div>
-
-            <div class="media mt-5 profile-timeline-media">
-              <div class="align-self-start iconbox-45 overflow-hidden mr-3">
-                <img  src="assets/img/user/u8.jpg" alt="Generic placeholder image">
-              </div>
-
-              <div class="media-body">
-                <h6 class="mt-0 text-dark">Selena Wagner</h6>
-                <span>Designer</span>
-                <span class="float-right">Mar 05, 2018</span>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua. ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa5.jpg" alt="Product">
-                </div>
-
-                <div class="d-inline-block rounded overflow-hidden mt-4 mr-0 mr-lg-4">
-                  <img src="assets/img/products/pa6.jpg" alt="Product">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="tab-widget mt-5">
-              <div class="row">
-                <div class="col-xl-4">
-                  <div class="media widget-media p-4 bg-white border">
-                    <div class="icon rounded-circle mr-4 bg-primary">
-                      <i class="mdi mdi-account-outline text-white "></i>
-                    </div>
-
-                    <div class="media-body align-self-center">
-                      <h4 class="text-primary mb-2">5300</h4>
-                      <p>New Users</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-xl-4">
-                  <div class="media widget-media p-4 bg-white border">
-                    <div class="icon rounded-circle bg-warning mr-4">
-                      <i class="mdi mdi-cart-outline text-white "></i>
-                    </div>
-
-                    <div class="media-body align-self-center">
-                      <h4 class="text-primary mb-2">1953</h4>
-                      <p>Order Placed</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-xl-4">
-                  <div class="media widget-media p-4 bg-white border">
-                    <div class="icon rounded-circle mr-4 bg-danger">
-                      <i class="mdi mdi-cart-outline text-white "></i>
-                    </div>
-
-                    <div class="media-body align-self-center">
-                      <h4 class="text-primary mb-2">1450</h4>
-                      <p>Total Sales</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-xl-6">
-                  
-                        <!-- Notification Table -->
-                        <div class="card card-default">
-                          <div class="card-header justify-content-between mb-1">
-                            <h2>Latest Notifications</h2>
-                            <div>
-                                <button class="text-black-50 mr-2 font-size-20"><i class="mdi mdi-cached"></i></button>
-                                <div class="dropdown show d-inline-block widget-dropdown">
-                                    <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdown-notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-                                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-notification">
-                                      <li class="dropdown-item"><a  href="#">Action</a></li>
-                                      <li class="dropdown-item"><a  href="#">Another action</a></li>
-                                      <li class="dropdown-item"><a  href="#">Something else here</a></li>
-                                    </ul>
-                                  </div>
-                            </div>
-
-                          </div>
-                          <div class="card-body compact-notifications" data-simplebar style="height: 434px;">
-                            <div class="media pb-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-primary text-white">
-                                <i class="mdi mdi-cart-outline font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3 ">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">New Order</a>
-                                <p >Selena has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 10 AM</span>
-                            </div>
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-success text-white">
-                                <i class="mdi mdi-email-outline font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">New Enquiry</a>
-                                <p >Phileine has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 9 AM</span>
-                            </div>
-
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-warning text-white">
-                                <i class="mdi mdi-stack-exchange font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">Support Ticket</a>
-                                <p >Emma has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 10 AM</span>
-                            </div>
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-primary text-white">
-                                <i class="mdi mdi-cart-outline font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">New order</a>
-                                <p >Ryan has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 10 AM</span>
-                            </div>
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-info text-white">
-                                <i class="mdi mdi-calendar-blank font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="">Comapny Meetup</a>
-                                <p >Phileine has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 10 AM</span>
-                            </div>
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-warning text-white">
-                                <i class="mdi mdi-stack-exchange font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">Support Ticket</a>
-                                <p >Emma has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 10 AM</span>
-                            </div>
-
-                            <div class="media py-3 align-items-center justify-content-between">
-                              <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-success text-white">
-                                <i class="mdi mdi-email-outline font-size-20"></i>
-                              </div>
-                              <div class="media-body pr-3">
-                                <a class="mt-0 mb-1 font-size-15 text-dark" href="#">New Enquiry</a>
-                                <p >Phileine has placed an new order</p>
-                              </div>
-                              <span class=" font-size-12 d-inline-block"><i class="mdi mdi-clock-outline"></i> 9 AM</span>
-                            </div>
-
-                          </div>
-                          <div class="mt-3"></div>
-                        </div>
-
-                </div>
-
-                <div class="col-xl-6">
-                  
-                  <!-- To Do list -->
-                  <div class="card card-default todo-table" id="todo">
-                    <div class="card-header d-block pb-0 ">
-                      <div class="todo-single-item mb-0" id="todo-input">
-                        <form class="todo-form">
-                          <div class="input-group mb-0">
-                            <input type="text" class="form-control border-right-0" placeholder="Add Todo" required="" autofocus>
-                            <div class="input-group-append ml-0">
-                              <button class="input-group-text border-0 btn bg-primary" type="submit">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 448 448" width="18" class="">
-                                  <g><path d="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0" data-original="#000000" class="active-path" data-old_color="#000000" fill="#FFFFFF"/>
-                                  </g>
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-
-                    <div class="card-body compact-to-do-list" data-simplebar style="height: 450px;">
-                      <div class="todo-list" id="todo-list" >
-                        <div id="item" class="todo-single-item todo-item d-flex flex-row justify-content-between finished alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Finish Dashboard UI Kit update</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between current alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Create new prototype for the landing page</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Add new Google Analytics code to all main files sed auctor lacus in sem interdum, ac gravida tortor elementum. Cras magna enim.</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Update parallax scroll on team page</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Integer et porta odio, pulvinar pretium eros. Curabitur vel tellus erat.</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Pellentesque blandit ut eros sed vehicula.</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec felis ligula, fringilla in volutpat sit amet, viverra nec mi. Donec at dui dolor.</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="todo-single-item d-flex flex-row justify-content-between mb-1 alert alert-dismissible fade show" role="alert">
-                          <i class="mdi"></i>
-                          <span>Update parallax scroll on team page</span>
-
-                          <div class="task-content">
-                            <span data-dismiss="alert" aria-label="Close">
-                              <svg class="remove-task" id="Capa_1" enable-background="new 0 0 515.556 515.556" height="16" viewBox="0 0 515.556 515.556" width="16" xmlns="http://www.w3.org/2000/svg"><path class="" d="m64.444 451.111c0 35.526 28.902 64.444 64.444 64.444h257.778c35.542 0 64.444-28.918 64.444-64.444v-322.222h-386.666z"/><path d="m322.222 32.222v-32.222h-128.889v32.222h-161.111v64.444h451.111v-64.444z"/></svg>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mt-3"></div>
-                  </div>
-
-                </div>
-
-                <div class="col-12">
-                  <!-- Recent Order Table -->
-                  <div class="card card-table-border-none" id="recent-orders">
-                    <div class="card-header justify-content-between">
-                      <h2>Recent Orders</h2>
-
-                      <div class="date-range-report">
-                        <span></span>
-                      </div>
-                    </div>
-
-                    <div class="card-body pt-0 pb-5">
-                      <table class="table card-table table-responsive table-responsive-large" style="width:100%">
-                        <thead>
-                          <tr>
-                            <th>Order ID</th>
-                            <th>Product Name</th>
-                            <th class="d-none d-xl-table-cell">Units</th>
-                            <th class="d-none d-xl-table-cell">Order Date</th>
-                            <th class="d-none d-xl-table-cell">Order Cost</th>
-                            <th>Status</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          <tr>
-                            <td>24541</td>
-                            <td>
-                              <a class="text-dark" href=""> Coach Swagger</a>
-                            </td>
-                            <td class="d-none d-xl-table-cell">1 Unit</td>
-                            <td class="d-none d-xl-table-cell">Oct 20, 2018</td>
-                            <td class="d-none d-xl-table-cell">$230</td>
-                            <td>
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="" role="button" id="dropdown-recent-order1"
-                                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order1">
-                                  <li class="dropdown-item">
-                                    <a href="#">View</a>
-                                  </li>
-
-                                  <li class="dropdown-item">
-                                    <a href="#">Remove</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td>24541</td>
-                            <td>
-                              <a class="text-dark" href=""> Toddler Shoes, Gucci Watch</a>
-                            </td>
-                            <td class="d-none d-xl-table-cell">2 Units</td>
-                            <td class="d-none d-xl-table-cell">Nov 15, 2018</td>
-                            <td class="d-none d-xl-table-cell">$550</td>
-                            <td>
-                              <span class="badge badge-warning">Delayed</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdown-recent-order2"
-                                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order2">
-                                  <li class="dropdown-item">
-                                    <a href="#">View</a>
-                                  </li>
-
-                                  <li class="dropdown-item">
-                                    <a href="#">Remove</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td>24541</td>
-                            <td>
-                              <a class="text-dark" href=""> Hat Black Suits</a>
-                            </td>
-                            <td class="d-none d-xl-table-cell">1 Unit</td>
-                            <td class="d-none d-xl-table-cell">Nov 18, 2018</td>
-                            <td class="d-none d-xl-table-cell">$325</td>
-                            <td>
-                              <span class="badge badge-warning">On Hold</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdown-recent-order3"
-                                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order3">
-                                  <li class="dropdown-item">
-                                    <a href="#">View</a>
-                                  </li>
-
-                                  <li class="dropdown-item">
-                                    <a href="#">Remove</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td>24541</td>
-                            <td>
-                              <a class="text-dark" href=""> Backpack Gents, Swimming Cap Slin</a>
-                            </td>
-                            <td class="d-none d-xl-table-cell">5 Units</td>
-                            <td class="d-none d-xl-table-cell">Dec 13, 2018</td>
-                            <td class="d-none d-xl-table-cell">$200</td>
-                            <td>
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdown-recent-order4"
-                                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order4">
-                                  <li class="dropdown-item">
-                                    <a href="#">View</a>
-                                  </li>
-
-                                  <li class="dropdown-item">
-                                    <a href="#">Remove</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td>24541</td>
-                            <td>
-                              <a class="text-dark" href=""> Speed 500 Ignite</a>
-                            </td>
-                            <td class="d-none d-xl-table-cell">1 Unit</td>
-                            <td class="d-none d-xl-table-cell">Dec 23, 2018</td>
-                            <td class="d-none d-xl-table-cell">$150</td>
-                            <td>
-                              <span class="badge badge-danger">Cancelled</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="#" role="button" id="dropdown-recent-order5"
-                                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order5">
-                                  <li class="dropdown-item">
-                                    <a href="#">View</a>
-                                  </li>
-
-                                  <li class="dropdown-item">
-                                    <a href="#">Remove</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          
-        </div>
+        </FileMngr2>
       </div>
     </div>
   </div>
 </div>
             </div>
         </div>
-        <!--<div class="card" role="">
-            <div class="modal-content">
-            <div class="modal-header justify-content-end border-bottom-0">
-            </div>
-
-            <div class="modal-body pt-0">
-                <div class="row no-gutters">
-                <div class="col-md-12">
-                    <div class="profile-content-left px-4">
-                        <div class="card text-center widget-profile px-0 border-0">
-                            <div class="card-img mx-auto rounded-circle">
-                                <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
-                            </div>
-
-                            <div class="card-body">
-                            <h4 class="py-2 text-dark">{{viewusers.firstname}} {{viewusers.lastname}}</h4>
-                            <p>{{viewusers.email_address}}</p>
-                            </div>
-                        </div>
-                        <hr />
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <div class="profile-content-left px-4">
-                        <div class="contact-details">
-                            <h4 class="text-dark mb-1">Employee Details</h4>
-                            <div class="modal-header justify-content-end border-bottom-0">
-                                <button type="button" class="btn-edit-icon" data-dismiss="modal" data- target="_blank" data-toggle="modal" data-target="#modal-edit-contact" @click="EditEmployee">
-                                <i class="mdi mdi-pencil"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="profile-content-left px-4">
-                        <div class="d-flex justify-content-between ">
-                            <div class="contact-info px-1">
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Address</p>
-                                <p>{{viewusers.address}}</p>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Phone Number</p>
-                                <p>{{viewusers.phonenumber}}</p>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Username</p>
-                                <p>{{viewusers.username}}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="profile-content-left px-4">
-                        <div class="d-flex justify-content-between ">
-                            <div class="contact-info px-1">
-                                <h4 class="text-dark mb-1"></h4>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Date Hired</p>
-                                <p>{{viewusers.date_hired}}</p>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Designation</p>
-                                <p>{{viewusers.position}}</p>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Gender</p>
-                                <p>{{viewusers.gender}}</p>
-                                <p class="text-dark font-weight-medium pt-4 mb-2">Rate per hour</p>
-                                <p>{{viewusers.rate}}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <hr />
-                    <div class="contact-info px-4 contact-details">
-                    <h4 class="text-dark mb-1">Uploaded Documents</h4>
-                    <div class="modal-header justify-content-end border-bottom-0">
-                        <button type="button" class="btn-edit-icon">
-                        <i class="mdi mdi-clipboard-plus"></i>
-                        </button>
-                    </div>
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <hr />
-                    <div class="contact-info px-4 contact-details">
-                        <h4 class="text-dark mb-1">Employee Discipline</h4>
-                        <div class="modal-header justify-content-end border-bottom-0">
-                            <button type="button" class="btn-edit-icon">
-                            <i class="mdi mdi-clipboard-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-                </div>
-            </div>
-            </div>
-        </div> -->
     </LayoutView>
 </template>
 <script>
 
-import {axios,validateForm, lStore } from '../../functions';
+import {axios,validateForm, lStore, elementLoad } from '../../functions';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import toastr from 'toastr';
+import FileMngr2 from '../../views/SharedLayoutView/FileMngr2.vue'
 
 export default({
   name: 'LoginPage',
   data() {
       return{
+            designation: [],
+            firstname: "",
+            lastname: "",
+            phonenumber: "",
+            gender: "",
+            datehired: "",
+            rate: "",
+            address: "",
+            username: "",
+            email: "",
+            password: "",
+            confirmpassword: "",
+            designations: "",
+            users:[],
+            viewdetailsusersbranch: [{}],
+            viewusers: {},
+            role: "",
+            userid: "",
+            search: "",
+            filesrc: "",
+            rate:"",
+            comment:"",
           viewusers: {},
+          mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
       };
   },
   mounted() 
   {
+    document.querySelector(".toast").id = "toaster";
+    mapboxgl.accessToken = this.mapToken;
+
+        const geocoder3 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+        console.log(geocoder3);
+        const geocoder4 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+
+        elementLoad('#geocoder3').then(()=>{
+            geocoder3.addTo('#geocoder3');
+        });
+        elementLoad('#geocoder4').then(()=>{
+            if($('.mapboxgl-ctrl-geocoder').length == 1){
+                
+                geocoder4.addTo('#geocoder2');
+            }
+         });
+
+        geocoder3.on('result', e => {
+            console.log(e);
+            this.address = e.result.place_name;
+        });
+
+        geocoder4.on('result', e => {
+            console.log(e);
+            this.address = e.result.place_name;
+        });
+        axios.post("designation?_batch=true").catch(res=>{
+        }).then(res=>{
+            if(res.data.success){
+                this.designation = res.data.result;
+            }
+        });
     this.viewusers = ""
     axios.post("users?id="+lStore.get("userdetails")+"&_joins=mobile_designation&_on=mobile_users.designation_id=mobile_designation.id&_batch=true",null,{}).catch(res=>{
             this.callToaster("toast-top-right",2);
@@ -740,11 +379,344 @@ export default({
             });
             res.data.result.forEach(el => {
                 this.viewusers = el;
+                if(this.viewusers.comments == null && this.viewusers.status == 1 || this.viewusers.comments == "" && this.viewusers.status == 1)
+                {
+                  elementLoad('.alert').then(()=>{
+                    document.querySelector(".alert").style.display = "block";
+                    document.querySelector(".alert").textContent = "No reason added for the termination of this employee";
+                  });
+                }
+                else if(this.viewusers.comments == null && this.viewusers.status == 0 || this.viewusers.comments == "" && this.viewusers.status == 0)
+                {
+                  elementLoad('.alert').then(()=>{
+                    document.querySelector(".alert").style.display = "none";
+                  });
+                }
+                else{
+                  elementLoad('.alert').then(()=>{
+                    document.querySelector(".alert").style.display = "block";
+                  });
+                }
                 return;
             });
         });
         console.log(this.viewusers);
 
+  },
+  methods: {
+    cleardata(){
+            this.firstname = "";
+            this.lastname = "";
+            this.phonenumber = "";
+            this.gender = "";
+            this.datehired = "";
+            this.address = "";
+            this.username = "";
+            this.email = "";
+            this.password = "";
+            this.confirmpassword = "";
+            this.designations = "";
+            this.role = "";
+            this.userid = "";
+            this.search = "";
+            this.filesrc = "";
+            this.rate = "";
+        },
+    EditEmployee(){
+        this.cleardata();
+        this.role = this.viewusers.role;
+        this.firstname = this.viewusers.firstname;
+        this.lastname = this.viewusers.lastname;
+        this.phonenumber = this.viewusers.phonenumber;
+        this.gender = this.viewusers.gender;
+        this.datehired = this.viewusers.date_hired;
+        this.address = this.viewusers.address;
+        this.username = this.viewusers.username;
+        this.email = this.viewusers.email_address;
+        this.userid = this.viewusers.user_id;
+        this.rate = this.viewusers.hourly_rate;
+        document.querySelector('#edes').value = this.viewusers.designation_id;
+        document.querySelector('#egender').value = this.viewusers.gender;
+        document.querySelector('#erole').value = this.viewusers.role;
+        document.querySelector('#egender').value = this.viewusers.gender;
+        document.querySelector('#edate').value = this.viewusers.date_hired;
+    },
+    callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: false,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror == 1)
+                {
+                    toastr.success("Data was save successfully", "Successfully Save!");
+                }
+                if(reserror == 2)
+                {
+                    toastr.error("Something went Wrong!", "Error!");
+                }
+                if(reserror == 3)
+                {
+                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                }
+            }
+        },
+        TermEmployee(){
+          this.status = 1
+          axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.success)
+                    {
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+        },
+        RehireEmployee(){
+          this.status = 0;
+          axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.success)
+                    {
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+        },
+    SaveEmployee(){
+      document.querySelector('.feedback13').style.display = "none";
+            document.querySelector('.feedback14').style.display = "none";
+            document.querySelector('.feedback15').style.display = "none";
+            document.querySelector('.feedback16').style.display = "none";
+            document.querySelector('.feedback17').style.display = "none";
+            document.querySelector('.feedback18').style.display = "none";
+            document.querySelector('.feedback19').style.display = "none";
+            document.querySelector('.feedback20').style.display = "none";
+            document.querySelector('.feedback21').style.display = "none";
+            document.querySelector('.feedback22').style.display = "none";
+            document.querySelector('.feedback23').style.display = "none";
+            let newUser = {
+                firstname: this.firstname,
+                lastname:this.lastname,
+                phonenumber:this.phonenumber,
+                datehired:this.datehired,
+                address:this.address,
+                username:this.username,
+                email:this.email,
+                password:this.password,
+                confirmpassword:this.confirmpassword
+            };
+            const valid = validateForm(newUser,{
+                firstname:"required",
+                lastname:"required",
+                phonenumber: "required",
+                datehired: "required",
+                username: "required",
+                email: {
+                    isEmail: true,
+                    isRequired:true,
+                    callback: res=>{
+                        if(res!='invalid_email') return;
+                        document.querySelector('.feedback23').textContent = "Email is not valid!";
+                        document.querySelector('.feedback23').style.display = "block";
+                    }
+                },
+                callback: (a)=>{
+                    if(a == "firstname")
+                    {
+                        document.querySelector('.feedback13').textContent = "Firstname is required";
+                        document.querySelector('.feedback13').style.display = "block";
+                    }
+                    if(a == "lastname")
+                    {
+                        document.querySelector('.feedback14').textContent = "Lastname is required";
+                        document.querySelector('.feedback14').style.display = "block";
+                    }
+                    if(a == "phonenumber")
+                    {
+                        document.querySelector('.feedback15').textContent = "Phone number is required";
+                        document.querySelector('.feedback15').style.display = "block";
+                    }
+                    if(a == "datehired")
+                    {
+                        document.querySelector('.feedback19').textContent = "Date Hired is required";
+                        document.querySelector('.feedback19').style.display = "block";
+                    }
+                    if(a == "address")
+                    {
+                        document.querySelector('.feedback21').textContent = "Address is required";
+                        document.querySelector('.feedback21').style.display = "block";
+                    }
+                    if(a == "username")
+                    {
+                        document.querySelector('.feedback22').textContent = "Username is required";
+                        document.querySelector('.feedback22').style.display = "block";
+                    }
+                    if(a == "email")
+                    {
+                        document.querySelector('.feedback23').textContent = "Email is required";
+                        document.querySelector('.feedback23').style.display = "block";
+                    }
+                }   
+                
+            });
+            if(document.querySelector("#egender").value == ""){
+                valid.allValid = false;
+                document.querySelector('.feedback17').textContent = "Gender is required";
+                document.querySelector('.feedback17').style.display = "block";
+            }
+            if(document.querySelector("#edes").value == "")
+            {
+                valid.allValid = false;
+                document.querySelector('.feedback16').textContent = "Designation is required";
+                document.querySelector('.feedback16').style.display = "block";
+            }
+            if(document.querySelector('#erole').value == "")
+            {
+                valid.allValid = false;
+                document.querySelector('.feedback18').textContent = "Role is required";
+                document.querySelector('.feedback18').style.display = "block";
+            }
+            if(valid.allValid) {
+                this.designations = document.querySelector("#edes").value;
+                this.gender = document.querySelector("#egender").value;
+                this.role = document.querySelector("#erole").value;
+               if( document.getElementById("uploadFile2").files.length == 0 ){
+                if(this.password == "")
+                {
+                    axios.post("users/update?id="+lStore.get("userdetails"),null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.success)
+                    {
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+                    return;
+                }
+                else
+                {
+                    axios.post("users/update?id="+lStore.get("userdetails"),null,{lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                username: this.username, address: this.address, password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.success)
+                    {
+                        this.callToaster("toast-top-right",1);
+                        this.cleardata();
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    }
+                    else
+                    {
+                        this.callToaster("toast-top-right",2);
+                    }
+                });
+                    return;
+                }
+                }
+                let fname = document.getElementById("uploadFile2").files[0].name
+                axios.post('files/upload?keep_filename=true',null,
+                {file:document.getElementById("uploadFile2").files[0]}).catch(ress=>{
+                    console.log(ress.data);
+                }).then(ress=>{
+                    console.log(ress.data);
+                    if(!ress.data.success){
+                        alert('Error Uploading File!');
+                    }
+                    this.filesrc = ress.data.file_name;
+                    if(this.password == "")
+                    {
+                        axios.post("users/update?id="+lStore.get("userdetails"),null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                    username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(res.data);
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            this.cleardata();
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                    }
+                    else
+                    {
+                        axios.post("users/update?id="+lStore.get("userdetails"),null,{profile_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc,lastname: this.lastname, firstname: this.firstname, phonenumber: this.phonenumber, email_address: this.email,
+                    username: this.username, address: this.address,password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
+                        this.callToaster("toast-top-right",2);
+                    }).then(res=>{
+                        console.log(res.data);
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            this.cleardata();
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                        }
+                    });
+                    }
+                });
+            }
+            else
+            {
+                return;
+            }
+    },
   }
 });
 </script>
@@ -755,6 +727,7 @@ export default({
 @import '../../assets/scss/_type.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
+
 .img-fluid{
     width: 100px;
     height: 100px !important;
@@ -772,5 +745,22 @@ export default({
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+}
+#profile{
+  display: block;
+}
+#empterm{
+  display: flex;
+flex-wrap: wrap;
+width: auto;
+float: right;
+margin-right: 20px;
+position: absolute;
+top: 0;
+right: 0;
+}
+.alert{
+  display:none;
+  margin-top: 20px;
 }
 </style>

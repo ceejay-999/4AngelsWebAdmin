@@ -15,10 +15,6 @@
                                         <th>Name</th>
                                         <th>Designation</th>
                                         <th>Email</th>
-                                        <th>Date Hired</th>
-                                        <th>Total hours</th>
-                                        <th>Overtime</th>
-                                        <th>Total Earn</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -32,18 +28,18 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
+
 export default ({
     name: "App",
     components: {
-    LayoutView
+        LayoutView
     },
-    mounted(){
-        
-    }
 })
 </script>
 <style scoped>
 @import '../../assets/scss/_card.scss';
 @import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/scss/_type.scss';
+@import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
 </style>

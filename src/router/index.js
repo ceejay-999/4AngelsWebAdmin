@@ -9,6 +9,7 @@ import TimeclockView from '../views/ManagementView/TimeclockView.vue'
 import TimesheetsView from '../views/ManagementView/TimesheetsView.vue'
 import EmployeeProfileView from '../views/ManagementView/EmployeeProfileView.vue'
 import BranchesEmployView from '../views/ManagementView/BranchesEmployView.vue'
+import RequestVIew from '../views/ManagementView/RequestVIew.vue'
 import { lStore } from '../functions'
 
 const router = createRouter({
@@ -99,6 +100,14 @@ const router = createRouter({
       path: '/timesheets',
       name: 'timesheets',
       component: TimesheetsView,
+      beforeEnter: () => {
+        if (!lStore.isset('user_token')) return '/login';
+      },
+    },
+    {
+      path: '/request',
+      name: 'request',
+      component: RequestVIew,
       beforeEnter: () => {
         if (!lStore.isset('user_token')) return '/login';
       },
