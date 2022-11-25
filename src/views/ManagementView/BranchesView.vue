@@ -546,43 +546,6 @@ export default ({
                 document.querySelector(".textcenter").textContent = "No Data to be presented!";
             }
         });
-        elementLoad('#search-btn').then(()=>{
-            document.querySelector("#search-btn").onclick = ()=>{
-            this.search = document.querySelector("#search-input").value;
-            axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-                }).then(res=>{
-                    this.branches = [];
-                    if(res.data.success){
-                        this.branches = res.data.result;
-                        document.querySelector(".textcenter").style.display = "none";
-                    }
-                    else{
-                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                    }
-                });
-            };
-        })
-        document.querySelector("#search-input").onkeyup = (e)=>{
-        if(!(e.key == 'Enter')) return;
-        this.search = document.querySelector("#search-input").value;
-        axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-            }).then(res=>{
-                if(res.data.success)
-                {
-                    this.users = [];
-                    if(res.data.success){
-                        this.branches = res.data.result;
-                        document.querySelector(".textcenter").style.display = "none";
-                    }
-                    else{
-                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                        document.querySelector(".textcenter").style.display = "block"; 
-                    }
-                }
-            });
-        }
     },
 })
 </script>

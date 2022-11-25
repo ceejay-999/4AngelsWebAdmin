@@ -3,197 +3,6 @@
         <div class="toast" >
 
         </div>
-        <div class="modal fade" id="modal-add-contact" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                <form >
-                    <div class="modal-header px-4">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Edit Employee</h5>
-                    </div>
-
-                    <div class="modal-body px-4">
-                    <div class="form-group row mb-6">
-                            <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
-                            <div class="col-sm-8 col-lg-6">
-                                <div class="form-group">
-                                    <input type="file" id="uploadFile2" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
-                                </div>
-                            </div>
-                    </div>
-                    <div class="row">
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">First name</label>
-								<input type="text" v-model="firstname" class="form-control" placeholder="John">
-                                <div class="invalid-feedback feedback13">
-								   
-							    </div>
-							</div>
-						</div>
-
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="lname">Last name</label>
-								<input type="text" v-model="lastname" class="form-control" placeholder="Smith">
-                                <div class="invalid-feedback feedback14">
-								   
-							    </div>
-							</div>
-						</div>
-
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Phone number</label>
-								<input type="text" v-model="phonenumber" class="form-control" placeholder="+63">
-                                <div class="invalid-feedback feedback15">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Designation</label>
-								<select class="form-control" id="edes">
-                                    <option value="">Please Select Designation</option>
-                                    <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
-                                </select>
-                                <div class="invalid-feedback feedback16">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Gender</label>
-								<select class="form-control" id="egender">
-                                    <option value="">Please select gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                                <div class="invalid-feedback feedback17">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Role</label>
-								<select class="form-control" id="erole">
-                                    <option value="">Please select role</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="Supervisor">Supervisor</option>
-                                    <option value="Employee">Employee</option>
-                                </select>
-                                <div class="invalid-feedback feedback18">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Date Hired</label>
-								<input type="date" id="edate" v-model="edate" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback19">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm-6">
-							<div class="form-group">
-								<label for="fname">Rate $ (per hour)</label>
-								<input type="text" v-model="rate" class="form-control" placeholder="$">
-                                <div class="invalid-feedback feedback20">
-								   
-							    </div>
-							</div>
-						</div>
-					</div>
-                    <div class="row">
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Address</label>
-								<div id="geocoder3"></div>
-                                <div class="invalid-feedback feedback21">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Username</label>
-								<input type="text" v-model="username" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback22">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Email</label>
-								<input type="text" v-model="email" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback23">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
-                    <div class="row">
-                            <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Password</label>
-								<input type="password" v-model="password" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback24">
-								   
-							    </div>
-							</div>
-						</div>
-                        <div class="col-sm">
-							<div class="form-group">
-								<label for="fname">Confirm Password</label>
-								<input type="password" v-model="confirmpassword" class="form-control" placeholder="">
-                                <div class="invalid-feedback feedback25">
-								   
-							    </div>
-							</div>
-						</div>
-                    </div>
-                    </div>
-                    <div class="modal-footer px-4">
-                    <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-pill savedB" @click="SaveEmployee">Update</button>
-                    </div>
-                </form>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="modal-add-contact-term" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                <form >
-                    <div class="modal-header px-4">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Terminate Employee</h5>
-                    </div>
-
-                    <div class="modal-body px-4">
-                    
-                      <div class="col-sm-12">
-                        <div class="form-group">
-                          <label for="fname">Reason</label>
-                          <textarea v-model="comment" class="form-control"></textarea>
-                          <div class="invalid-feedback feedback13"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="modal-footer px-4">
-                    <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-pill savedB" @click="TermEmployee">Update</button>
-                    </div>
-                </form>
-                </div>
-            </div>
-        </div>
         <div class="breadcrumb-wrapper breadcrumb-contacts">
             <div>
                 <h1>Employee</h1>    
@@ -204,89 +13,186 @@
                         <span class="mdi mdi-home"></span>                
                         </RouterLink>
                     </li>
-                    <li class="breadcrumb-item" aria-current="page"><RouterLink to="/employee">Employee</RouterLink></li>
-                    <li class="breadcrumb-item" aria-current="page">Profile</li>
+                    <li class="breadcrumb-item" aria-current="page" @click="late-ups"><RouterLink to="/employee">Employee</RouterLink></li>
+                    <li class="breadcrumb-item" aria-current="page" >Profile</li>
                 </ol>
                 </nav>
             </div>
         </div>
-        <div class="content-wrapper">
-            <div class="content">
-                <div class="alert alert-danger" role="alert">
-            Reason of Termination: 
-            {{viewusers.comments}}
-          </div>
-                <div class="bg-white border rounded">
-  <div class="row no-gutters">
-    <div class="col-lg-4 col-xl-3">
-      <div class="profile-content-left profile-left-spacing pt-5 pb-3 px-3 px-xl-5">
-        <div class="card text-center widget-profile px-0 border-0">
-          <div class="card-img mx-auto rounded-circle">
-            <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="user image">
-          </div>
-          <div class="card-body">
-            <h4 class="py-2 text-dark">{{viewusers.firstname}} {{viewusers.lastname}}</h4>
-            <p>{{viewusers.email_address}}</p>
-            <a class="btn btn-primary btn-pill btn-lg my-4" href="#" data-toggle="modal" data-target="#modal-add-contact" @click="EditEmployee">Edit</a>
-          </div>
-        </div>
 
-        <div class="d-flex justify-content-between ">
-          <div class="text-center pb-4">
-            <h6 class="text-dark pb-2">{{viewusers.gender}}</h6>
-            <p>Gender</p>
-          </div>
+        <div class="invoice-wrapper rounded border bg-white py-5 px-3 px-md-4 px-lg-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <div>
+                        <h2 class="text-dark font-weight-medium">{{viewusers.firstname}} {{viewusers.lastname}}</h2>
+                        <ul class="list-unstyled">
+                        <li class="d-flex mb-1">
+                        <i class="mdi mdi-map mr-1"></i>
+                        <span>Employee at {{}} locations</span>
+                        </li>
 
-          <div class="text-center pb-4">
-            <h6 class="text-dark pb-2">{{viewusers.position}}</h6>
-            <p>Designation</p>
-          </div>
+                        <li class="d-flex mb-1">
+                        <i class="mdi mdi-phone mr-1"></i>
+                        <span>{{viewusers.phonenumber}} | <i class="mdi mdi-email mr-1"></i> {{viewusers.email_address}}</span>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
 
-          <div class="text-center pb-4">
-            <h6 class="text-dark pb-2" v-if="viewusers.status == 0">Hired</h6>
-            <h6 class="text-dark pb-2" v-if="viewusers.status == 1">Terminate</h6>
-            <p>Status</p>
-          </div>
-        </div>
-
-        <hr class="w-100">
-
-        <div class="contact-info pt-4">
-          <h5 class="text-dark mb-1">Basic Information</h5>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Email address</p>
-          <p>{{viewusers.email_address}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Phone Number</p>
-          <p>{{viewusers.phonenumber}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Username</p>
-          <p>{{viewusers.username}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Address</p>
-          <p>{{viewusers.address}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Date Hired</p>
-          <p>{{viewusers.date_hired}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2">Rate(per hour)</p>
-          <p>${{viewusers.hourly_rate}}</p>
-          <p class="text-dark font-weight-medium pt-4 mb-2"></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-8 col-xl-9">
-      <div class="profile-content-right profile-right-spacing py-5">
-        <a class="btn btn-primary btn-pill btn-lg my-4" id = "empterm" href="#" @click="RehireEmployee"  v-if="viewusers.status == 1">Rehire</a>
-        <a class="btn btn-danger btn-pill btn-lg my-4" id = "empterm" href="#" data-toggle="modal" data-target="#modal-add-contact-term" v-if="viewusers.status == 0 ">Terminate</a>
-        <ul class="nav nav-tabs px-3 px-xl-5 nav-style-border" id="myTab" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active" id="timeline-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="true">Uploaded Documents</a>
-          </li>
-        </ul>
-        <FileMngr2>
-
-        </FileMngr2>
-      </div>
-    </div>
-  </div>
-</div>
+                <div class="btn-group d-flex">
+                    <button class="btn btn-sm btn-danger" v-if="value == 0">
+                        <i class="mdi mdi-account-alert"></i> Terminate
+                    </button>
+                    
+                    <button class="btn btn-sm btn-primary" v-else>
+                        <i class="mdi mdi-printer"></i> Rehire
+                    </button>
+                </div>
             </div>
+            <!--List Group Start-->
+            <div class="col-lg-12 col-xl-12">
+                <div class="profile-right-spacing py-5">
+                    <ul class="nav nav-tabs px-3 px-xl-5 nav-style-border" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Personal Information</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="true">Documents</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Role</a>
+                    </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+                        <FileMngr2></FileMngr2>
+                    </div>
+
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="tab-widget mt-5">
+                            <div class="card-body">
+                                <div id="accordion3" class="accordion accordion-bordered">
+                                    <div class="card" v-for="r in usersroleb">
+                                        <div class="card-header" id="heading1">
+                                            <button class="btn btn-link text-uppercase font-weight-bold" data-toggle="collapse" data-target="#" aria-expanded="true" aria-controls="collapse1">
+                                                {{r.name}}
+                                            </button>
+                                        </div>
+
+                                        <div id="collapse1" class="collapse show" aria-labelledby="heading1" data-parent="#accordion3">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm font-weight-bold">
+                                                    Access level
+                                                    </div>
+                                                    <div class="col-sm font-weight-bold">
+                                                    Role
+                                                    </div>
+                                                    <div class="col-sm font-weight-bold">
+                                                    Wages
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm text-uppercase">
+                                                    {{viewusers.role}}
+                                                    </div>
+                                                    <div class="col-sm text-uppercase">
+                                                    {{r.position}}
+                                                    </div>
+                                                    <div class="col-sm text-uppercase">
+                                                    ${{r.hourly_rate}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-pane-content mt-5">
+                            <div class="card">
+                                <div class="card-header">
+                                    Contact Information
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Preferred Name:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.firstname}} {{viewusers.lastname}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Personal Email:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.email_address}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Phone Number:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.phonenumber}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-3"></div>
+                            <div class="card">
+                                <div class="card-header">
+                                    Personal Information
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Gender:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.gender}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Username:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.username}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Address:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.address}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm font-weight-bold">
+                                        Date Hired:
+                                        </div>
+                                        <div class="col-12 col-md-9 text-uppercase">
+                                        {{viewusers.date_hired}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
         </div>
     </LayoutView>
 </template>
@@ -303,6 +209,8 @@ export default({
   name: 'LoginPage',
   data() {
       return{
+            usersroleb: [],
+            value: 0,
             designation: [],
             firstname: "",
             lastname: "",
@@ -370,10 +278,9 @@ export default({
             }
         });
     this.viewusers = ""
-    axios.post("users?id="+lStore.get("userdetails")+"&_joins=mobile_designation&_on=mobile_users.designation_id=mobile_designation.id&_batch=true",null,{}).catch(res=>{
+    axios.post("users?id="+lStore.get("userdetails")+"&_batch=true",null,{}).catch(res=>{
             this.callToaster("toast-top-right",2);
         }).then(res=>{
-            console.log(res.data.result);
             res.data.result.forEach(el => {
             
             });
@@ -400,7 +307,19 @@ export default({
                 return;
             });
         });
-        console.log(this.viewusers);
+    axios.post("userDesignations?user_id="+lStore.get("userdetails")+"&_joins=mobile_branches,mobile_designation&_on=mobile_userdesignations.branch_id=mobile_branches.id,mobile_userdesignations.designation_id=mobile_designation.id&_batch=true",null,{}).catch(res=>{
+        this.callToaster("toast-top-right",2);
+    }).then(res=>{
+        if(res.data.success == true)
+        {
+            this.usersroleb = res.data.result;
+            console.log(this.usersroleb);
+        }
+        else
+        {
+            return;
+        }
+    });
 
   },
   methods: {
@@ -479,7 +398,6 @@ export default({
           axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
-                    console.log(res.data);
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",1);
@@ -499,7 +417,6 @@ export default({
           axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
-                    console.log(res.data);
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",1);
@@ -619,7 +536,7 @@ export default({
                 username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
-                    console.log(res.data);
+
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",1);
@@ -641,7 +558,6 @@ export default({
                 username: this.username, address: this.address, password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
-                    console.log(res.data);
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right",1);
@@ -661,9 +577,9 @@ export default({
                 let fname = document.getElementById("uploadFile2").files[0].name
                 axios.post('files/upload?keep_filename=true',null,
                 {file:document.getElementById("uploadFile2").files[0]}).catch(ress=>{
-                    console.log(ress.data);
+
                 }).then(ress=>{
-                    console.log(ress.data);
+
                     if(!ress.data.success){
                         alert('Error Uploading File!');
                     }
@@ -674,7 +590,7 @@ export default({
                     username: this.username, address: this.address, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
-                        console.log(res.data);
+
                         if(res.data.success)
                         {
                             this.callToaster("toast-top-right",1);
@@ -695,7 +611,7 @@ export default({
                     username: this.username, address: this.address,password: this.password, gender: this.gender, date_hired : this.datehired, role: this.role, designation_id:this.designations,hourly_rate : this.rate}).catch(res=>{
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
-                        console.log(res.data);
+
                         if(res.data.success)
                         {
                             this.callToaster("toast-top-right",1);
@@ -746,9 +662,6 @@ export default({
     justify-content: space-between;
     align-items: center;
 }
-#profile{
-  display: block;
-}
 #empterm{
   display: flex;
 flex-wrap: wrap;
@@ -762,5 +675,12 @@ right: 0;
 .alert{
   display:none;
   margin-top: 20px;
+}
+.tab-content > .active
+{
+    display: block !important;
+}
+.accordion .card-header .btn::after{
+    display: none;
 }
 </style>

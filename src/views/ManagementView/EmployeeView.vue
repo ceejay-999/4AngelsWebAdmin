@@ -195,10 +195,28 @@
                     </li>
                     <li class="breadcrumb-item" aria-current="page">Employee</li>
                 </ol>
+                <div class="form-check form-check-inline">
+                    <button type="button" class="btn btn-primary" v-if="value==0" @click="ShowTerm">Show Terminate</button>
+                    <button type="button" class="btn btn-outline-primary" v-else @click="ShowTerm">Show Terminate</button>
+                </div>
                 </nav>
 
         </div>
 
+        <div>
+
+        </div>
+        <div>
+            
+        </div>
+        <div>
+            
+        </div>
+        <div>
+            
+        </div>
+        <div>
+        </div>
         <div>
             <button @click="cleardata" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
             </button>
@@ -229,6 +247,13 @@
                         <i class="mdi mdi-phone mr-1"></i>
                         <span>{{u.phonenumber}}</span>
                         </li>
+                        
+                        <li class="d-flex mb-1">
+                        <i class="mdi mdi-account-check text-success" v-if="u.status == 0"></i>
+                        <i class="mdi mdi-account-alert text-danger" v-else></i>
+                        <span v-if="u.status == 0" class="text-success"> Active</span>
+                        <span v-else class="text-danger"> Terminate</span>
+                        </li>
                     </ul>
                     </div>
                 </a>
@@ -255,6 +280,7 @@ export default ({
     data(){
         return{
             rolenumberformindex: 0,
+            value: "",
             branches: [],
             designation: [],
             firstname: "",
@@ -345,99 +371,32 @@ export default ({
                 this.designation = res.data.result;
             }
         });
-        axios.post("users?_batch=true").catch(res=>{
+        axios.post("users?status=0&_batch=true").catch(res=>{
+        }).then(res=>{
+            this.users = res.data.result;
+        });
+    },
+    methods : {
+        ShowTerm(){
+            if(this.value == 0)
+            {
+                this.value = 1;
+                console.log(this.value);
+                axios.post("users?&_batch=true").catch(res=>{
                 }).then(res=>{
                   this.users = res.data.result;
                 })
-        //Searching
-        document.querySelector("#search-input").onkeyup = (e)=>{
-        if(!(e.key == 'Enter')) return;
-        this.search = document.querySelector("#search-input").value;
-        axios.post("users?lastname="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-            }).then(res=>{
-                if(res.data.success)
-                {
-                    this.users = [];
-                    if(res.data.success){
-                        this.users = res.data.result;
-                        document.querySelector(".textcenter").style.display = "none";
-                    }
-                    else{
-                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                        document.querySelector(".textcenter").style.display = "block";
-                    }
-                }
-                else
-                {
-                    axios.post("users?firstname="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-                    }).then(res=>{
-                        if(res.data.success)
-                        {
-                            this.users = [];
-                            if(res.data.success){
-                                this.users = res.data.result;
-                                document.querySelector(".textcenter").style.display = "none";
-                            }
-                            else{
-                                document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                                document.querySelector(".textcenter").style.display = "block";
-                            }
-                        }
-                        else
-                        {
-                            this.callToaster("toast-top-right",2);
-                        }
-                    });
-                }
-            });
-        //End of Searching
-        }
-        document.querySelector("#search-btn").onclick = ()=>{
-        this.search = document.querySelector("#search-input").value;
-        axios.post("users?lastname="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-            }).then(res=>{
-                if(res.data.success)
-                {
-                    this.users = [];
-                    if(res.data.success){
-                        this.users = res.data.result;
-                        document.querySelector(".textcenter").style.display = "none";
-                    }
-                    else{
-                        document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                        document.querySelector(".textcenter").style.display = "block";
-                    }
-                }
-                else
-                {
-                    axios.post("users?firstname="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-                    }).then(res=>{
-                        if(res.data.success)
-                        {
-                            this.users = [];
-                            if(res.data.success){
-                                this.users = res.data.result;
-                                document.querySelector(".textcenter").style.display = "none";
-                            }
-                            else{
-                                document.querySelector(".textcenter").textContent = "No Data to be presented!";
-                                document.querySelector(".textcenter").style.display = "block";
-                            }
-                        }
-                        else
-                        {
-                            
-                        }
-                    });
-                }
-            });
-        };
-    },
-    methods : {
+            }
+            else
+            {
+                this.value = 0;
+                console.log(this.value);
+                axios.post("users?status=0&_batch=true").catch(res=>{
+                }).then(res=>{
+                    this.users = res.data.result;
+                });
+            }
+        },
         SaveEmployee(){
             document.querySelector('.feedback1').style.display = "none";
             document.querySelector('.feedback2').style.display = "none";
@@ -455,55 +414,66 @@ export default ({
                 firstname: this.firstname,
                 lastname:this.lastname,
                 phonenumber:this.phonenumber,
-                datehired:this.datehired,
+                date_hired:this.datehired,
                 gender: document.querySelector("#gender").value,
                 username:this.username,
-                email:this.email,
+                email_address:this.email,
                 password:this.password,
                 confirmpassword:this.confirmpassword,
-                access: document.querySelector("#role").value,
+                role: document.querySelector("#role").value,
+                file: document.getElementById('uploadFile1').files[0]
             };
             let check = 0;
             if(this.rolenumberformindex > 0)
             {
-                
+                let newArrRole = [];
+                let newRole = {
+                    role: document.querySelector("#des").value,
+                    branch: document.querySelector("#bran").value,
+                    rate: document.querySelector("#rates").value,
+                }
+                newArrRole.push(newRole);
+                console.log(newArrRole);
                 for(let i = 1; i <= this.rolenumberformindex; i++)
                 {
-                    let newRole = {
+                    console.log(i);
+                    newRole = {
                         role: document.querySelector("#des"+ i).value,
                         branch: document.querySelector("#bran"+ i).value,
                         rate: document.querySelector("#rates"+ i).value,
                     }
-                    let roleval = validateForm(newRole,{
-                        role: "required",
-                        branch: "required",
-                        rate: "required",
-                        callback: (a)=>{
-                            if(a == "role")
-                            {
-                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-                                document.querySelector('.feedback13').style.display = "block";
+                    newArrRole.push(newRole);
+                    (newArrRole).forEach(element => {
+                        let roleval = validateForm(element,{
+                            role: "required",
+                            branch: "required",
+                            rate: "required",
+                            callback: (a)=>{
+                                if(a == "role")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
+                                if(a == "branch")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
+                                if(a == "rate")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
                             }
-                            if(a == "branch")
-                            {
-                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-                                document.querySelector('.feedback13').style.display = "block";
-                            }
-                            if(a == "rate")
-                            {
-                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-                                document.querySelector('.feedback13').style.display = "block";
-                            }
+                        });
+                        if(!roleval.allValid)
+                        {
+                            check++;
                         }
                     });
-                    if(!roleval.allValid)
-                    {
-                        check++;
-                    }
                 }
             }
             else{
-                console.log("last: "+this.rolenumberformindex);
                 let newRole = {
                         role: document.querySelector("#des").value,
                         branch: document.querySelector("#bran").value,
@@ -540,12 +510,11 @@ export default ({
                 firstname:"required",
                 lastname:"required",
                 phonenumber: "required",
-                datehired: "required",
+                date_hired: "required",
                 username: "required",
                 gender: "required",
-                rate: "required",
-                access: "required",
-                email: {
+                role: "required",
+                email_address: {
                     isEmail: true,
                     isRequired:true,
                     callback: res=>{
@@ -582,7 +551,7 @@ export default ({
                         document.querySelector('.feedback3').textContent = "Phone number is required";
                         document.querySelector('.feedback3').style.display = "block";
                     }
-                    if(a == "datehired")
+                    if(a == "date_hired")
                     {
                         document.querySelector('.feedback6').textContent = "Date Hired is required";
                         document.querySelector('.feedback6').style.display = "block";
@@ -592,7 +561,7 @@ export default ({
                         document.querySelector('.feedback7').textContent = "Address is required";
                         document.querySelector('.feedback7').style.display = "block";
                     }
-                    if(a == "email")
+                    if(a == "email_address")
                     {
                         document.querySelector('.feedback10').textContent = "Email is required";
                         document.querySelector('.feedback10').style.display = "block";
@@ -617,16 +586,50 @@ export default ({
                         document.querySelector('.feedback9').textContent = "Username is required";
                         document.querySelector('.feedback9').style.display = "block";
                     }
-                    if(a == "access")
+                    if(a == "role")
                     {
                         document.querySelector('.feedback4').textContent = "Access Level is required";
                         document.querySelector('.feedback4').style.display = "block";
                     }
                 }
             });
-
+            console.log(valid.allValid + " and " + check)
             if(valid.allValid && check == 0){
-                console.log("aw");
+                let roleArrusers = [];
+                let roleusers = {
+                    role: document.querySelector("#des").value,
+                    rate: document.querySelector("#rates").value,
+                    facilities: document.querySelector("#bran").value,
+                };
+                roleArrusers.push(roleusers);
+                if(this.rolenumberformindex > 0)
+                {
+                    for(let i = 1; i <= this.rolenumberformindex; i++)
+                    {
+                        roleusers = {
+                            role: document.querySelector("#des").value,
+                            rate: document.querySelector("#rates").value,
+                            facilities: document.querySelector("#bran").value,
+                        };
+                        roleArrusers.push(roleusers);
+                    }
+                }
+
+                console.log(roleArrusers);
+                delete newUser.confirmpassword;
+                roleArrusers.forEach((el,i)=>{
+                    newUser['_userDesignate'+i+'_branch_id'] =  el.facilities;
+                    newUser['_userDesignate'+i+'_designation_id'] =  el.role;
+                    newUser['_userDesignate'+i+'_hourly_rate'] =  el.rate;
+                });
+                console.log(newUser);
+                axios.post("users/create",null,newUser).catch(res=>{
+                    this.callToaster("toast-top-right",2);
+                }).then(res=>{
+                    this.users = res.data.result;
+                    this.callToaster("toast-top-right",1);
+                    // this.$router.go(0);
+                });
             }
 
         },
