@@ -3,69 +3,91 @@
         <div class="toast" >
 
         </div>
-        <div class="breadcrumb-wrapper breadcrumb-contacts">
-        <div>
-            <h1>Assigned Employees</h1>    
-            <nav aria-label="breadcrumb">
-            <ol class="breadcrumb p-0">
-                <li class="breadcrumb-item">
-                    <RouterLink to="/dashboard">
-                    <span class="mdi mdi-home"></span>                
-                    </RouterLink>
-                </li>
-                <li class="breadcrumb-item" aria-current="page"><RouterLink to="/branch">Facilities</RouterLink></li>
-                <li class="breadcrumb-item" aria-current="page">Assigned Employees</li>
-            </ol>
-            </nav>
-        </div>
-        </div>
-        <div class="card" role="">
-            <div class="modal-content">
-            <div class="modal-header justify-content-end border-bottom-0">
+        <div class="card card-default">
+            <div class="card-body d-flex justify-content-between">
+                <h5 class="card-title text-secondary">Facility Name</h5>
+                <div class="mr-4 text-secondary"><h5>Paid Hours</h5></div>
+                <div class="mr-4 text-secondary"><h5>Total Wages</h5></div>
+                <div class="mr-4 text-"><h5><span class="mdi mdi-file-excel text-secondary">Export to Excel</span></h5></div>
+                <div class="mr-4 text-"><h5><span class="mdi mdi-printer text-secondary">Print</span></h5></div>
+                <div class="date-range-report text-secondary">
+                    Nov, 30 2022
+					<span></span>
+				</div>
             </div>
+        </div>
 
-            <div class="modal-body pt-0">
-                <div class="row no-gutters">
-                <div class="col-md-12">
-                    <div class="profile-content-left px-4">
-                        <div class="card text-center widget-profile px-0 border-0">
-                            <div class="card-img mx-auto rounded-circle">
-                                <img :src="branches.branch_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
+        <div class="card card-default">
+            <div class="card-body">
+                <ul class="nav nav-tabs px-3 px-xl-5 nav-style-border" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#NowUpComming" role="tab" aria-controls="settings" aria-selected="false">Now & Upcoming</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#Complete" role="tab" aria-controls="timeline" aria-selected="true">Completed</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="NowUpComming" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-pane-content">
+                            <div class="bd-callout bd-callout-default d-flex justify-content-between">
+                                <div class="d-flex flex-column">
+                                    <div>image / name <small>role / rate</small></div>
+                                    <small>clockin and clockout / Schedule</small>
+                                </div>
+                                <div>
+                                    Hours lend
+                                </div>
+                                <div>
+                                    Wages
+                                </div>
+                                <div></div>
+                                <div>
+                                    <div class="btn-group">
+                                        <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Add Clockin</a>
+                                            <a class="dropdown-item" href="#">Edit Clockin</a>
+                                            <a class="dropdown-item" href="#">Add Clockout</a>
+                                            <a class="dropdown-item" href="#">Edit Clockout</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div></div>
                             </div>
-
-                            <div class="card-body">
-                            <h4 class="py-2 text-dark">{{branches.name}}</h4>
-                            <p>{{branches.location}}</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade show" id="Complete" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-pane-content">
+                            <div class="bd-callout bd-callout-default d-flex justify-content-between">
+                                <div class="d-flex flex-column">
+                                    <div>image / name <small>role / rate</small></div>
+                                    <small>clockin and clockout / Schedule</small>
+                                </div>
+                                <div>
+                                    Hours lend
+                                </div>
+                                <div>
+                                    Wages
+                                </div>
+                                <div></div>
+                                <div>
+                                    <div class="btn-group">
+                                        <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Add Clockin</a>
+                                            <a class="dropdown-item" href="#">Edit Clockin</a>
+                                            <a class="dropdown-item" href="#">Add Clockout</a>
+                                            <a class="dropdown-item" href="#">Edit Clockout</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <hr />
-                    <div class="contact-info px-4 contact-details">
-                        <h4 class="text-dark mb-1">Employee Assigned Today Schedule</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="responsive-data-table">
-                            <table id="hoverable-data-table" class="table table-hover nowrap dataTable no-footer display nowrap" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Position</th>
-                                        <th>Clock In</th>
-                                        <th>Clock Out</th>
-                                        <th>Clock In Location</th>
-                                        <th>Clock Out Location</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
             </div>
         </div>
     </LayoutView>
@@ -80,10 +102,18 @@ export default({
   data() {
       return{
         branches: {},
-        mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
+        mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA',
+        schedules: [],
       };
   },
   mounted() {
+    axios.post("assigned/joint?range=2022-01-01,2023-03-01&_batch=true").catch(res=>{
+
+    }).then(res=>{
+            this.branches = res.data.result;
+            console.log(this.branches)
+        
+    });
     let q = new QueryBuilder('https://www.4angelshc.com/mobile/assigned');
     let dateToday = new Date();
     let dateTomm = new Date();
@@ -169,6 +199,8 @@ export default({
 @import '../../assets/scss/_type.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
+@import '../../assets/plugins/daterangepicker/daterangepicker.css';
+
 .img-fluid{
     width: 100px;
     height: 100px !important;
@@ -178,9 +210,6 @@ export default({
     margin: 0 auto;
     font-size: 20px;
 }
-.card {
-    overflow: hidden;
-}
 .contact-details{
     display: flex;
     flex-wrap: wrap;
@@ -189,5 +218,81 @@ export default({
 }
 .responsive-data-table{
     overflow: auto;
+}
+.tab-content > .active
+{
+    display: block !important;
+}
+.bd-callout {
+padding: 1.25rem;
+margin-bottom: 1.25rem;
+border: 1px solid #eee;
+border-left-width: .25rem;
+border-radius: .25rem
+}
+
+.bd-callout h4 {
+margin-top: 0;
+margin-bottom: .25rem
+}
+
+.bd-callout p:last-child {
+margin-bottom: 0
+}
+
+.bd-callout code {
+border-radius: .25rem
+}
+
+.bd-callout+.bd-callout {
+margin-top: -.25rem
+}
+
+.bd-callout-info {
+border-left-color: #5bc0de
+}
+
+.bd-callout-info h4 {
+color: #5bc0de
+}
+
+.bd-callout-warning {
+border-left-color: #f0ad4e
+}
+
+.bd-callout-warning h4 {
+color: #f0ad4e
+}
+
+.bd-callout-danger {
+border-left-color: #d9534f
+}
+
+.bd-callout-danger h4 {
+color: #d9534f
+}
+
+.bd-callout-primary{
+border-left-color: #007bff
+}
+
+.bd-callout-primaryh4 {
+color: #007bff
+}
+
+.bd-callout-success{
+border-left-color: #28a745
+}
+
+.bd-callout-successh4 {
+color: #28a745
+}
+
+.bd-callout-default{
+border-left-color: #6c757d
+}
+
+.bd-callout-defaulth4 {
+color: #6c757d
 }
 </style>

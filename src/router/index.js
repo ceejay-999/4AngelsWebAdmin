@@ -10,6 +10,8 @@ import TimesheetsView from '../views/ManagementView/TimesheetsView.vue'
 import EmployeeProfileView from '../views/ManagementView/EmployeeProfileView.vue'
 import BranchesEmployView from '../views/ManagementView/BranchesEmployView.vue'
 import RequestVIew from '../views/ManagementView/RequestVIew.vue'
+import EmployeePrintable from '../views/ManagementView/EmployeePrintable.vue'
+import EmployeeExportToExcel from '../views/ManagementView/EmployeeExportToExcel.vue'
 import { lStore } from '../functions'
 
 const router = createRouter({
@@ -59,6 +61,24 @@ const router = createRouter({
       name: 'designation',
       component: DesignationView,
       beforeEnter: () => {
+        if (!lStore.isset('user_token')) return '/login';
+      },
+    },
+    {
+      path: '/employeeprint',
+      name: 'employeeprint',
+      component: EmployeePrintable,
+      beforeEnter: () => {
+        console.log(lStore.isset('user_token'));
+        if (!lStore.isset('user_token')) return '/login';
+      },
+    },
+    {
+      path: '/employeeexcel',
+      name: 'employeeexcel',
+      component: EmployeeExportToExcel,
+      beforeEnter: () => {
+        console.log(lStore.isset('user_token'));
         if (!lStore.isset('user_token')) return '/login';
       },
     },

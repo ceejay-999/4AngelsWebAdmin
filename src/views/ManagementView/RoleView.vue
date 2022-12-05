@@ -52,7 +52,7 @@
 
                     <div class="modal-footer">
                         <button type="button" @click="clearVariable" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" id="submitbut" @click="SubmitRole">Submit</button>
+                        <button type="button" class="btn btn-primary btn-pill" id="submitbut">Submit</button>
                     </div>
                 </div>
             </div>

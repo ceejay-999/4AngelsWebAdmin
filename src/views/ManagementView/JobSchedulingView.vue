@@ -7,7 +7,7 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-import AppointView from "../../views/SharedLayoutView/AppointmentsCalendar.vue"
+import AppointView from "../../views/SharedLayoutView/Scheduler.vue"
 
 export default ({
     name: "App",

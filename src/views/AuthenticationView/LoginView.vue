@@ -36,7 +36,7 @@
     </div>
 </template>
 <script>
-import { axios , validateForm,lStore } from '@/functions.js';
+import { lStore, axios , validateForm } from '../../functions';
 import toastr from 'toastr';
 
 export default({
@@ -77,6 +77,13 @@ export default({
             }
             if(res.data.success == true) {
                 if(res.data.result.role == "Admin"){
+                  lStore.set('user_id',res.data.result.id);
+                  lStore.set('user_token',res.data.token);
+                  lStore.set('user_info', res.data.result);
+                  this.callToaster("toast-top-right",1);
+                  this.$router.replace('/jobschedule');
+                }
+                else if(res.data.result.role == "Supervisor"){
                   lStore.set('user_id',res.data.result.id);
                   lStore.set('user_token',res.data.token);
                   lStore.set('user_info', res.data.result);

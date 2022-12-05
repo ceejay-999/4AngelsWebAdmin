@@ -184,8 +184,6 @@
         <div class="breadcrumb-wrapper breadcrumb-contacts">
         <div>
             <h1>Employee</h1>
-
-            
                 <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-0">
                     <li class="breadcrumb-item">
@@ -202,29 +200,17 @@
                 </nav>
 
         </div>
-
-        <div>
-
-        </div>
-        <div>
-            
-        </div>
-        <div>
-            
-        </div>
-        <div>
-            
-        </div>
-        <div>
-        </div>
-        <div>
+        <div class="d-flex align-items-center">
+            <RouterLink to="/employeeexcel" target="_blank"><div class="mr-4 text-"><h5><span class="mdi mdi-file-excel">Export to Excel</span></h5></div></RouterLink>
+            <RouterLink to="/employeeprint" target="_blank"><div class="mr-4 text-"><h5><span class="mdi mdi-printer">Print</span></h5></div></RouterLink>
             <button @click="cleardata" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
             </button>
         </div>
         </div>
         <div class="row">
             <div class="textcenter"></div>
-            <div class="col-lg-6 col-xl-4" v-for="u in users" :key = "u.id">
+            <div class="d-flex justify-content-center" v-if="users.length == 0"><div> No Data Found </div></div>
+            <div class="col-lg-6 col-xl-4" v-else v-for="u in users" :key = "u.id">
                 <div class="card card-default p-4">
                 <a href="#" class="media text-secondary" @click="ViewDetailsEmp(u.id)">
                     <img :src="u.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
@@ -377,7 +363,7 @@ export default ({
         });
     },
     methods : {
-        ShowTerm(){
+        ShowTerm(){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             if(this.value == 0)
             {
                 this.value = 1;
@@ -415,6 +401,7 @@ export default ({
                 lastname:this.lastname,
                 phonenumber:this.phonenumber,
                 date_hired:this.datehired,
+                address: this.address,
                 gender: document.querySelector("#gender").value,
                 username:this.username,
                 email_address:this.email,
@@ -628,7 +615,8 @@ export default ({
                 }).then(res=>{
                     this.users = res.data.result;
                     this.callToaster("toast-top-right",1);
-                    // this.$router.go(0);
+                    document.querySelector('#modal-add-contact').style.display = "none"
+                    this.$router.go(0);
                 });
             }
 

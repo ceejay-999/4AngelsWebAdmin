@@ -153,7 +153,7 @@ export default({
 </script>
 
 <style scoped>
-.filemngr_cont{background:#eee;font-family: sans-serif;}
+.filemngr_cont{background:#f9f9f9;font-family: sans-serif;}
 .filemng_top_ctrl{padding: 20px;}
 .filemng_top_ctrl button{padding: 10px;border-radius: 10px;transition: 0.2s;border:none;margin: 5px;}
 .filemng_top_ctrl button:hover{transform:scale(0.9);}
@@ -180,7 +180,7 @@ export default({
 .filemngr_itm_disp .fileicon,.filemngr_itm_disp .playicon,.filemngr_itm_disp .uploadicon{height: 30px;position: absolute;top: 50%;transform: translateY(-50%)translateX(-50%);display: block;object-fit: contain;}
 .filemngr_vwr_itm:hover .uploadicon{animation-name: bounce;animation-duration: 0.5s;}
 .filemngr_itm_disp .selectInd{height: 20px;width:20px;position: absolute;top: 5px;left:5px;display: block;border-radius: 50%;padding:2px;box-shadow: 0 0 2px #000;transform: none;background: #fff;z-index: 1;}
-.hoverTitle{padding: 10px;height: 100%;display: block;background: #ddd;border-top:1px solid #aaa;overflow:hidden;white-space: nowrap;text-overflow: ellipsis;}
+.hoverTitle{padding: 10px;height: 100%;display: block;background: #f9f9f9;border-top:1px solid #aaa;overflow:hidden;white-space: nowrap;text-overflow: ellipsis;}
 
 @keyframes bounce {
     0%{transform: translateX(-50%) translateY(-50%);}

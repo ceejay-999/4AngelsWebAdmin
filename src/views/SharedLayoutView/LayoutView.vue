@@ -21,28 +21,17 @@
               <span class="nav-text">Dashboard</span>
             </RouterLink>
           </li>
-          <li class="has-sub " data-url="/timeclock">
-            <a class="sidenav-item-link" href="javascript:void(0)" data-toggle="collapse" data-target="#buttons"
-                          aria-expanded="false" aria-controls="buttons">
+          <li class="has-sub " data-url="/timesheets">
+            <RouterLink class="sidenav-item-link" to="/timesheets">
               <i class="mdi mdi-calendar-clock"></i>
-              <span class="nav-text">Time Clock</span><b class="caret"></b>
-            </a>
-            <ul class="collapse " id="buttons">
-              <div class="sub-menu">
-                <li class="">
-                  <RouterLink class="sidenav-item-link" to="/timeclock">Today</RouterLink>
-                </li>
-
-                <li class="">
-                  <RouterLink class="sidenav-item-link"  to="/timesheets">Timesheets</RouterLink>
-                </li>
-
-                <li class="">
-                  <RouterLink class="sidenav-item-link" to="/request">Request</RouterLink>
-                </li>
-
-              </div>
-            </ul>
+              <span class="nav-text">Timesheets</span>
+            </RouterLink>
+          </li>
+          <li class="has-sub " data-url="/request">
+            <RouterLink class="sidenav-item-link" to="/request">
+              <i class="mdi mdi-account-details"></i>
+              <span class="nav-text">Request</span>
+            </RouterLink>
           </li>
           <li class="has-sub " data-url="/jobschedule">
             <RouterLink class="sidenav-item-link" to="/jobschedule">
