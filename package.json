@@ -12,6 +12,7 @@
     "axios": "^1.1.2",
     "bootstrap": "^4.6.2",
     "chosen-js": "^1.8.7",
+    "datetimepicker": "^0.1.39",
     "mapbox-gl": "^2.10.0",
     "node-sass": "^7.0.3",
     "nprogress": "^0.2.0",

@@ -194,16 +194,21 @@
                     <li class="breadcrumb-item" aria-current="page">Employee</li>
                 </ol>
                 <div class="form-check form-check-inline">
-                    <button type="button" class="btn btn-primary" v-if="value==0" @click="ShowTerm">Show Terminate</button>
-                    <button type="button" class="btn btn-outline-primary" v-else @click="ShowTerm">Show Terminate</button>
+                    <button type="button" class="btn btn-outline-primary" v-if="value==0" @click="ShowTerm">Show Terminate</button>
+                    <button type="button" class="btn btn-primary" v-else @click="ShowTerm">Hide Terminate</button>
                 </div>
                 </nav>
 
         </div>
         <div class="d-flex align-items-center">
-            <RouterLink to="/employeeexcel" target="_blank"><div class="mr-4 text-"><h5><span class="mdi mdi-file-excel">Export to Excel</span></h5></div></RouterLink>
-            <RouterLink to="/employeeprint" target="_blank"><div class="mr-4 text-"><h5><span class="mdi mdi-printer">Print</span></h5></div></RouterLink>
-            <button @click="cleardata" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
+
+            <div class="form-inline mr-2">
+                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-success my-2 my-sm-0" type="submit"><span class="mdi mdi-magnify"></span></button>
+            </div>
+            <RouterLink to="/employeeexcel" target="_blank"><div class="mr-2 btn btn-primary"><span class="mdi mdi-download">Download Excel CSV</span></div></RouterLink>
+            <!-- <RouterLink to="/employeeprint" target="_blank"><div class="mr-2 btn btn-info"><span class="mdi mdi-printer">Print</span></div></RouterLink> -->
+            <button @click="cleardata" type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-add-contact"> Add Employee
             </button>
         </div>
         </div>

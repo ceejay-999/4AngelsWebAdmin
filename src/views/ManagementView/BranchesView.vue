@@ -140,7 +140,11 @@
                 </ol>
                 </nav>
             </div>
-            <div>
+            <div class="d-flex">
+                <div class="form-inline mr-2">
+                    <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-success my-2 my-sm-0" type="submit"><span class="mdi mdi-magnify"></span></button>
+                </div>
                 <button type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Facility
                 </button>
             </div>
@@ -186,6 +190,7 @@ import { elementLoad, lStore } from '../../functions';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+
 
 
 export default ({
