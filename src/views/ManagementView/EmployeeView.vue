@@ -203,8 +203,8 @@
         <div class="d-flex align-items-center">
 
             <div class="form-inline mr-2">
-                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-success my-2 my-sm-0" type="submit"><span class="mdi mdi-magnify"></span></button>
+                <input class="form-control" type="search" v-model="searchkey" placeholder="Search" aria-label="Search">
+                <button class="btn btn-success my-2 my-sm-0" @click="SearchEmp" type="submit"><span class="mdi mdi-magnify"></span></button>
             </div>
             <RouterLink to="/employeeexcel" target="_blank"><div class="mr-2 btn btn-primary"><span class="mdi mdi-download">Download Excel CSV</span></div></RouterLink>
             <!-- <RouterLink to="/employeeprint" target="_blank"><div class="mr-2 btn btn-info"><span class="mdi mdi-printer">Print</span></div></RouterLink> -->
@@ -293,7 +293,8 @@ export default ({
             userid: "",
             search: "",
             filesrc: "",
-            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
+            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA',
+            searchkey: ""
         }
     }, 
     mounted() {
@@ -368,6 +369,18 @@ export default ({
         });
     },
     methods : {
+        SearchEmp(){
+            this.users = [];
+            axios.post("users/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
+                if(res.data.result == null)
+                {
+                    return;
+                }
+                this.users = res.data.result;
+                console.log(this.users);
+                this.searchkey = "";
+            });
+        },
         ShowTerm(){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
             if(this.value == 0)
             {

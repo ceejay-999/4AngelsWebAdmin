@@ -142,8 +142,8 @@
             </div>
             <div class="d-flex">
                 <div class="form-inline mr-2">
-                    <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-success my-2 my-sm-0" type="submit"><span class="mdi mdi-magnify"></span></button>
+                    <input class="form-control" type="search" v-model="searchkey" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-success my-2 my-sm-0" @click="SearchFacilities" type="submit"><span class="mdi mdi-magnify"></span></button>
                 </div>
                 <button type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Facility
                 </button>
@@ -208,12 +208,26 @@ export default ({
             search: "",
             uploading: {},
             filesrc: "",
+            searchkey: "",
             long: "",
             lat: "",
             mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
         }
     },
     methods:{
+        SearchFacilities()
+        {
+            axios.post("branches/search?from=name&s="+this.searchkey+"&batch=true").then(res=>{
+                if(res.data.success){
+                    this.branches = res.data.result;
+                    console.log(res.data.result);
+                    document.querySelector(".textcenter").style.display = "none";
+                }
+                else{
+                    document.querySelector(".textcenter").textContent = "No Data to be presented!";
+                }
+            });
+        },
         Viewbranchemployee(data){
             lStore.set('branchidemp',data);
             this.$router.replace('/branch/assignedemployee');

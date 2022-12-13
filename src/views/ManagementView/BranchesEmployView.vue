@@ -3,9 +3,67 @@
         <div class="toast" >
 
         </div>
-        <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-primary mr-2"><span class="mdi mdi-download text-default">Download Excel CSV</span></button>
-            <!-- <button class="btn btn-info"><span class="mdi mdi-printer text-default">Print</span></button> -->
+        <div class="modal fade" id="addClockinModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockin</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Clockin Time</label>
+                                <input type="time" class="form-control" v-model="clockintime">
+                                <div class="invalid-feedback feedback1">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addClockoutModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockout</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Clockout Time</label>
+                                <input type="time" class="form-control" v-model="clockouttime">
+                                <div class="invalid-feedback feedback1">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockout">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content mb-3">
+            <!-- <button class="btn btn-primary mr-2"><span class="mdi mdi-download text-default">Download Excel CSV</span></button> -->
+            <RouterLink to="/branch"><button class="btn btn-info"><span class="mdi mdi-keyboard-backspace"></span></button></RouterLink>
         </div>
         <div class="card card-default">
             <div class="card-body d-flex justify-content-between">
@@ -38,15 +96,18 @@
                     <div class="tab-pane fade show active" id="NowUpComming" role="tabpanel" aria-labelledby="settings-tab">
                         <div class="tab-pane-content">
                             <div v-for="sched in SchedToday">
+                                <div class="d-flex justify-content-center align-items-center text-secondary" v-if="(datetoday == today)">Today Time: {{time}}</div>
                                 <div class="text-secondary m-3">{{sched.shift_start}}</div>
                                 <div  v-for = "ass in sched.assignedEmps">
-                                    <div class="bd-callout" :class="{'bd-callout-default': (ass.time_in == null),'bd-callout-success':(ass.time_in != null)}" v-if="(ass.time_out == null )">
+                                    <div class="bd-callout" :class="{'bd-callout-default': (ass.time_in == null && sched.shift_date == today),'bd-callout-success':(ass.time_in != null && sched.shift_date == today),'bd-callout-danger':(ass.time_in == null && sched.shift_date <= today || ass.time_out == null && sched.shift_date <= today  )}" v-if="(ass.time_out == null )">
                                         <div class="d-flex justify-content-between">
                                             <div class="d-flex justify-content-center align-items-center">
                                                 <img class="mr-3 img-fluid rounded" :src="ass.profile_img"/>
                                                 <div class="d-flex flex-column font-weight-bold"> {{ass.lastname}}, {{ass.firstname}} {{ass.position}} <small>rate: ${{ass.hourly_rate}} per hour</small>
-                                                <small>Clockin: {{ass.time_in}} </small>
-                                                <small>Clockout: {{ass.time_out}} </small> 
+                                                <small v-if="(ass.time_in != null)">Clockin: {{ass.time_in}} </small>
+                                                <small v-else>Clockin:<span class="text-danger"> No Clockin </span></small>
+                                                <small v-if="(ass.time_out != null)">Clockout: {{ass.time_out}} </small> 
+                                                <small v-else>Clockin: <span class="text-danger"> No Clockout </span></small>
                                                 <small>Shift Start: {{sched.shift_start}} Shift End: {{sched.shift_end}}</small>
                                                 </div>
                                             </div>
@@ -63,10 +124,10 @@
                                             <div>
                                                 <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#" v-if="(ass.time_in == null || ass.time_in == '')">Add Clockin</a>
-                                                    <a class="dropdown-item" href="#" v-else>Edit Clockin</a>
-                                                    <a class="dropdown-item" href="#" v-if="(ass.time_out == null || ass.time_out == '')">Add Clockout</a>
-                                                    <a class="dropdown-item" href="#" v-else>Edit Clockout</a>
+                                                    <a class="dropdown-item addclockin" :data-userid="ass.user_id" :data-scheduleid="sched.id" href="#" v-if="(ass.time_in == null || ass.time_in == '')" data-toggle="modal" data-target="#addClockinModalForm" @click="AddClockin">Add Clockin</a>
+                                                    <a class="dropdown-item addclockin" :id="ass.id" href="#" @click="AddClockin" data-toggle="modal" data-target="#addClockinModalForm" v-else>Edit Clockin</a>
+                                                    <a class="dropdown-item addclockout" :id="ass.id" href="#" @click="AddClockout" v-if="(ass.time_out == null || ass.time_out == '')" data-toggle="modal" data-target="#addClockoutModalForm">Add Clockout</a>
+                                                    <a class="dropdown-item addclockout" :id="ass.id" href="#" @click="AddClockout" data-toggle="modal" data-target="#addClockoutModalForm" v-else>Edit Clockout</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -78,6 +139,7 @@
                     <div class="tab-pane fade show" id="Complete" role="tabpanel" aria-labelledby="settings-tab">
                         <div class="tab-pane-content">
                             <div v-for="sched in SchedToday">
+                                <div class="d-flex justify-content-center align-items-center text-secondary" v-if="(datetoday == today)">Today Time: {{time}}</div>
                                 <div class="text-secondary m-3">{{sched.shift_start}}</div>
                                 <div  v-for = "ass in sched.assignedEmps">
                                     <div class="bd-callout bd-callout-primary" v-if="(ass.time_out != null)">
@@ -88,8 +150,7 @@
                                                 <small>Clockin: {{ass.time_in}} </small><small>Clockout: {{ass.time_out}} </small> <small>Shift Start: {{sched.shift_start}} Shift End: {{sched.shift_end}}</small>
                                                 </div>
                                             </div>
-                                            <div class="d-flex flex-column">
-                                                Total Hours
+                                            <div class="d-flex flex-column">Total Hours
                                                 <p class="d-flex justify-content-center">{{ass.total_reg_rendered}}</p>
                                             </div>
                                             <div class="d-flex flex-column">
@@ -99,10 +160,10 @@
                                             <div>
                                                 <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#" v-if="(ass.time_in == null || ass.time_in == '')">Add Clockin</a>
-                                                    <a class="dropdown-item" href="#" v-else>Edit Clockin</a>
-                                                    <a class="dropdown-item" href="#" v-if="(ass.time_out == null || ass.time_out == '')">Add Clockout</a>
-                                                    <a class="dropdown-item" href="#" v-else>Edit Clockout</a>
+                                                    <a class="dropdown-item" href="#" :data-id="ass.id" v-if="(ass.time_in == null || ass.time_in == '')" data-toggle="modal" data-target="#addClockinModalForm">Add Clockin</a>
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addClockinModalForm" v-else>Edit Clockin</a>
+                                                    <a class="dropdown-item" href="#" v-if="(ass.time_out == null || ass.time_out == '')" data-toggle="modal" data-target="#addClockoutModalForm">Add Clockout</a>
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addClockoutModalForm" v-else>Edit Clockout</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -127,6 +188,13 @@ export default({
   data() {
       return{
         color: "",
+        time:"",
+        clockintime: "",
+        timerecordid: "",
+        timerecorduser_id: "",
+        timerecordsched: "",
+        clockouttime: "",
+        today: "",
         SchedToday: [],
         branch: {},
         mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA',
@@ -134,10 +202,16 @@ export default({
         totalhoursb: 0,
         totalwageb: 0,
         
+        
       };
   },
   mounted() {
     this.datetoday = new Date().toJSON().slice(0, 10);
+    var t = new Date();
+    var h = t.getHours();
+    var m = t.getMinutes();
+    this.today = t.toJSON().slice(0,10);
+    this.time = h + ":" + m
 
 
     axios.post("branches?id="+lStore.get("branchidemp")).catch(res=>{
@@ -153,7 +227,6 @@ export default({
         {
             return;
         }
-        console.log(res.data.result);
         this.tempschedstorage = res.data.result;
         this.tempschedstorage.forEach(element => {
             let obj = element;
@@ -172,20 +245,139 @@ export default({
 
             this.SchedToday.push(element);
             this.SchedToday.forEach(element => {
-                if(element.total_reg_rendered != null)
-                {
-                    this.totalhoursb = this.totalhoursb + element.total_reg_rendered;
-                }
-                if(element.total_earned != null)
-                {
-                    this.totalwageb = this.totalwageb + this.total_earned;
-                }
+                element.assignedEmps.forEach(el => {
+                    if(el.total_reg_rendered != null)
+                    {
+                        this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(el.total_reg_rendered);
+                    }
+                    if(el.total_earned != null)
+                    {
+                        this.totalwageb = parseFloat(this.totalwageb) + parseFloat(el.total_earned);
+                    }
+                });
             });
         });
     });
     
     },
     methods : {
+        cleardata(){
+            this.clockintime = "";
+            this.clockouttime = "";
+        },
+        AddClockin(){
+            this.timerecordid = document.getElementsByClassName("addclockin")[0].id;
+            if(this.timerecordid == null || this.timerecordid == "")
+            {
+                this.timerecorduser_id = document.getElementsByClassName("addclockin")[0].dataset.userid;
+                this.timerecordsched = document.getElementsByClassName("addclockin")[0].dataset.scheduleid;
+            }
+
+            axios.post("timerecord?id="+this.timerecordid).then(res => {  
+                if(res.data.success)
+                {
+                    let time = new Date(res.data.result.time_in).toLocaleTimeString('en-US',{hour12:false});
+                    this.clockintime = time;
+                }
+                else
+                {
+                    this.cleardata();
+                    this.callToaster("toast-top-right",2);
+                }
+            });
+        },
+        AddClockout()
+        {
+            this.timerecordid = document.getElementsByClassName("addclockout")[0].id;
+            axios.post("timerecord?id="+this.timerecordid).then(res => {  
+                if(res.data.success)
+                {
+                    let time = new Date(res.data.result.time_in).toLocaleTimeString('en-US',{hour12:false});
+                    this.clockintime = time;
+                }
+                else
+                {
+                    this.cleardata();
+                    this.callToaster("toast-top-right",2);
+                }
+            });
+        },
+        EditClockin(){
+            if(this.clockintime != null || this.clockintime != "")
+            {
+                if(this.timerecordid != "")
+                {
+                    axios.post("timerecord/update?id="+this.timerecordid,null,{time_in : this.datetoday + " " + this.clockintime}).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                    });
+                }
+                else
+                {
+                    axios.post("timerecord/create",null,{time_in : this.clockintime, user_id : this.timerecorduser_id,schedule_id : this.timerecordsched}).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                    });
+                }
+            }
+        },
+        EditClockout(){
+            if(this.clockintime != null || this.clockintime != "")
+            {
+                if(this.timerecordid != "")
+                {
+                    console.log(this.clockouttime)
+                    axios.post("timerecord/update?id="+this.timerecordid,null,{time_out : this.datetoday + " " + this.clockouttime}).then(res=>{
+                        if(res.data.success)
+                        {
+                            this.callToaster("toast-top-right",1);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                        else
+                        {
+                            this.callToaster("toast-top-right",2);
+                            setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                        }
+                    });
+                }
+                else
+                {
+                    this.cleardata();
+                    this.callToaster("toast-top-right",2);
+                    setTimeout(() => {
+                                this.$router.go(0);
+                            }, 2000);
+                }
+            }
+        },
         SearchRecordData(){
             this.SchedToday.splice(0);
             axios.post("assigned/joint?range="+this.datetoday+"&_batch=true&branch_id="+lStore.get("branchidemp")).catch(res=>{
@@ -195,7 +387,6 @@ export default({
                 {
                     return;
                 }
-                console.log(res.data.result);
                 this.tempschedstorage = res.data.result;
                 this.tempschedstorage.forEach(element => {
                     let obj = element;
@@ -213,19 +404,63 @@ export default({
                     element.assignedEmps = assigned;
 
                     this.SchedToday.push(element);
+
                     this.SchedToday.forEach(element => {
-                        if(element.total_reg_rendered != null)
-                        {
-                            this.totalhoursb = this.totalhoursb + element.total_reg_rendered;
-                        }
-                        if(element.total_earned != null)
-                        {
-                            this.totalwageb = this.totalwageb + this.total_earned;
-                        }
+                        element.assignedEmps.forEach(el => {
+                            if(el.total_reg_rendered != null)
+                            {
+                                this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(el.total_reg_rendered);
+                            }
+                            else
+                            {
+                                this.totalhoursb = 0;
+                            }
+                            if(el.total_earned != null)
+                            {
+                                this.totalwageb = parseFloat(this.totalwageb) + parseFloat(el.total_earned);
+                            }
+                            else
+                            {
+                                this.totalwageb = 0;
+                            }
+                        });
                     });
                 });
             });
-        }
+        },
+        callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: false,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror == 1)
+                {
+                    toastr.success("Data was save successfully", "Successfully Save!");
+                }
+                if(reserror == 2)
+                {
+                    toastr.error("Something went Wrong!", "Error!");
+                }
+                if(reserror == 3)
+                {
+                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                }
+            }
+        },
     }
 });
 </script>
