@@ -13,6 +13,19 @@
 
       <!-- begin sidebar scrollbar -->
       <div class="" data-simplebar style="height: 100%; overflow:hidden !important;">
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-content d-flex align-items-center justify-content-between">
+            <RouterLink class="a-link" to="/branch">
+            <i class="mdi mdi-hospital-building"></i>&nbsp;&nbsp;
+              <span class="nav-text" v-if="branchselected == null"> {{branchselected}} Choose Facility</span>
+              <span class="nav-text" v-else>{{ branchselected }}</span>
+            </RouterLink>
+            <button type="button" @click="removedManageBranch" class="close" v-if="branchselected != null">
+                <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <hr class="separator mb-0" />
+        </div>
         <!-- sidebar menu -->
         <ul class="nav sidebar-inner" id="sidebar-menu">
           <li class="has-sub"  data-url="/dashboard">
@@ -22,19 +35,19 @@
             </RouterLink>
           </li>
           <li class="has-sub " data-url="/timesheets">
-            <RouterLink class="sidenav-item-link" to="/timesheets">
+            <RouterLink class="sidenav-item-link" to="/timesheets" v-if="branchselected != null">
               <i class="mdi mdi-calendar-clock"></i>
               <span class="nav-text">Timesheets</span>
             </RouterLink>
           </li>
           <li class="has-sub " data-url="/request">
-            <RouterLink class="sidenav-item-link" to="/request">
+            <RouterLink class="sidenav-item-link" to="/request" v-if="branchselected != null">
               <i class="mdi mdi-account-details"></i>
               <span class="nav-text">Request</span>
             </RouterLink>
           </li>
           <li class="has-sub " data-url="/jobschedule">
-            <RouterLink class="sidenav-item-link" to="/jobschedule">
+            <RouterLink class="sidenav-item-link" to="/jobschedule" v-if="branchselected != null">
               <i class="mdi mdi-calendar"></i>
               <span class="nav-text">Job Scheduling</span>
             </RouterLink>
@@ -45,18 +58,16 @@
               <span class="nav-text">Employee</span>
             </RouterLink>
           </li>
-
-          <li class="has-sub" data-url="/branch">
-            <RouterLink class="sidenav-item-link" to="/branch">
-              <i class="mdi mdi-hospital-building"></i>
-              <span class="nav-text">Facilities</span>
-            </RouterLink>
-          </li>
-
-          <li class="has-sub" data-url="/designation">
+          <li class="has-sub" data-url="/designation"> 
             <RouterLink class="sidenav-item-link" to="/designation">
               <i class="mdi mdi-settings"></i>
-              <span class="nav-text">Designation</span>
+              <span class="nav-text">Roles</span>
+            </RouterLink>
+          </li>
+          <li class="has-sub" data-url="/users"> <!--// Only For ADMINS-->
+            <RouterLink class="sidenav-item-link" to="/users" v-if="infodata.users_permission_status == 1">
+              <i class="mdi mdi-account-box"></i>
+              <span class="nav-text">Account</span>
             </RouterLink>
           </li>
         </ul>
@@ -518,22 +529,17 @@
           <!-- User Account -->
           <li class="dropdown user-menu">
                     <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
-                      <img :src="infodata.profile_img" class="user-image" alt="User Image">
-                      <span class="d-none d-lg-inline-block">{{infodata.firstname}} {{infodata.lastname}}</span>
+                      <span class="d-none d-lg-inline-block text-success text-uppercase" v-if="infodata.users_permission_status == 1"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Admin )</span>
+                      <span class="d-none d-lg-inline-block text-primary text-uppercase" v-if="infodata.users_permission_status == 2"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Supervisor )</span>
+                      <span class="d-none d-lg-inline-block text-info text-uppercase" v-if="infodata.users_permission_status == 3"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Manager )</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
                       <!-- User image -->
                       <li class="dropdown-header">
-                        <img :src="infodata.profile_img" class="img-circle" alt="User Image">
                         <div class="d-inline-block">
-                          {{infodata.firstname}} {{infodata.lastname}} <small class="pt-1">{{infodata.email_address}}</small>
+                          <span class="mdi mdi-account"></span>
+                          {{infodata.users_username}}
                         </div>
-                      </li>
-
-                      <li>
-                        <a href="user-profile.html">
-                          <i class="mdi mdi-account"></i> My Profile
-                        </a>
                       </li>
                       <li>
                         <a href="#">
@@ -560,6 +566,7 @@
 </template>
 <script>
 import { axios , validateForm,lStore } from '@/functions.js';
+
 export default ({
   name: "App",
   components: {
@@ -568,13 +575,17 @@ export default ({
   data(){
     return{
       search: "",
-      branches: "",
+      branches: [],
       infodata: [],
+      branchselected: lStore.get('selected_facility'),
     }
   },
   mounted(){
-    this.infodata = lStore.get("user_info");
+    this.infodata = lStore.get("users_info");
     $(document).ready(function () {
+
+    setInterval(()=>{
+    },1000);
 
     /*======== SCROLLBAR SIDEBAR ========*/
     var sidebarScrollbar = $(".sidebar-scrollbar");
@@ -855,6 +866,12 @@ export default ({
     }
   },
   methods:{
+    removedManageBranch()
+    {
+      this.branchselected = null;
+      localStorage.removeItem('async_selected_facility');
+      window.location.assign('/adminapp/dashboard');
+    },
     navigateStyle(){
         let navers = document.querySelectorAll('.has-sub');
         navers.forEach (el=>{
@@ -890,5 +907,23 @@ export default ({
   }
   .app-brand a img{
     max-width: 55px !important;
+  }
+  .sidebar-footer-content{
+    padding-top: 0.81rem !important;
+    padding-bottom: 0rem !important;
+    padding-left: 0.9rem !important;
+  }
+  .a-link{
+    color: #fff;
+  }
+  .sidebar-footer-content .nav-text{
+    font-size: 20px;
+  }
+  .close{
+    color:#fff;
+    text-shadow: none;
+  }
+  .close:hover{
+    color:blue;
   }
 </style>

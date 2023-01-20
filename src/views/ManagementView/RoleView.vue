@@ -6,21 +6,26 @@
         <div class="modal fade" id="exampleEditModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Edit Role ID: {{roleid}}</h5>
-                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalFormTitle">Edit Role ID: {{roleid}}</h5>
+                            <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Role</label>
-                                <input type="text" class="form-control" v-model="position"  placeholder="Position *">
-                                <div class="invalid-feedback feedback1">
-								   
-							    </div>
+                                <input type="text" class="form-control" v-model="position" placeholder="Position *">
+                                <div class="invalid-feedback feedback3">
+                                    
+                                </div>
                             </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Color</label>
+                                <input type="color" class="form-control form-control-color" v-model="rolecolor">
+                                <div class="invalid-feedback feedback4">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -44,15 +49,22 @@
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Role</label>
                                 <input type="text" class="form-control" v-model="position" placeholder="Position *">
-                                <div class="invalid-feedback feedback3">
+                                <div class="invalid-feedback feedback1">
 								   
 							    </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Color</label>
+                                <input type="color" class="form-control form-control-color" v-model="rolecolor">
+                                <div class="invalid-feedback feedback2">
+                                
+                                </div>
                             </div>
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" @click="clearVariable" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" id="submitbut">Submit</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="SubmitRole" id="submitbut">Submit</button>
                     </div>
                 </div>
             </div>
@@ -125,18 +137,38 @@
                     </div>
 
                     <div class="card-body">
-                        <div class="responsive-data-table">
-                            <table id="hoverable-data-table" class="table table-hover nowrap dataTable no-footer display nowrap" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Role</th>
-                                        <th>Date Created</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
+                        <table class="table card-table table-responsive table-responsive-large" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Role ID</th>
+                                    <th>Role name</th>
+                                    <th class="d-none d-lg-table-cell">Role Color</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-if="role == null || role == ''">
+                                    <td colspan="3" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
+                                </tr>
+                            <tr v-for="r in role">
+                                <td >{{ r.role_id }}</td>
+                                <td >
+                                {{r.role_name}}
+                                </td>
+                                <td class="d-none d-lg-table-cell"><div class="box" :style="'background:'+r.role_color"></div></td>
+                                <td class="text-right">
+                                    <div class="dropdown show d-inline-block widget-dropdown">
+                                        <a class="dropdown-toggle icon-burger-mini" href="" role="button" id="dropdown-recent-order1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
+                                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order1">
+                                        <li class="dropdown-item">
+                                            <a href="#" @click="ViewRole(r.role_id)" data-toggle="modal" data-target="#exampleEditModalForm">Edit</a>
+                                        </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                      </table>
                     </div>
                 </div>
             </div>
@@ -147,6 +179,7 @@
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
 import { axios , elementLoad} from '@/functions';
 import toastr from 'toastr';
+import { validateForm } from '../../functions';
 
 export default ({
     name: "App",
@@ -157,6 +190,8 @@ export default ({
         return {
             position: "",
             roleid: "",
+            rolecolor: "",
+            role:[],
         }
     },
     methods:{
@@ -170,7 +205,7 @@ export default ({
             }
             else{
                 document.querySelector(".toast").id = "toaster";
-                axios.post("designation/update?id="+this.roleid,null,{position:this.position}).catch(res=>{
+                axios.post("designation/update?id="+this.roleid,null,{role_name:this.position,role_color: this.rolecolor}).catch(res=>{
                     this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -194,25 +229,41 @@ export default ({
         ViewRole(data)
         {
             this.clearVariable();
-            axios.post("designation?id="+data).catch(res=>{
+            axios.post("designation?role_id="+data).catch(res=>{
 
-                }).then(res=>{
-                    this.position = res.data.result.position;
-                    this.roleid = data;
-                });
+            }).then(res=>{
+                this.position = res.data.result.role_name;
+                this.rolecolor = res.data.result.role_color;
+                this.roleid = data;
+            });
         },
         SubmitRole()
         {
-            if(this.position == "")
-            {
-                document.querySelector(".feedback3").textContent = "Position name is required!";
-                document.querySelector(".feedback3").style.display = "block";
-                return;
+            let newRole = {
+                rolename: this.position,
+                rolecolor: this.rolecolor,
             }
-            else{
-                document.querySelector(".toast").id = "toaster";
-                document.querySelector(".feedback3").style.display = "none";
-                axios.post("designation/create",null,{position:this.position}).catch(res=>{
+            const valid = validateForm(newRole,{
+                rolename: "required",
+                rolecolor: "required",
+                callback: (a)=>{
+                    if(a == "rolename")
+                    {
+                        document.querySelector('.feedback1').textContent = "Role name is required";
+                        document.querySelector('.feedback1').style.display = "block";
+                    }
+                    if(a == rolecolor)
+                    {
+                        document.querySelector('.feedback2').textContent = "Role Color is required";
+                        document.querySelector('.feedback2').style.display = "block";
+                    }
+                }
+            })
+            if(valid.allValid)
+            {
+                document.querySelector('.feedback1').style.display = "none";
+                document.querySelector('.feedback2').style.display = "none";
+                axios.post("designation/create",null,{role_name:this.position,role_color:this.rolecolor}).catch(res=>{
                     this.clearVariable();
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -231,8 +282,8 @@ export default ({
                         this.callToaster("toast-top-right",2);
                     }
                 });
-
             }
+
         },
         DeleteRole(data)
         {
@@ -301,93 +352,15 @@ export default ({
             this.position = "";
             this.roleid = "";
         },
-        checkError(data){
-            var val = 0;
-            if(this.position == "" && data == 2)
-            {
-                document.querySelector(".feedback2").textContent = "Branch name is required!";
-                document.querySelector(".feedback2").style.display = "block";
-                val = 1;
-            }
-            else
-            {
-                document.querySelector(".feedback2").textContent = "";
-                document.querySelector(".feedback2").style.display = "none";
-            }
-            if(this.basic_salary == "" && data == 1)
-            {
-                document.querySelector(".feedback5").textContent = "Branch name is required!";
-                document.querySelector(".feedback5").style.display = "block";
-                val = 1;
-            }
-            if(this.branchname != "" && this.branchloc != "")
-            {
-                document.querySelector(".feedback1").textContent = "";
-                document.querySelector(".feedback2").textContent = "";
-                document.querySelector(".feedback3").textContent = "";
-                document.querySelector(".feedback4").textContent = "";
-                document.querySelector(".feedback5").style.display = "none";
-                document.querySelector(".feedback3").style.display = "none";
-                document.querySelector(".feedback5").style.display = "none";
-                document.querySelector(".feedback6").style.display = "none";
-                val = 0;
-            }
-            return val;
-        },
     },
     mounted() {
-        document.querySelector(".toast").id = "";
-            $('#hoverable-data-table').dataTable({
-              aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],
-              emptyTable:     "No data available in table",
-              rowReorder: {
-                selector: 'td:nth-child(2)'
-              },
-              responsive: true,
-              ajax : {
-                url: 'https://www.4angelshc.com/mobile/designation?_batch=true',
-                dataSrc: 'result'
-              },
-              columns : [
-                { data : "id" },
-                { data : "position" },
-                { data : "created_at" },
-                { data : "id",
-                    render: function(data){
-                        return '<a class="actionb" data-toggle="modal" data-target="#exampleEditModalForm" target="_blank"><span id="editrow" data-value='+data+' class="mdi mdi-square-edit-outline"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModalTooltip" target="_blank"><span id="viewrow" data-value='+data+' class="mdi mdi-eye"></span></a> <a class="actionb" data-toggle="modal" data-target="#exampleModal" target="_blank"><span id="deleterow" data-value='+data+' class="mdi mdi-trash-can red"></span></a>'
-                    }
-                }
-              ],
-          });
-          elementLoad('#deleterow').then(()=>{
-            document.querySelectorAll('#deleterow').forEach(el=>{
-                el.onclick = e=>{
-                this.clearVariable();
-                const dataelem = e.target.closest("[data-value]")
-                this.roleid = dataelem.dataset.value;
-                }
-            })
-          });
-          elementLoad('#viewrow').then(()=>{
-            document.querySelectorAll('#viewrow').forEach(el=>{
-                el.onclick = e=>{
-                this.clearVariable();
-                const dataelem = e.target.closest("[data-value]")
-                this.roleid = dataelem.dataset.value;
-                this.ViewRole(this.roleid);
-                }
-            })
-          });
-          elementLoad('#editrow').then(()=>{
-            document.querySelectorAll('#editrow').forEach(el=>{
-                el.onclick = e=>{
-                this.clearVariable();
-                const dataelem = e.target.closest("[data-value]")
-                this.roleid = dataelem.dataset.value;
-                this.ViewRole(this.roleid);
-                }
-            })
-          });
+        axios.post("designation?_batch=true").catch({
+
+        }).then(res=>{
+           this.role = res.data.result;
+           console.log(res);
+        });
+        
     },
 })
 </script>
@@ -398,5 +371,9 @@ export default ({
 
 .responsive-data-table{
     overflow: auto;
+}
+.box{
+    padding: 20px;
+    width: 10%;
 }
 </style>

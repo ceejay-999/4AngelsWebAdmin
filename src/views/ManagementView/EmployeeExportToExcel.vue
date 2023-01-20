@@ -14,14 +14,14 @@
             </thead>
             <tbody>
                 <tr v-for="u in location">
-                <td scope="col">{{u.id}}</td>
-                <td scope="col">{{u.firstname}}</td>
-                <td scope="col">{{u.lastname}}</td>
-                <td scope="col">{{u.email_address}}</td>
-                <td scope="col">{{u.phonenumber}}</td>
-                <td scope="col"><div v-for="uu in u.userdesignations">Employee at {{uu.name}}</div> <br /></td>
-                <td scope="col" v-if="(u.status == 1)">Terminate</td>
-                <td scope="col" v-if="(u.status == 0)">Active</td>
+                <td scope="col">{{u.employee_id}}</td>
+                <td scope="col">{{u.employee_firstname}}</td>
+                <td scope="col">{{u.employee_lastname}}</td>
+                <td scope="col">{{u.employee_emailaddress}}</td>
+                <td scope="col">{{u.employee_phonenumber}}</td>
+                <td scope="col"><div v-for="uu in u.assigndesignation">Employee at {{uu.facility_name}}</div> <br /></td>
+                <td scope="col" v-if="(u.employee_status == 1)">Terminate</td>
+                <td scope="col" v-if="(u.employee_status == 0)">Active</td>
                 </tr>
             </tbody>
         </table>

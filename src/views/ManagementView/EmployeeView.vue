@@ -43,19 +43,6 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label for="fname">Gender</label>
-                                    <select class="form-control" id="gender">
-                                        <option value="">Please select gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                    <div class="invalid-feedback feedback5">
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
                                     <label for="fname">Date Hired</label>
                                     <input type="date" v-model="datehired" class="form-control" placeholder="">
                                     <div class="invalid-feedback feedback6">
@@ -65,8 +52,8 @@
                             </div>
                             <div class="col-sm">
                                 <div class="form-group">
-                                    <label for="fname">Address</label>
-                                    <div id="geocoder1"></div>
+                                    <label for="fname">Birthdate</label>
+                                    <input type="date" v-model="birthdate" class="form-control" placeholder="">
                                     <div class="invalid-feedback feedback7">
                                     
                                     </div>
@@ -86,20 +73,6 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label for="fname">Access Level</label>
-                                    <select class="form-control" id="role">
-                                        <option value="">Please select Access Level</option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="Supervisor">Supervisor</option>
-                                        <option value="Employee">Employee</option>
-                                    </select>
-                                    <div class="invalid-feedback feedback4">
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
                                     <label for="fname">Username</label>
                                     <input type="text" v-model="username" class="form-control" placeholder="">
                                     <div class="invalid-feedback feedback9">
@@ -107,7 +80,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-12">
                                 <div class="form-group">
                                     <label for="fname">Email</label>
                                     <input type="email" v-model="email" class="form-control" placeholder="">
@@ -139,6 +112,9 @@
                             <div class="invalid-feedback feedback13">
                                                 
                             </div>
+                            <div class="mt-4">
+                                <a id="add_role" class="adrole ml-2">Add Role</a>
+                            </div>
                             <div id="phone_number_form">
                                 <div class="row mt-4">
                                     <div class="col-sm-3">
@@ -146,7 +122,7 @@
                                             <label for="fname">Role</label>
                                             <select class="form-control" id="des">
                                                 <option value="">Please Select Role</option>
-                                                <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
+                                                <option v-for="desig in designation" :value="desig.role_id">{{desig.role_name}}</option>
                                             </select>
 
                                     </div>
@@ -161,7 +137,7 @@
                                             <label for="fname">Facilities</label>
                                             <select class="form-control" id="bran">
                                                 <option value="">Please Select Facilities</option>
-                                                <option v-for="br in branches" :value="br.id">{{br.name}}</option>
+                                                <option v-for="br in branches" :value="br.facility_id">{{br.facility_name}}</option>
                                             </select>
 
                                     </div>
@@ -171,7 +147,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <a id="add_role" class="adrole ml-2">Add Role</a>
                     </div>
                     <div class="modal-footer px-4">
                     <button type="button" class="btn btn-secondary btn-pill" data-dismiss="modal">Cancel</button>
@@ -215,34 +190,30 @@
         <div class="row">
             <div class="textcenter"></div>
             <div class="d-flex justify-content-center" v-if="users.length == 0"><div> No Data Found </div></div>
-            <div class="col-lg-6 col-xl-4" v-else v-for="u in users" :key = "u.id">
+            <div class="col-lg-6 col-xl-4" v-else v-for="u in users" :key = "u.employee_id">
                 <div class="card card-default p-4">
-                <a href="#" class="media text-secondary" @click="ViewDetailsEmp(u.id)">
-                    <img :src="u.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                <a href="#" class="media text-secondary" @click="ViewDetailsEmp(u.employee_id)">
+                    <img src="../../assets/users.png" class="mr-3 img-fluid rounded" alt="Avatar Image" v-if="u.employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'">
+                    <img v-else :src="u.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image">
 
                     <div class="media-body">
-                    <h5 class="mt-0 mb-2 text-dark">{{u.firstname}} {{u.lastname}}</h5>
+                    <h5 class="mt-0 mb-2 text-dark">{{u.employee_firstname}} {{u.employee_lastname}}</h5>
 
                     <ul class="list-unstyled">
                         <li class="d-flex mb-1">
-                        <i class="mdi mdi-map mr-1"></i>
-                        <span>{{u.address}}</span>
-                        </li>
-
-                        <li class="d-flex mb-1">
                         <i class="mdi mdi-email mr-1"></i>
-                        <span>{{u.email_address}}</span>
+                        <span>{{u.employee_emailaddress}}</span>
                         </li>
 
                         <li class="d-flex mb-1">
                         <i class="mdi mdi-phone mr-1"></i>
-                        <span>{{u.phonenumber}}</span>
+                        <span>{{u.employee_phonenumber}}</span>
                         </li>
                         
                         <li class="d-flex mb-1">
-                        <i class="mdi mdi-account-check text-success" v-if="u.status == 0"></i>
+                        <i class="mdi mdi-account-check text-success" v-if="u.employee_status == 0"></i>
                         <i class="mdi mdi-account-alert text-danger" v-else></i>
-                        <span v-if="u.status == 0" class="text-success"> Active</span>
+                        <span v-if="u.employee_status == 0" class="text-success"> Active</span>
                         <span v-else class="text-danger"> Terminate</span>
                         </li>
                     </ul>
@@ -280,7 +251,7 @@ export default ({
             gender: "",
             datehired: "",
             rate: "",
-            address: "",
+            birthdate: "",
             username: "",
             email: "",
             password: "",
@@ -298,32 +269,23 @@ export default ({
         }
     }, 
     mounted() {
-        axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
-
-        }).then(res=>{
-                if(res.data.success){
-                    this.branches = res.data.result;
-                    console.log(this.branches);
-                }
-        });
-        //Start of Adding Multiple Role
-            $("#add_role").click(()=>{
-                this.rolenumberformindex++;
-                $("#phone_number_form").after($("#phone_number_form").clone().attr("id","phone_number_form" + this.rolenumberformindex));
-                $("#phone_number_form" + this.rolenumberformindex).css("display","inline");
-                var a = this.rolenumberformindex;
-                $("#phone_number_form" + this.rolenumberformindex + " :input").each(function(){
-                    $(this).attr("name",$(this).attr("name") + a);
-                    $(this).attr("id",$(this).attr("id") + a);
-                    });
-                
-                $("#remove_phone_number" + this.rolenumberformindex).click(()=>{
-                    this.rolenumberformindex--;
-                })
-                $("#remove_phone_number" + this.rolenumberformindex).click(function(){
-                    $("#phone_number_form"+ a).remove();
+        $("#add_role").click(()=>{
+            this.rolenumberformindex++;
+            $("#phone_number_form").after($("#phone_number_form").clone().attr("id","phone_number_form" + this.rolenumberformindex));
+            $("#phone_number_form" + this.rolenumberformindex).css("display","inline");
+            var a = this.rolenumberformindex;
+            $("#phone_number_form" + this.rolenumberformindex + " :input").each(function(){
+                $(this).attr("name",$(this).attr("name") + a);
+                $(this).attr("id",$(this).attr("id") + a);
                 });
+            
+            $("#remove_phone_number" + this.rolenumberformindex).click(()=>{
+                this.rolenumberformindex--;
+            })
+            $("#remove_phone_number" + this.rolenumberformindex).click(function(){
+                $("#phone_number_form"+ a).remove();
             });
+        });
         //End Adding multiple role
         mapboxgl.accessToken = this.mapToken;
 
@@ -363,15 +325,22 @@ export default ({
                 this.designation = res.data.result;
             }
         });
-        axios.post("users?status=0&_batch=true").catch(res=>{
+        axios.post("employee?employee_status=0&_batch=true").catch(res=>{
         }).then(res=>{
+            if(res.data.result == null)
+            {
+                return
+            }
             this.users = res.data.result;
         });
+        axios.post("branches?&_batch=true").then(res=>{
+            this.branches = res.data.result;
+        })
     },
     methods : {
         SearchEmp(){
             this.users = [];
-            axios.post("users/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
+            axios.post("employee/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
                 if(res.data.result == null)
                 {
                     return;
@@ -386,7 +355,7 @@ export default ({
             {
                 this.value = 1;
                 console.log(this.value);
-                axios.post("users?&_batch=true").catch(res=>{
+                axios.post("employee?&_batch=true").catch(res=>{
                 }).then(res=>{
                   this.users = res.data.result;
                 })
@@ -395,7 +364,7 @@ export default ({
             {
                 this.value = 0;
                 console.log(this.value);
-                axios.post("users?status=0&_batch=true").catch(res=>{
+                axios.post("employee?status=0&_batch=true").catch(res=>{
                 }).then(res=>{
                     this.users = res.data.result;
                 });
@@ -405,8 +374,6 @@ export default ({
             document.querySelector('.feedback1').style.display = "none";
             document.querySelector('.feedback2').style.display = "none";
             document.querySelector('.feedback3').style.display = "none";
-            document.querySelector('.feedback4').style.display = "none";
-            document.querySelector('.feedback5').style.display = "none";
             document.querySelector('.feedback6').style.display = "none";
             document.querySelector('.feedback7').style.display = "none";
             document.querySelector('.feedback9').style.display = "none";
@@ -415,17 +382,15 @@ export default ({
             document.querySelector('.feedback12').style.display = "none";
             document.querySelector('.feedback13').style.display = "none";
             let newUser = {
-                firstname: this.firstname,
-                lastname:this.lastname,
-                phonenumber:this.phonenumber,
-                date_hired:this.datehired,
-                address: this.address,
-                gender: document.querySelector("#gender").value,
-                username:this.username,
-                email_address:this.email,
-                password:this.password,
+                employee_firstname: this.firstname,
+                employee_lastname:this.lastname,
+                employee_hiredate: this.datehired,
+                employee_phonenumber:this.phonenumber,
+                employee_birthday: this.birthdate,
+                employee_username:this.username,
+                employee_emailaddress:this.email,
+                employee_password:this.password,
                 confirmpassword:this.confirmpassword,
-                role: document.querySelector("#role").value,
                 file: document.getElementById('uploadFile1').files[0]
             };
             let check = 0;
@@ -433,9 +398,9 @@ export default ({
             {
                 let newArrRole = [];
                 let newRole = {
-                    role: document.querySelector("#des").value,
-                    branch: document.querySelector("#bran").value,
-                    rate: document.querySelector("#rates").value,
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
                 }
                 newArrRole.push(newRole);
                 console.log(newArrRole);
@@ -443,16 +408,16 @@ export default ({
                 {
                     console.log(i);
                     newRole = {
-                        role: document.querySelector("#des"+ i).value,
-                        branch: document.querySelector("#bran"+ i).value,
-                        rate: document.querySelector("#rates"+ i).value,
+                        assigndesignation_roleid: document.querySelector("#des"+ i).value,
+                        assigndesignation_facilityid: document.querySelector("#bran"+ i).value,
+                        assigndesignation_wagerate: document.querySelector("#rates"+ i).value,
                     }
                     newArrRole.push(newRole);
                     (newArrRole).forEach(element => {
                         let roleval = validateForm(element,{
-                            role: "required",
-                            branch: "required",
-                            rate: "required",
+                            assigndesignation_roleid: "required",
+                            assigndesignation_facilityid: "required",
+                            assigndesignation_wagerate: "required",
                             callback: (a)=>{
                                 if(a == "role")
                                 {
@@ -480,14 +445,14 @@ export default ({
             }
             else{
                 let newRole = {
-                        role: document.querySelector("#des").value,
-                        branch: document.querySelector("#bran").value,
-                        rate: document.querySelector("#rates").value,
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
                     }
                     let rolevalid = validateForm(newRole,{
-                        role: "required",
-                        branch: "required",
-                        rate: "required",
+                        assigndesignation_roleid: "required",
+                        assigndesignation_facilityid: "required",
+                        assigndesignation_wagerate: "required",
                         callback: (a)=>{
                             if(a == "role")
                             {
@@ -512,14 +477,13 @@ export default ({
                     }
             }
             const valid = validateForm(newUser,{
-                firstname:"required",
-                lastname:"required",
-                phonenumber: "required",
-                date_hired: "required",
-                username: "required",
-                gender: "required",
-                role: "required",
-                email_address: {
+                employee_firstname:"required",
+                employee_lastname:"required",
+                employee_phonenumber: "required",
+                employee_birthday: "required",
+                employee_username: "required",
+                employee_hiredate: "required",
+                employee_emailaddress: {
                     isEmail: true,
                     isRequired:true,
                     callback: res=>{
@@ -528,7 +492,7 @@ export default ({
                         document.querySelector('.feedback10').style.display = "block";
                     }
                 },
-                password: "required",
+                employee_password: "required",
                 confirmpassword: {
                     equalTo: this.password,
                     isRequired: true,
@@ -541,37 +505,32 @@ export default ({
                     }
                 },
                 callback: (a)=>{
-                    if(a == "firstname")
+                    if(a == "employee_firstname")
                     {
                         document.querySelector('.feedback1').textContent = "Firstname is required";
                         document.querySelector('.feedback1').style.display = "block";
                     }
-                    if(a == "lastname")
+                    if(a == "employee_lastname")
                     {
                         document.querySelector('.feedback2').textContent = "Lastname is required";
                         document.querySelector('.feedback2').style.display = "block";
                     }
-                    if(a == "phonenumber")
+                    if(a == "employee_phonenumber")
                     {
                         document.querySelector('.feedback3').textContent = "Phone number is required";
                         document.querySelector('.feedback3').style.display = "block";
                     }
-                    if(a == "date_hired")
+                    if(a == "employee_birthday")
                     {
-                        document.querySelector('.feedback6').textContent = "Date Hired is required";
-                        document.querySelector('.feedback6').style.display = "block";
+                        document.querySelector('.feedback3').textContent = "Birthday is required";
+                        document.querySelector('.feedback3').style.display = "block";
                     }
-                    if(a == "address")
-                    {
-                        document.querySelector('.feedback7').textContent = "Address is required";
-                        document.querySelector('.feedback7').style.display = "block";
-                    }
-                    if(a == "email_address")
+                    if(a == "employee_emailaddress")
                     {
                         document.querySelector('.feedback10').textContent = "Email is required";
                         document.querySelector('.feedback10').style.display = "block";
                     }
-                    if(a == "password")
+                    if(a == "employee_password")
                     {
                         document.querySelector('.feedback11').textContent = "Password is required";
                         document.querySelector('.feedback11').style.display = "block";
@@ -581,20 +540,10 @@ export default ({
                         document.querySelector('.feedback12').textContent = "Confirm Password is required";
                         document.querySelector('.feedback12').style.display = "block";
                     }
-                    if(a == "gender")
-                    {
-                        document.querySelector('.feedback5').textContent = "Gender is required";
-                        document.querySelector('.feedback5').style.display = "block";
-                    }
                     if(a == "username")
                     {
                         document.querySelector('.feedback9').textContent = "Username is required";
                         document.querySelector('.feedback9').style.display = "block";
-                    }
-                    if(a == "role")
-                    {
-                        document.querySelector('.feedback4').textContent = "Access Level is required";
-                        document.querySelector('.feedback4').style.display = "block";
                     }
                 }
             });
@@ -602,9 +551,9 @@ export default ({
             if(valid.allValid && check == 0){
                 let roleArrusers = [];
                 let roleusers = {
-                    role: document.querySelector("#des").value,
-                    rate: document.querySelector("#rates").value,
-                    facilities: document.querySelector("#bran").value,
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
                 };
                 roleArrusers.push(roleusers);
                 if(this.rolenumberformindex > 0)
@@ -612,23 +561,23 @@ export default ({
                     for(let i = 1; i <= this.rolenumberformindex; i++)
                     {
                         roleusers = {
-                            role: document.querySelector("#des").value,
-                            rate: document.querySelector("#rates").value,
-                            facilities: document.querySelector("#bran").value,
+                            assigndesignation_roleid: document.querySelector("#des").value,
+                            assigndesignation_wagerate: document.querySelector("#rates").value,
+                            assigndesignation_facilityid: document.querySelector("#bran").value,
                         };
                         roleArrusers.push(roleusers);
                     }
                 }
-
                 console.log(roleArrusers);
                 delete newUser.confirmpassword;
                 roleArrusers.forEach((el,i)=>{
-                    newUser['_userDesignate'+i+'_branch_id'] =  el.facilities;
-                    newUser['_userDesignate'+i+'_designation_id'] =  el.role;
-                    newUser['_userDesignate'+i+'_hourly_rate'] =  el.rate;
+                    console.log(el);
+                    newUser['assigndesignation_'+i+'facilityid'] =  el.assigndesignation_facilityid;
+                    newUser['assigndesignation_'+i+'roleid'] =  el.assigndesignation_roleid;
+                    newUser['assigndesignation_'+i+'wagerate'] =  el.assigndesignation_wagerate;
                 });
                 console.log(newUser);
-                axios.post("users/create",null,newUser).catch(res=>{
+                axios.post("employee/create",null,newUser).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     this.users = res.data.result;
@@ -663,8 +612,6 @@ export default ({
             document.querySelector('.feedback1').style.display = "none";
             document.querySelector('.feedback2').style.display = "none";
             document.querySelector('.feedback3').style.display = "none";
-            document.querySelector('.feedback4').style.display = "none";
-            document.querySelector('.feedback5').style.display = "none";
             document.querySelector('.feedback6').style.display = "none";
             document.querySelector('.feedback7').style.display = "none";
             document.querySelector('.feedback9').style.display = "none";

@@ -1,10 +1,16 @@
 <script>
-import {dateFormat,formatDateString,axios} from '../../functions';
-import {toRaw} from 'vue';
+import {dateFormat,formatDateString,axios,validateForm} from '../../functions';
 
 export default({
+    props:{
+        facilityId: Number
+    },
     data(){
         return{
+            requestsModal:{
+                shown: false,
+                mode:3
+            },
             currentCalendar:{
                 y:0,
                 m:0,
@@ -20,25 +26,19 @@ export default({
             updateSchedId:'',
             queSched:{
                 id:'',
-                title:'',
                 shift_date: '',
                 shift_date_end: '',
                 shift_start:'',
                 shift_end:'',
-                max_employees:1,
                 repeatDays:[],
-                excludeDates:[],
                 description:'',
-                branch_id:20,
-                designations:[],
+                branch_id:this.facilityId,
+                designation:'',
                 assignedEmps:[],
                 color:''
             },
             daysOfWeek:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
             deletedSchedIds:[],
-
-            branches:[],
-            searchBranch:'Keppel Hub',
             designations:[],
             searchDesignations:'',
             colors:['#4054b2','#d30915','#1b9ce2','#3bb57a','#f2522c'],
@@ -46,8 +46,11 @@ export default({
             allowDrag: true,
             schedules:{},
             selectedBranch:20,
-
-            employees:{}
+            copyMode:false,
+            employees:{},
+            invalidInput:[],
+            alertMsg:'',
+            editDisabled:false
         }
     },
     mounted(){
@@ -55,48 +58,15 @@ export default({
         this.currentCalendar.y = date.getFullYear();
         this.currentCalendar.m = date.getMonth();
         this.currentCalendar.d = date.getDate();
+        this.initScheduler();
 
-        axios.post('designation?_select=id,position&_batch=true&_batch=true').then(res=>{
-            this.designations = res.data.result;
-        });
-        
-        axios.post('branches?_select=id,name&_batch=true').then(res=>{
-            this.branches = res.data.result;
-        });
-
-        this.fetchEmps();
-
-        
-        
-        axios.post('common/schedules?branch_id='+this.queSched.branch_id).then(res=>{
-            res.data.result.forEach(el=>{
-                delete el.created_at;
-                delete el.updated_at;
-                let designations = [];
-                let assignedEmps = [];
-                if(el.designations != null) el.designations.forEach(el2=>designations.push(el2.id));
-                if(el.assignedEmps != null) el.assignedEmps.forEach(el2=>assignedEmps.push(el2.id));
-                el.designations = designations;
-                el.assignedEmps = assignedEmps;
-                this.schedules[el.id] = el;
-            });
-
-            this.resetQueSched();
-            this.buildCalendar();
-        })
-
+        this.buildCalendar();
         
     },
     computed:{
-        filteredBranches(){
-            let filtered = this.branches.filter(el=>{
-                return el.name.toLowerCase().includes(this.searchBranch.toLowerCase());
-            });
-            return filtered;
-        },
         filteredDesignations(){
             let filtered = this.designations.filter(el=>{
-                return el.position.toLowerCase().includes(this.searchDesignations.toLowerCase()) && !this.queSched.designations.includes(el.id);
+                return el.role_name.toLowerCase().includes(this.searchDesignations.toLowerCase()) && !this.queSched.designation.includes(el.id);
             });
             return filtered;
         }
@@ -104,39 +74,119 @@ export default({
     methods:{
         dateFormat,
         formatDateString,
+        prepareEdit(ds){
+            if(new Date(ds.shift_date+' '+ds.shift_start).getTime() <= new Date().getTime()) this.editDisabled = true;
+            if(this.facilityId != ds.branch_id) this.editDisabled = true;
+            this.showSetSchedModal = true;
+            this.updateSchedId = ds.id;
+            
+            this.queSched=this.stringifyAndParse(ds);
+            this.searchDesignations = this.findPropInObjArray(this.designations,'role_id',this.queSched.designation).role_name;
+        },
+        initScheduler(){
+            axios.encrypted('Designation?_batch=true')
+            .then(res=>{
+                res.data = axios.decryptToJSON(res.data);
+                if(!res.data) return;
+                this.designations = res.data.result;
+            });
+
+            axios.post(`UserDesignations?
+            assigndesignation_facilityid=${this.facilityId}
+            &_batch=true
+            &_joins=employee,role
+            &_on=employee.employee_id=assigndesignation.assigndesignation_employeeid,role.role_id=assigndesignation.assigndesignation_roleid`)
+            .then(res=>{
+                // res.data = axios.decryptToJSON(res.data);
+                // if(!res.data) return;
+                res.data.result.forEach(el=>{
+                    this.employees[el.employee_id] = el;
+                });
+                
+            });
+
+            const processAssignedEmps = arr =>{
+                let newArr = [];
+                arr.forEach(el=>{
+                    newArr.push({
+                        id:el.assigndesignation_employeeid,
+                        status:el.assignschedules_status,
+                        ...el
+                    })
+                })
+                return newArr;
+            };
+
+            axios.encrypted(`Schedule/joint?_batch=true`).then(res=>{
+                res.data = axios.decryptToJSON(res.data);
+                if(!res.data) return;
+                res.data.result.forEach(el=>{
+                    this.schedules[el.schedules_id] = {
+                        id:el.schedules_id,
+                        shift_date:el.schedules_dates,
+                        shift_date_end:el.schedules_dates,
+                        shift_start:el.schedules_timestart,
+                        shift_end:el.schedules_timeend,
+                        repeatDays:[],
+                        description:el.schedules_description,
+                        branch_id:el.schedules_facilityid,
+                        branch_name:el.facility_name,
+                        designation:el.schedules_roleid,
+                        assignedEmps:processAssignedEmps(el.assignedEmps),
+                        color:el.role_color
+                    };
+                });
+                this.buildCalendar();
+            });
+        },
+        toggleRequestView(e){
+
+        },
         stringifyAndParse(obj){
             return JSON.parse(JSON.stringify(obj));
         },
         dragSched(e,ds){
+            if(this.facilityId != ds.branch_id) {
+                alert('You can only move schedules from the branch you selected.')
+                return;
+            }
             try{
-            e.dataTransfer.setData('schedData',JSON.stringify(ds));
-            e.dataTransfer.setData('origin',formatDateString(e.target.parentElement.dataset.datestring).replaceAll(' ',''))
+                e.dataTransfer.setData('schedData',JSON.stringify(ds));
+
+                if(new Date(ds.shift_date+' '+ds.shift_start).getTime() <= new Date().getTime()){
+                    e.preventDefault();
+                }
             }catch(err){return;}
         },
         fetchEmps(){
-            axios.post(`userDesignations?
-            _select=mobile_users.id,mobile_users.lastname,mobile_users.firstname,mobile_userdesignations.designation_id,mobile_designation.position
-            &_joins=mobile_users,mobile_designation
-            &_on=
-            mobile_userdesignations.user_id=mobile_users.id,
-            mobile_userdesignations.designation_id=mobile_designation.id
-            &_batch=true
-            &branch_id=`+this.queSched.branch_id).then(res=>{
-                this.employees = {};
-                res.data.result.forEach(el=>{
-                    this.employees[el.id] = el;
-                })
-                
-            });
+        },
+        isScheduleDone(ds){
+            let date = new Date(ds.shift_date+' '+ds.shift_start).getTime();
+            let ndate = new Date().getTime();
+            return date <= ndate;
         },
         dropSched(e){
-            if(e.dataTransfer.getData('schedData') == '' || e.dataTransfer.getData('origin') == '' || e.target.dataset.datestring == null) return;
+            if(e.dataTransfer.getData('schedData') == '' || e.target.dataset.datestring == null) return;
             let sched = JSON.parse(e.dataTransfer.getData('schedData'));
-            let origin = e.dataTransfer.getData('origin');
-            this.queSched = JSON.parse(JSON.stringify(sched));
-            this.queSched.shift_date = formatDateString(e.target.dataset.datestring).replaceAll(' ','');
-            if(this.queSched.crudStatus != 0) this.queSched.crudStatus = 1;
-            this.schedules[this.queSched.id] = JSON.parse(JSON.stringify(this.queSched));
+
+            if(this.copyMode) {
+                this.copySched(e);
+                return;
+            }
+
+            let date = new Date(e.target.dataset.datestring+' '+sched.shift_start).getTime();
+            let ndate = new Date().getTime();
+
+            if(date <= ndate){
+                alert('You cannot drag a schedule to a datetime that is already finished!');
+                return;
+            }
+
+            
+            
+            sched.shift_date_end = sched.shift_date = formatDateString(e.target.dataset.datestring).replaceAll(' ','');
+            if(sched.crudStatus != 0) sched.crudStatus = 1;
+            this.schedules[sched.id] = JSON.parse(JSON.stringify(sched));
 
 
             // if(this.schedules[this.queSched.id].excludeDates.indexOf()) this.schedules[this.queSched.id].excludeDates.push(origin);
@@ -144,30 +194,36 @@ export default({
             this.resetQueSched();
             this.buildCalendar();
         },
+        copySched(e){
+             if(e.dataTransfer.getData('schedData') == '' || e.target.dataset.datestring == null) return;
+            let sched = JSON.parse(e.dataTransfer.getData('schedData'));
+            if(sched.shift_date == e.target.dataset.datestring) {
+                alert('Please choose a different date!');
+                return;
+            }
+            this.queSched = JSON.parse(JSON.stringify(sched));
+            this.queSched.shift_date_end = this.queSched.shift_date = formatDateString(e.target.dataset.datestring).replaceAll(' ','');
+            this.setSchedule();
+            this.resetQueSched();
+            this.buildCalendar();
+        },
         dropSchedToEmp(e,empId){
             if(e.dataTransfer.getData('schedData') == '') return;
             let sched = JSON.parse(e.dataTransfer.getData('schedData'));
-            if(!this.schedules[sched.id].designations.includes(this.employees[empId].designation_id)) {
+            if(this.schedules[sched.id].designation != this.employees[empId].role_id) {
                 alert('You must only drop schedules with appropriate roles for this employee!');
                 return;
             }
 
-            if(this.schedules[sched.id].assignedEmps.length >= this.schedules[sched.id].max_employees) {
-                alert('Too many employees for this schedule!');
-                return;
+            if(this.schedules[sched.id].assignedEmps == null){
+                this.schedules[sched.id].assignedEmps = [];
             }
+
         
             if(this.schedules[sched.id].crudStatus != 0) this.schedules[sched.id].crudStatus = 1;
             
             if(this.schedules[sched.id].assignedEmps.includes(empId)) return;
-            this.schedules[sched.id].assignedEmps.push(empId);
-        },
-        selectDesignation(num){
-            if(this.queSched.designations.includes(num))
-                this.queSched.designations.splice(this.queSched.designations.indexOf(num),1);
-            else
-                this.queSched.designations.push(num);
-            this.searchDesignations = '';
+            this.schedules[sched.id].assignedEmps.push({id:empId,status:0});
         },
         objFromArr(arr,id){
             return this[arr].find(el=>el.id == id);
@@ -183,116 +239,135 @@ export default({
         },
         resetQueSched(){
             this.updateSchedId = '';
+            this.editDisabled = false;
             this.queSched={
                 id:'',
-                title:'',
                 shift_date: this.currentCalendar.y+'-'+(this.currentCalendar.m+1)+'-'+this.currentCalendar.d,
                 shift_date_end: '',
                 shift_start:'',
                 shift_end:'',
                 repeatDays:[],
                 description:'',
-                excludeDates:[],
-                branch_id:this.queSched.branch_id,
-                max_employees:1,
-                designations:[],
+                branch_id:this.facilityId,
+                designation:'',
                 assignedEmps:[],
                 color:''
             };
+
+            this.searchDesignations = '';
+        },
+        findPropInObjArray(array,property,value){
+            let match = false;
+            array.forEach(el=>{
+                if(el[property] == value) match = el;
+            })
+            return match;
+        },
+        checkConflicts(dateString,ds){
+            let schedules = this.getDayScheds(dateString);
+            let hasConflict = false;
+
+            schedules.forEach(el=>{
+                let startA = new Date(ds.shift_date+' '+ds.shift_start);
+                let startB = new Date(el.shift_date+' '+el.shift_start);
+                let endA = new Date(ds.shift_date+' '+ds.shift_end);
+                let endB = new Date(el.shift_date+' '+el.shift_end);
+
+                if(ds.id != el.id) 
+                    if((startA <= startB && endA > startB) || (startA >= startB && endB > startA))
+                        if(ds.branch_id == el.branch_id && ds.designation == el.designation)
+                            hasConflict = true;
+            }); 
+
+            return hasConflict;
         },
         setSchedule(){
-            let date = new Date();
-            if(
-                this.queSched.title == '' ||
-                this.queSched.shift_date == '' ||
-                this.queSched.shift_start =='' ||
-                this.queSched.shift_end =='' ||
-                this.queSched.branch_id == 0 ||
-                this.queSched.searchBranch == 0 ||
-                this.queSched.designations.length == 0 ||
-                this.queSched.designations.max_employees <= 0 ||
-                this.queSched.color == ''
-            ) {
-                alert('Required Fields are empty!');
-                return;
-            }
-            if(new Date(this.queSched.shift_date).getTime() > new Date(this.queSched.shift_date_end).getTime()){
-                alert('End date is sooner than the start date!');
-                return;
-            }
+            let q = this.queSched;
+            let currentDateTime = new Date().getTime();
+            let startDateTime = new Date(q.shift_date+' '+q.shift_start).getTime();
+            this.invalidInput = [];
 
-            let daydiffs = (new Date(this.queSched.shift_date_end) - new Date(this.queSched.shift_date)) / (1000 * 60 * 60 * 24);
-            let inclusiveDates = [];
+            let validate = validateForm(q,{
+                shift_date: "required",
+                shift_date_end: "required",
+                shift_start: "required",
+                shift_end: "required",
+                designation:"required",
+                callback:(v,k)=>{
+                    this.invalidInput.push(k);
+                }
+            });
+            
+            if(!validate.allValid) return;
+            
 
             
-            let dateId1 = String(date.getUTCFullYear())+String(date.getUTCMonth())
-            +String(date.getUTCDate())+String(date.getUTCHours())+String(date.getUTCMinutes())+String(date.getUTCSeconds());
-            if(this.queSched.shift_start.match(/^[0-9]+:[0-9]+$/g) != null) this.queSched.shift_start = this.queSched.shift_start+':00';
-            if(this.queSched.shift_end.match(/^[0-9]+:[0-9]+$/g) != null) this.queSched.shift_end = this.queSched.shift_end+':00';
-
             if(this.updateSchedId == ''){
-                inclusiveDates.push([this.queSched.shift_date,dateId1])
-                let month = this.currentCalendar.m;
-                let day = parseInt(this.currentCalendar.d);
                 
-                for(let i=1;i<=daydiffs;i++){
-                    let numDays = new Date(this.currentCalendar.y,this.currentCalendar.m+1,0).getDate();
-                    day++;
-                    
-                    if(parseInt(day) > numDays) {
-                        day =1;
-                        month++;
-                    }
+                let startDate = new Date(q.shift_date).getTime();
                 
-                    let newDate = new Date(this.currentCalendar.y,month,day);
-                    let dateId2 = (Math.floor(Math.random() * 1000) + 1000)+String(date.getUTCMonth())
-                +String(date.getUTCDate())+String(date.getUTCHours())+String(date.getUTCMinutes())+String(date.getUTCSeconds());
-                    let dateString = formatDateString(String(newDate.getFullYear())+'-'+(String(newDate.getMonth()+ 1) )
-                +'-'+String(day)).replaceAll(' ','');
-        
-                    if(this.queSched.repeatDays.length > 0 && this.queSched.repeatDays.includes(newDate.getDay())){
-                        inclusiveDates.push([dateString,dateId2]);
-                    }else if(this.queSched.repeatDays.length == 0){
-                        inclusiveDates.push([dateString,dateId2]);
-                    }
-                }
-                inclusiveDates.forEach(el=>{
-                    let sched = this.queSched;
-                    sched.id = el[1];
-                    sched.shift_date = el[0];
-                    delete sched.repeatDays;
-                    delete sched.shift_date_end;
-                    delete sched.excludeDates;
-                    sched.crudStatus = 0;
-                    this.schedules[sched.id] = JSON.parse(JSON.stringify(sched));
-                });
-            }else{
-                let emps = this.queSched.assignedEmps;
+                let endDate = new Date(q.shift_date_end).getTime();
+                let dayDiff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                
 
-                for(let i = 0; i < emps.length; i++){
-                    if(!this.queSched.designations.includes(this.employees[emps[i]].designation_id)){
-                        alert('Please remove the employees you assigned which did not have the role(s) you specified!');
-                        return;
-                    }
-                }
-
-                if(emps.length > this.queSched.max_employees){
-                    alert('Please remove some employees from this schedule before you reduce the maximum number of employees!');
+                if(startDateTime <= currentDateTime){
+                    alert("You cannot add a schedule that has started already!");
                     return;
                 }
-        
+
+                for(let i = 0,j=0;i<=dayDiff;i++){
+                    let includedDate = new Date(q.shift_date);
+                    includedDate.setDate(includedDate.getDate() + i);
+                    
+                    if(q.repeatDays.length > 0 && q.repeatDays.includes(includedDate.getDay()) || q.repeatDays.length == 0 || i == 0){
+                        let newSched = JSON.parse(JSON.stringify(q));
+                        // replace 1008 with lStore.get('user_id') once connected
+                        newSched.id = (1008).toString(32)+'-'+new Date().getTime().toString(32)+'-'+j;
+                        let opts = {year:'numeric',month:'2-digit',day: "2-digit"};
+                        newSched.shift_date = includedDate.toLocaleDateString('zh-Hans-CN',opts).replaceAll('/','-');
+                        newSched.shift_date_end = includedDate.toLocaleDateString('zh-Hans-CN',opts).replaceAll('/','-');
+                        newSched.crudStatus = 0;
+                        this.schedules[newSched.id] = JSON.parse(JSON.stringify(newSched));
+                        
+                        j++;
+                    }
+                        
+                }
+                
+            }else{
+                if(startDateTime <= currentDateTime){
+                    alert("You cannot modify a schedule's time to a datetime that has already started!");
+                    return;
+                }
+
+                let emps = this.queSched.assignedEmps;
+                if(emps != null){
+                    if(emps.length > 0){
+                         for(let i = 0; i < emps.length; i++){
+                            if(this.queSched.designation != this.employees[emps[i].id].role_id){
+                                alert('Please remove the employees you assigned which did not have the role you specified!');
+                                return;
+                            }
+                        }
+
+                        if(emps.length > this.queSched.max_employees){
+                            alert('Please remove some employees from this schedule before you reduce the maximum number of employees!');
+                            return;
+                        }
+                    }
+                }
+
                 if(this.queSched.crudStatus != 0) this.queSched.crudStatus = 1;
 
                 this.schedules[this.queSched.id] = JSON.parse(JSON.stringify(this.queSched));
             }
-            
-            this.resetQueSched();
-            this.updateSchedId = '';
-            this.selectedBranch = 20;
-            this.showSetSchedModal = false;
+
             
             this.buildCalendar();
-        },
+            this.showSetSchedModal = false;
+            this.resetQueSched();
+        },  
         
         buildCalendar(){
             let cc = this.currentCalendar;
@@ -304,21 +379,25 @@ export default({
                 let endOffset = 7 - new Date(date.getFullYear(),date.getMonth()+1,1).getDay();
                 if(endOffset == 7) endOffset = 0;
                 
+                
                 this.calendarBox = new Array();
                 for(let i=0,j=1;i<numDays+startOffset+endOffset;i++){
                     if(i>=startOffset&&j<=numDays){
+                        let dateString = formatDateString(new Date(cc.y+'-'+(cc.m+1)+'-'+j).toLocaleDateString('zh-Hans-CN')).replaceAll(' ','');
                         this.calendarBox.push({
                             dateNum: j,
-                            dateString:cc.y+'-'+(cc.m+1)+'-'+j,
-                            dayScheds:this.getDayScheds(cc.y+'-'+(cc.m+1)+'-'+j),
+                            dateString:dateString,
+                            dayScheds:this.getDayScheds(dateString),
                             onclick: ()=> {
                                 this.currentCalendar.d = ((j-1)<10) ? '0'+(j-1) : j - 1;
                             },
-                            today: date.getDate() == j
+                            today: new Date().toLocaleDateString == new Date(cc.y,cc.m,j)
                         });
                         j++;
                     }else{
-                        this.calendarBox.push({});
+                        this.calendarBox.push({
+                            onclick: ()=>{}
+                        });
                     }
                 }
                 return;
@@ -386,14 +465,17 @@ export default({
             return console.log(txt);
         },
         getDayScheds(dateString){
-            dateString = formatDateString(dateString).replaceAll(' ','');
             let hitScheds = [];
             for(let s in this.schedules){
-                if(dateString == this.schedules[s].shift_date && this.schedules[s].branch_id==  this.selectedBranch)
+                if(dateString == this.schedules[s].shift_date)
                     hitScheds.push(this.schedules[s]);
             }
-
-            return hitScheds;
+            if(hitScheds.length == 0) return [];
+            return hitScheds.sort((a,b)=>{
+                let timeA = new Date(a.shift_date+' '+a.shift_start).getTime();
+                let timeB = new Date(b.shift_date+' '+b.shift_start).getTime();
+                return timeA - timeB;
+            });
         },
         deleteSchedule(id){
             delete this.schedules[id];
@@ -402,110 +484,173 @@ export default({
             this.buildCalendar();
         },
         filteredDayScheds(scheds,empId){
-            return scheds.filter(el=>el.assignedEmps.includes(empId));
+            return scheds.filter(el=>{
+                
+                if(el.assignedEmps != null){
+                    let e = el.assignedEmps.filter(el=>el.id==empId);
+                    return e.length > 0;
+                }
+            });
         },
         removeSchedFromEmp(schedId,empId){
-            console.log(this.schedules[schedId].assignedEmps,String(empId));
-            let index = this.schedules[schedId].assignedEmps.indexOf(String(empId));
+            let index = this.schedules[schedId].assignedEmps.indexOf(this.schedules[schedId].assignedEmps.find(el=>el.id == empId));
             this.schedules[schedId].assignedEmps.splice(index,1);
+            if(this.schedules[schedId].crudStatus != 0) this.schedules[schedId].crudStatus = 1;
         },
         saveChanges(){
             let created = [];
             let updated = [];
             
+            const getAssignDesignationID = (arr,schedid)=>{
+                let assigned = [];
+                arr.forEach(el=>{
+                    const status = el.status;
+                    const id = el.id;
+                    delete el.assigndesignation_employeeid;
+                    delete el.status;
+                    delete el.id;
+                    delete el.assignschedules_id;
+                    assigned.push({
+                        assignschedules_assigndesignationid:this.employees[id].assigndesignation_id,
+                        assignschedules_scheduleid:schedid,
+                        assignschedules_status:status,
+                        ...el
+                    });
+                });
+                return assigned;
+            };
+
             for(let s in this.schedules){
-                console.log(this.schedules[s]);
                 if(this.schedules[s].crudStatus == null) continue;
-                if(this.schedules[s].crudStatus == 0) created.push(JSON.parse(JSON.stringify(this.schedules[s])));
-                else updated.push(JSON.parse(JSON.stringify(this.schedules[s])));
+                let newData = JSON.parse(JSON.stringify({
+                    schedule:{
+                        schedules_dates:this.schedules[s].shift_date,
+                        schedules_description:this.schedules[s].description,
+                        schedules_facilityid:this.schedules[s].branch_id,
+                        schedules_id:this.schedules[s].id,
+                        schedules_roleid:this.schedules[s].designation,
+                        schedules_timestart:this.schedules[s].shift_start,
+                        schedules_timeend:this.schedules[s].shift_end,
+                    }
+                }));
+                if(this.schedules[s].assignedEmps.length > 0){
+                    newData.assignedEmps = getAssignDesignationID(this.schedules[s].assignedEmps,this.schedules[s].id);
+                }
+
+                if(this.schedules[s].crudStatus == 0) created.push(newData);
+                else updated.push(newData);
             }
 
             created.forEach(el=>{
-                let assignedEmps = el.assignedEmps;
-                let designations = el.designations;
-                delete el.assignedEmps;
-                delete el.designations;
-                delete el.crudStatus;
-                console.log(el);
-                axios.post('schedule/create',null,el).then(()=>{
-                    
-                    assignedEmps.forEach(el2=>{
-                        axios.post('assigned/create',null,{
-                            user_id: el2,
-                            schedule_id:el.id
-                        }).then(res=>console.log(res));
-                    });
-                    designations.forEach(el2=>{
-                        axios.post('scheduleDesignations/create',null,{
-                            designation_id: el2,
-                            schedule_id:el.id
-                        }).then(res=>console.log(res));
-                    });
-                });
-                
+                 axios.post('Schedule/create',null,el.schedule).then(()=>{
+                    if(el.assignedEmps == null) return;
+                    if(el.assignedEmps.length == 0) return;
+                    el.assignedEmps.forEach(el2=>{
+                        axios.post('Assign/create',null,el2);
+                    })
+                 });
             });
 
             updated.forEach(el=>{
-                let assignedEmps = el.assignedEmps;
-                let designations = el.designations;
-                delete el.assignedEmps;
-                delete el.designations;
-                delete el.crudStatus;
-                console.log(el);
-                axios.post('schedule/update?id='+el.id,null,el).then(res=>console.log(res));
-                axios.post('assigned/delete?schedule_id='+el.id,null,el).then(()=>{
-                    console.log(assignedEmps);
-                    assignedEmps.forEach(el2=>{
-                        
-                        
-                        axios.post('assigned/create',null,{
-                            user_id: el2,
-                            schedule_id:el.id
-                        }).then(res=>console.log(res));
-                    });
-                });
-                axios.post('scheduleDesignations/delete?schedule_id='+el.id,null,el).then(()=>{
-                    designations.forEach(el2=>{
-                        axios.post('scheduleDesignations/create',null,{
-                            designation_id: el2,
-                            schedule_id:el.id
-                        }).then(res=>console.log(res));
-                    });
-                });
-                
+                 axios.encrypted('Schedule/update?id='+el.schedule.schedules_id,null,el.schedule).then(()=>{
+                    axios.encrypted('Assign/delete?scheduleid='+el.schedule.schedules_id,null);
+                    if(el.assignedEmps == null) return;
+                    if(el.assignedEmps.length == 0) return;
+                    el.assignedEmps.forEach(el2=>{
+                        axios.post('Assign/create',null,el2);
+                    })
+                 });
             });
 
             this.deletedSchedIds.forEach(el=>{
-                axios.post('scheduleDesignations/delete?schedule_id='+el);
-                axios.post('assigned/delete?schedule_id='+el);
-                axios.post('schedule/delete?id='+el);
+                axios.encrypted('Schedule/delete?id='+el);
+                axios.encrypted('Assign/delete?scheduleid='+el);
             });
 
-            
+            setTimeout(()=>{
+                window.location.reload();
+            },3000);
         }
     }
 })
 </script>
 
 <template>
+<div class="requestsModal" v-if="requestsModal.shown">
+    <div class="requestsModalBox">
+        <div class="requestsModalHeader">
+            <h3>Schedule Requests</h3>
+            <button @click="requestsModal.shown = false">Close</button>
+        </div>
+        <div class="requestsModalBody">
+            <div class="requestsCtrl">
+                <button :class="{active:requestsModal.mode == 3}" @click="requestsModal.mode =3">Schedule Applications</button>
+                <button :class="{active:requestsModal.mode == 4}" @click="requestsModal.mode = 4">Reschedule Requests</button>
+                <button :class="{active:requestsModal.mode == 2}" @click="requestsModal.mode = 2">Reassign Requests</button>
+            </div>
+
+            <div class="requestsList">
+                <div class="requestsItem">
+                    <h3>Schedule One <small>January 2 (2:00am-5:00am) &bull; Employee Employee</small><button  @click="toggleRequestView">&#9660;</button></h3>
+                    <div class="requestsItemGrid">
+                        <div><small>Date</small>January 2, 2023</div>
+                        <div><small>From</small>2:00am</div>
+                        <div><small>To</small>5:00am</div>
+                        <div><small>Employee ID</small>12345678</div>
+                        <div class="right"><small>Employee Name</small>Employee Employee</div>
+                        <div><small>Employee Role</small>LPN</div>
+                        <div class="right"><small>Branch</small>4ANGELS HEALTH CENTER</div>
+                        <div class="requestsItemFooter full">
+                            <button>Accept</button>
+                            <button>Decline</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="requestsItem">
+                    <h3>Schedule Two <small>January 2 (2:00am-5:00am) &bull; Employee Employee</small><button  @click="toggleRequestView">&#9660;</button></h3>
+                    <div class="requestsItemGrid">
+                        <div><small>Date</small>January 2, 2023</div>
+                        <div><small>From</small>2:00am</div>
+                        <div><small>To</small>5:00am</div>
+                        <div><small>Resched Date</small>January 3, 2023</div>
+                        <div><small>Resched From</small>5:00am</div>
+                        <div><small>Resched To</small>7:00am</div>
+                        <div><small>Employee ID</small>12345678</div>
+                        <div class="right"><small>Employee Name</small>Employee Employee</div>
+                        <div><small>Employee Role</small>LPN</div>
+                        <div class="right"><small>Branch</small>4ANGELS HEALTH CENTER</div>
+                        <div class="full"><small>Reason</small>10 years na single, karun ra naay blind date</div>
+                        <div class="requestsItemFooter full">
+                            <button>Accept</button>
+                            <button>Decline</button>
+                        </div>
+                </div>
+                   
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+</div>
+
 <div class="setScheduleModal" v-if="showSetSchedModal">
     <div class="setScheduleModalBox">
         <div class="setScheduleModalHeader">
-            <h3>{{(updateSchedId == '') ? 'Add' : 'Edit'}} Schedule <small v-if="updateSchedId != ''">ID: {{updateSchedId}}</small></h3>
+            <h3>{{(updateSchedId == '') ? 'Add' : (editDisabled) ? 'View' : 'Edit'}} Schedule <small v-if="updateSchedId != ''">ID: {{updateSchedId}}</small></h3>
             <button @click="showSetSchedModal = false;resetQueSched();">Close</button>
         </div>
         <div class="setScheduleModalInputs">
-            <label>Title</label>
-            <input placeholder="Title of the schedule" v-model="queSched.title">
             <label >{{(updateSchedId == '') ? 'From' : 'Date'}}</label>
-            <input type="date" v-model="queSched.shift_date" readonly :class="{full: (updateSchedId != '')}">
+            <input type="date" v-model="queSched.shift_date" readonly :class="{full: (updateSchedId != ''), emptyInput: invalidInput.includes('shift_date_end')}">
             <label v-if="updateSchedId == ''">To</label>
-            <input type="date" v-model="queSched.shift_date_end" v-if="updateSchedId == ''">
+            <input :class="{emptyInput: invalidInput.includes('shift_date_end')}" type="date" v-model="queSched.shift_date_end" v-if="updateSchedId == ''">
             <label>Start Time</label>
-            <input type="time" v-model="queSched.shift_start" min="00:00" max="23:59">
+            <input :readonly="editDisabled" :class="{emptyInput: invalidInput.includes('shift_start')}" type="time" v-model="queSched.shift_start" min="00:00" max="23:59">
             <label>End Time</label>
-            <input type="time" v-model="queSched.shift_end" min="00:00" max="23:59">
-            <div class="wide">Max Employees <input type="number" class="maxEmpInput" v-model="queSched.max_employees" min="1"></div>
+            <input :readonly="editDisabled" :class="{emptyInput: invalidInput.includes('shift_end')}" type="time" v-model="queSched.shift_end" min="00:00" max="23:59">
             
             <div class="dta_label" v-if="updateSchedId == ''">Days to Appear
                 <div class="dta_btns">
@@ -519,35 +664,23 @@ export default({
                 </div>
             </div>
 
-            <label>Branch</label>
-            <div id="branch_select_con" class="full">
-                <input id="branch_select_input" v-model="searchBranch" placeholder="Search in branches">
-                <ul>
-                    <li v-for="b,i in filteredBranches" :key="i" @click="queSched.branch_id = b.id;searchBranch = b.name;this.selectedBranch = b.id;fetchEmps();">{{b.name}}</li>
-                </ul>
-            </div>
             <label>Roles</label>
             <div id="roles_select_con" class="full">
-                <input id="roles_select_input" v-model="searchDesignations" placeholder="Search in roles">
-                <ul>
-                    <li v-for="d,i in filteredDesignations" :key="i" @click="searchDesignations = d.position;selectDesignation(d.id)">{{d.position}}</li>
+                <input :readonly="editDisabled" :class="{emptyInput: invalidInput.includes('designation')}" id="roles_select_input" v-model="searchDesignations" placeholder="Search in roles">
+                <ul v-if="!editDisabled">
+                    <li v-for="d,i in filteredDesignations" :key="i" @click="searchDesignations = d.role_name;queSched.designation=d.role_id;queSched.color=d.role_color">{{d.role_name}}</li>
                 </ul>
             </div>
             <div class="roles_select_selected full" >
                 <div class="roles_selected_item" v-for="qd,i in queSched.designations" :key="i">
-                    {{objFromArr('designations',qd).position}}
+                    {{objFromArr('designations',qd).role_name}}
                     <a href="javascript:;" @click="queSched.designations.splice(i,1)">&times;</a>
                 </div>
             </div>
             <label>Description</label>
-            <textarea v-model="queSched.description" class="full"></textarea>
-
-            <label>Color</label>
-            <div class="colors full">
-                <button :class="{active: queSched.color == c}" v-for="c,i in colors" :key="i" @click="queSched.color = c" :style="'background:'+c"></button>
-            </div>
+            <textarea :readonly="editDisabled" v-model="queSched.description" class="full"></textarea>
         </div>
-        <div class="setScheduleModalFooter">
+        <div class="setScheduleModalFooter" v-if="!editDisabled">
             <button class="exitSetScheduleModal" @click="setSchedule">{{(updateSchedId == '') ? 'Add' : 'Edit'}} Schedule</button>
             <button class="deleteSchedule" v-if="updateSchedId != ''" @click="deleteSchedule(queSched.id)">Delete Schedule</button>
         </div>
@@ -555,33 +688,30 @@ export default({
     </div>
 </div>
 <div class="scheduler_ctrl">
-    <div id="branchmode_select_con" class="full">
-        <input v-model="searchBranch" placeholder="Branch" readonly>
-        <ul>
-            <li v-for="b,i in branches" :key="i" @click="selectedBranch = b.id;queSched.branch_id = b.id;searchBranch = b.name;this.fetchEmps();buildCalendar();">{{b.name}}</li>
-        </ul>
-    </div>
-    
+    <!-- <button class="calendarCtrlBtns"  @click="requestsModal.shown = true">View Requests</button> -->
     <button class="calendarCtrlBtns" @click="next(-12)" v-if="viewMode == 'Month View'">Prev Year</button>
     <button class="calendarCtrlBtns" @click="next(-1)">Prev Month</button>
     <button class="calendarCtrlBtns" @click="nextDay(-7)" v-if="viewMode == 'Week View'">Prev Week</button>
+    <button class="calendarCtrlBtns" @click="nextDay(7);" v-if="viewMode == 'Week View'">Next Week</button>
+    <button class="calendarCtrlBtns" @click="next(1)">Next Month</button>
+    <button class="calendarCtrlBtns" @click="next(12)" v-if="viewMode == 'Month View'">Next Year</button>
     <label for="gotoDate" class="calendarLabel">
         {{new Date(currentCalendar.y,currentCalendar.m,currentCalendar.d).toLocaleString('default', { month: 'long',year:'numeric' })}}
         <small>Click to jump to date</small>
         <input type="date" id="gotoDate" @change="jumpToDate" style="opacity:0;width:0;height:0;display:block">
     </label>
-    <button class="calendarCtrlBtns" @click="nextDay(7);" v-if="viewMode == 'Week View'">Next Week</button>
-    <button class="calendarCtrlBtns" @click="next(1)">Next Month</button>
-    <button class="calendarCtrlBtns" @click="next(12)" v-if="viewMode == 'Month View'">Next Year</button>
+    <button class="calendarCtrlBtns" @click="copyMode=!copyMode" :class="{red:copyMode,black:!copyMode}">{{copyMode ? 'Move' : 'Copy'}} Mode</button>
     <div id="viewmode_select_con" class="full">
-        <input v-model="viewMode" readonly>
-        <ul>
-            <li @click="viewMode = 'Month View';buildCalendar();">Month View</li>
-            <li @click="viewMode = 'Week View';buildCalendar();">Week View</li>
-        </ul>
-    </div>
-    <button class="calendarCtrlBtns" @click="saveChanges">Save Changes</button>
+            <input v-model="viewMode" readonly>
+            <ul>
+                <li @click="viewMode = 'Month View';buildCalendar();">Month View</li>
+                <li @click="viewMode = 'Week View';buildCalendar();">Week View</li>
+            </ul>
+        </div>
+    <button class="calendarCtrlBtns green" @click="saveChanges">Save Changes</button>
 </div>
+
+
 <div class="scheduler_view">
     <div class="scheduler_item title">Sun</div>
     <div class="scheduler_item title">Mon</div>
@@ -596,9 +726,12 @@ export default({
         <div class="scheduler_item_actions"  v-if="c.dateNum != null && c.dateNum==currentCalendar.d">
             <img class="icon" @click="showSetSchedModal = true;resetQueSched();queSched.shift_date_end = queSched.shift_date = formatDateString(currentCalendar.y+'-'+(currentCalendar.m+1)+'-'+currentCalendar.d).replaceAll(' ','');" title="Add Schedule" src="../../assets/add-icon.svg"/>
         </div>       
-        <div class="dayScheds" draggable="true" v-for="ds,i in c.dayScheds" :key="i" :data-schedule="stringify(ds)" @click="showSetSchedModal = true;updateSchedId = ds.id;queSched=stringifyAndParse(ds)" @dragstart="dragSched($event,ds)">
-            <h4>{{ds.title}}</h4>
-            <p>{{dateFormat('%h:%i%a',ds.shift_date+' '+ds.shift_start)}} to {{dateFormat('%h:%i%a',ds.shift_date+' '+ds.shift_end)}}</p>
+        <div class="dayScheds" :class="{unclickable:isScheduleDone(ds),notCurrentBranch: facilityId != ds.branch_id}" draggable="true" v-for="ds,i in c.dayScheds" :key="i" :data-schedule="stringify(ds)" @click="prepareEdit(ds)" @dragstart="dragSched($event,ds)">
+            <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}} <span title="Conflicting schedules!" v-if="checkConflicts(c.dateString,ds)" class="conflict">!</span></h4>
+            <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
+                {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
+            </p>
+            <strong class="notCurrentBranchIndicator" v-if="facilityId != ds.branch_id">Branch: {{ds.branch_name}}</strong>
             <div class="color" :style="'background:'+ds.color"></div>
         </div>
     {{c.text}}</div>
@@ -612,24 +745,45 @@ export default({
     </div>
     <div class="employee_item" v-for="e,i in employees" :key="i">
         <div class="employee_scheduler_item">
-            <h4>{{e.firstname}} {{e.lastname}} <small>{{e.position}}</small></h4>
+            <h4>{{e.employee_firstname}} {{e.employee_lastname}} <small :style="{border: '2px solid '+e.role_color}">{{e.role_name}}</small></h4>
         </div>
-        <div class="employee_scheduler_item" v-for="c in calendarBox" :key="c" :data-employee="i" @dragenter.prevent @dragover.prevent @drop="dropSchedToEmp($event,e.id)">
-            <div class="dayScheds" draggable="true" v-for="ds,i in filteredDayScheds(c.dayScheds,i)" :key="i" :data-schedule="stringify(ds)" @dragstart="dragSched($event,ds)">
-            <h4>{{ds.title}}</h4>
-            <p>{{dateFormat('%h:%i%a',ds.shift_date+' '+ds.shift_start)}} to {{dateFormat('%h:%i%a',ds.shift_date+' '+ds.shift_end)}}</p>
-            <a href="javascript:;" @click="removeSchedFromEmp(ds.id,e.id)">Remove (x)</a>
+        <div class="employee_scheduler_item" v-for="c in calendarBox" :key="c" :data-employee="i" @dragenter.prevent @dragover.prevent @drop="dropSchedToEmp($event,e.employee_id)">
+            <div class="dayScheds" :class="{unclickable:isScheduleDone(ds)}" draggable="true" v-for="ds,i in filteredDayScheds(c.dayScheds,i)" :key="i" :data-schedule="stringify(ds)" @dragstart="dragSched($event,ds)">
+                {{ds.status}}
+            <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}}</h4>
+            <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
+                {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
+            </p>
+            <a v-if="!isScheduleDone(ds)" href="javascript:;" @click="removeSchedFromEmp(ds.id,e.employee_id)">Remove (x)</a>
             <div class="color" :style="'background:'+ds.color"></div>
         </div>
         </div>
     </div>
     
 </div>
+<div class="scheduleAlert" :class="{alertShow:alertMsg!=''}" v-html="alertMsg">
+</div>
 </template>
 
 <style scoped>
 *{font-family: sans-serif;}
 h3,p{margin: 0;}
+
+.scheduleAlert{
+    padding: 10px;
+    background: #222;
+    position: fixed;
+    color:#fff;
+    border-radius: 5px;
+    bottom:-50px;
+    right:20px;
+    transition: 0.3s;
+    opacity: 0;
+}
+.alertShow{
+    bottom: 50px;
+    opacity: 1;
+}
 
 .scheduler_view{
     display: grid;
@@ -651,10 +805,11 @@ h3,p{margin: 0;}
 .dateNum{
     padding: 5px;
     display: inline-block;
-    border-radius: 0 0 50% 0;
+    border-radius: 50%;
     box-shadow: inset -1px -1px 4px #aaa;
-    width: 30px;
+    width: 35px;
     text-align: center;
+    margin: 5px;
 }
 
 .scheduler_item:not(.blank):not(.title):hover{outline:1px solid #000}
@@ -707,12 +862,13 @@ h3,p{margin: 0;}
 }
 
 .scheduler_ctrl{
-    padding: 20px;
+    padding:10px;
     border:1px solid #ccc;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 .calendarCtrlBtns{
     background: #2095db;
@@ -721,7 +877,20 @@ h3,p{margin: 0;}
     padding:10px;
     margin: 5px;
     border-radius: 10px;
+    transition: 0.2s;
 }
+.calendarCtrlBtns:hover{background: #1875ab;}
+.calendarCtrlBtns:active{background: #135b85;}
+.calendarCtrlBtns.green{background: #017c3a;}
+.calendarCtrlBtns.green:hover{background: #00632e;}
+.calendarCtrlBtns.green:active{background: #004d24;}
+.calendarCtrlBtns.red{background: #b94d37;}
+.calendarCtrlBtns.red:hover{background: #953c2a;}
+.calendarCtrlBtns.red:active{background: #8c3828;}
+.calendarCtrlBtns.black{background: #797979;}
+.calendarCtrlBtns.black:hover{background: #5f5f5f;}
+.calendarCtrlBtns.black:active{background: #444444;}
+
 .calendarLabel{
     margin: 0 40px;
     font-size:25px;
@@ -746,6 +915,13 @@ h3,p{margin: 0;}
     margin:5px 0;
 }
 .dayScheds h4,.dayScheds p{margin: 0;}
+.dayScheds h4 span.conflict{background: #e67523;
+width: 15px;
+height: 15px;
+display: inline-block;
+border-radius: 50%;
+text-align: center;
+font-size: 12px;}
 .dayScheds p{font-size: 14px;}
 .dayScheds .color{
     margin: 5px -5px 0 -5px;
@@ -823,9 +999,6 @@ h3,p{margin: 0;}
     align-items: center;
     gap: 10px;
     grid-template-columns: 2fr 3fr 2fr 3fr;
-}
-.setScheduleModalInputs input:first-of-type{
-    grid-column: 2/5;
 }
 
 .setScheduleModalInputs input,.setScheduleModalInputs textarea{
@@ -1060,6 +1233,8 @@ h3,p{margin: 0;}
 .employee_view{
     margin-top:20px;
     border:1px solid #ccc;
+    max-height: 300px !important;
+    overflow-y: scroll;
 }
 
 
@@ -1087,7 +1262,7 @@ h3,p{margin: 0;}
 
 .employee_item:not(:first-child) .employee_scheduler_item:first-child{
     display: flex;
-    align-items: center;
+    align-items: flex-start ;
     font-weight: 600;
     line-height: 25px;
 }
@@ -1104,14 +1279,189 @@ h3,p{margin: 0;}
     color: #777;
 }
 
-.employee_scheduler_item h4 small{
-    color: #fff;
-    background: #2095db;
-    padding: 3px;
-    border-radius: 20px;
-    margin: 3px;
+.employee_scheduler_item h4{
+    line-height: 100%;
+    margin: 0;
 }
 
+.employee_scheduler_item h4 small{
+    padding: 3px 8px;
+    margin: 7px 0 0;
+    display: block;
+    color: #000;
+    font-size: 14px;
+    width: max-content;
+    border-radius: 0 20px 20px 0;
+}   
+
+.unclickable{opacity: 0.7;}
+
+
+.requestsModal{
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    background: rgb(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
+}
+.requestsModalBox{
+    background: #fff;
+    width:100%;
+    max-width: 600px;
+    border-radius: 20px;
+}
+.requestsModalHeader{
+    padding: 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2095db;
+    border-bottom: 2px solid #19638e;
+    border-radius: 20px 20px 0 0;
+    color: #fff;
+}
+
+.requestsModalHeader button{
+    background: #19638e;
+    border: none;
+    color: #fff;
+    border-radius:5px;
+    padding: 10px;
+    transition: 0.4s;
+}
+.requestsModalBody{padding: 20px;}
+.requestsModalBody .requestsCtrl{margin-bottom: 20px;}
+.requestsModalBody .requestsCtrl button{
+    border: 1px solid #2095db;
+    background: #fff;
+    color: #2095db;
+    margin: 3px;
+    padding: 5px 7px;
+    border-radius: 20px;
+    transition: 0.4s;
+}
+
+.requestsModalBody .requestsCtrl button:hover,.requestsModalBody .requestsCtrl button.active{
+    color: #fff;
+    background: #2095db;
+}
+
+.requestsModalBody .requestsCtrl button:active{background: #19638e;}
+
+.requestsItem{
+    padding: 15px;
+    background: #eee;
+    border: 1px solid #dcdcdc;
+    /* border-bottom: 2px solid #aaa; */
+    border-radius: 10px;
+    margin: 5px 0;
+    font-size: 15px;
+}
+
+.requestsItemGrid{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:5px;
+    overflow: hidden;
+    transition: 0.4s;
+    height: 0;
+}
+.requestsItem.open .requestsItemGrid{
+    margin-top:10px;
+}
+
+.requestsItemGrid .full{grid-column: 1/4;}
+.requestsItemGrid .left{grid-column: 1/3;}
+.requestsItemGrid .right{grid-column: 2/4;}
+
+.requestsItemGrid > div{
+    padding: 3px;
+}
+
+.requestsItemGrid small{
+    display: block;
+    font-size: 12px;
+    color:#2095db;
+    margin-bottom: 3px;
+    font-weight: 700;
+}
+
+.requestsItem h3 small{
+    color: #2095db;
+    font-weight: 400;
+    font-size: 14px;
+    vertical-align: middle;
+    display: inline-block;
+    margin-left: 10px;
+    transition: 0.4s;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 1;
+}
+
+.requestsItem.open h3 small{opacity: 0;}
+
+.requestsItem h3 button{quotes: none;float:right;display: inline-block;transition: 0.4s;border:none}
+.requestsItem h3 button:hover{background: transparent;}
+.requestsItem.open h3 button{transform: scaleY(-1);}
+.requestsItemFooter{padding: 10px 0 5px;}
+.requestsItemFooter button{
+    background: #017c3a;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: inset 0 -3px 3px rgb(0,0,0,0.3);
+    margin: 3px;
+    transition: 0.2s;
+}
+
+
+.requestsItemFooter button:active{
+    box-shadow: inset 0 3px 3px rgb(0,0,0,0.3);
+    filter: brightness(75%);
+}
+
+.requestsItemFooter button:last-child{
+    background: #ab2828;
+}
+
+.emptyInput{box-shadow: 0 0 5px #f00;}
+
+.scheduler_ctrl2{
+    justify-content: center;
+    width: 100%;
+    display: flex;
+}
+
+.scheduler_ctrl2 > div{display: flex;align-items: center;}
+
+
+.notCurrentBranch{
+    border:1px solid #eee;
+    color:#555;
+}
+
+.notCurrentBranch .color{
+    height: 2px;
+    filter: grayscale(100%);
+}
+
+.notCurrentBranchIndicator{
+    font-size: 11px;
+    background: #555;
+    color: #fff;
+    padding: 3px;
+    display: block;
+    margin: 10px 0;
+}
 
 </style>
 

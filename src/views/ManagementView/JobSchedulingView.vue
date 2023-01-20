@@ -1,11 +1,12 @@
 <template>
     <LayoutView>
-        <AppointView>
+        <AppointView :facilityId=facilitychoosen>
 
         </AppointView>
     </LayoutView>
 </template>
 <script>
+import { lStore } from "../../functions";
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
 import AppointView from "../../views/SharedLayoutView/Scheduler.vue"
 
@@ -14,6 +15,11 @@ export default ({
     components: {
     LayoutView
     },
+    data(){
+        return{
+            facilitychoosen: lStore.get('selected_facilityId'),
+        }
+    }
 })
 </script>
 <style scoped>

@@ -160,10 +160,10 @@
                                             <div>
                                                 <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#" :data-id="ass.id" v-if="(ass.time_in == null || ass.time_in == '')" data-toggle="modal" data-target="#addClockinModalForm">Add Clockin</a>
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addClockinModalForm" v-else>Edit Clockin</a>
-                                                    <a class="dropdown-item" href="#" v-if="(ass.time_out == null || ass.time_out == '')" data-toggle="modal" data-target="#addClockoutModalForm">Add Clockout</a>
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addClockoutModalForm" v-else>Edit Clockout</a>
+                                                    <a class="dropdown-item addclockin" :data-userid="ass.user_id" :data-scheduleid="sched.id" href="#" v-if="(ass.time_in == null || ass.time_in == '')" data-toggle="modal" data-target="#addClockinModalForm" @click="AddClockin">Add Clockin</a>
+                                                    <a class="dropdown-item addclockin" :id="ass.id" href="#" @click="AddClockin" data-toggle="modal" data-target="#addClockinModalForm" v-else>Edit Clockin</a>
+                                                    <a class="dropdown-item addclockout" :id="ass.id" href="#" @click="AddClockout" v-if="(ass.time_out == null || ass.time_out == '')" data-toggle="modal" data-target="#addClockoutModalForm">Add Clockout</a>
+                                                    <a class="dropdown-item addclockout" :id="ass.id" href="#" @click="AddClockout" data-toggle="modal" data-target="#addClockoutModalForm" v-else>Edit Clockout</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -174,11 +174,11 @@
                     </div>
                 </div>
             </div>
-    </div>
+        </div>
     </LayoutView>
 </template>
 <script>
-import { lStore,axios,QueryBuilder, formatDateString } from '../../functions';
+// import { lStore,axios,QueryBuilder, formatDateString } from '../../functions';
 import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { objectToString } from '@vue/shared';
@@ -326,7 +326,7 @@ export default({
                 }
                 else
                 {
-                    axios.post("timerecord/create",null,{time_in : this.clockintime, user_id : this.timerecorduser_id,schedule_id : this.timerecordsched}).then(res=>{
+                    axios.post("timerecord/create",null,{time_in : this.datetoday + " " + this.clockintime, user_id : this.timerecorduser_id,schedule_id : this.timerecordsched}).then(res=>{
                         if(res.data.success)
                         {
                             this.callToaster("toast-top-right",1);

@@ -3,7 +3,7 @@
         <div class="toast" >
 
         </div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <!-- <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -20,6 +20,30 @@
                     <div class="modal-footer">
                         <button type="button" @click="clearVariable" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger btn-pill" @click="DeleteBranch(branchid)" data-dismiss="modal">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <img v-if="branchimg != 'https://www.4angelshc.com/mobile/filesystem/'" :src = "branchimg" class="img-fluid" alt="Avatar Image">
+                        <img v-else src="../../assets/building.jpg" class="img-fluid" alt="Avatar Image">
+                        <div class="mt-3">
+                            Facility Name:<h5 class="text-primary"> {{ branchname }}</h5>
+                            <div class="mt-3">
+                                Address:<p class="text-primary"> {{ branchloc }}</p>
+                            </div>
+                        </div>
+                        <!-- <div class="mt-3">
+                            No of Employees:<h5 class="text-primary"> {{ }}</h5>
+                        </div> -->
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" @click="clearVariable" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
+                        <button type="button" data-toggle="modal" data-target="#modal-edit-contact" @click="EditBranch(branchid)" class="btn btn-primary btn-pill" data-dismiss="modal">Edit</button>
                     </div>
                 </div>
             </div>
@@ -126,7 +150,7 @@
         <!--Modal-->
         <div class="breadcrumb-wrapper breadcrumb-contacts">
             <div>
-                <h1>Facilities</h1>
+                <h1>Facilities to Manage</h1>
 
             
                 <nav aria-label="breadcrumb">
@@ -145,7 +169,7 @@
                     <input class="form-control" type="search" v-model="searchkey" placeholder="Search" aria-label="Search">
                     <button class="btn btn-success my-2 my-sm-0" @click="SearchFacilities" type="submit"><span class="mdi mdi-magnify"></span></button>
                 </div>
-                <button type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Facility
+                <button v-if="permi == '1'" type="button" class="btn btn-primary" @click="clearVariable" data-toggle="modal" data-target="#modal-add-contact"> Add Facility
                 </button>
             </div>
         </div>
@@ -159,19 +183,21 @@
                         </button>
 
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item" data-toggle="modal" data-target="#exampleModal" @click="DelBranch(a.id)" href="#">Delete</a>
-                            <a class="dropdown-item" data-toggle="modal" data-target="#modal-edit-contact" @click="EditBranch(a.id)" href="#">Edit</a>
+                            <!-- <a class="dropdown-item" data-toggle="modal" data-target="#exampleModal1" @click="DelBranch(a.facility_id)" href="#">Delete</a> -->
+                            <a class="dropdown-item" data-toggle="modal" data-target="#exampleModal" @click="ViewBranch(a.facility_id)" href="#">View</a>
+                            <a class="dropdown-item" data-toggle="modal" data-target="#modal-edit-contact" @click="EditBranch(a.facility_id)" href="#">Edit</a>
                         </div>
                     </div>
-                    <a href="#" class="media text-secondary" @click="Viewbranchemployee(a.id)" >
-                        <img :src = "a.branch_img" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                    <a href="#" class="media text-secondary" @click="SelectedBranch(a.facility_name,a.facility_id)" >
+                        <img v-if="a.facility_image != 'https://www.4angelshc.com/mobile/filesystem/'" :src = "a.facility_image" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                        <img v-else src="../../assets/building.jpg" class="mr-3 img-fluid rounded" alt="Avatar Image">
                         <div class="media-body">
-                        <h5 class="mt-0 mb-2 text-dark">{{a.name}}</h5>
+                        <h5 class="mt-0 mb-2 text-dark">{{a.facility_name}}</h5>
 
                         <ul class="list-unstyled">
                             <li class="d-flex mb-1">
                             <i class="mdi mdi-map mr-1"></i>
-                            <span>{{a.location}}</span>
+                            <span>{{a.facility_location}}</span>
                             </li>
                         </ul>
                         </div>
@@ -204,17 +230,26 @@ export default ({
             branches: [],
             branchname: "",
             branchloc: "",
+            permi: "",
             branchid: "",
+            branchimg: "",
             search: "",
             uploading: {},
             filesrc: "",
             searchkey: "",
             long: "",
             lat: "",
-            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA'
+            employee: "",
+            mapToken: 'pk.eyJ1Ijoic3BlZWR5cmVwYWlyIiwiYSI6ImNsNWg4cGlzaDA3NTYzZHFxdm1iMTJ2cWQifQ.j_XBhRHLg-CcGzah7uepMA',
+            selected_facility:'',
         }
     },
     methods:{
+        SelectedBranch(data1,data2){
+            lStore.set('selected_facility',data1);
+            lStore.set('selected_facilityId',data2);
+            window.location.assign("/adminapp/dashboard");
+        },
         SearchFacilities()
         {
             axios.post("branches/search?from=name&s="+this.searchkey+"&batch=true").then(res=>{
@@ -228,10 +263,6 @@ export default ({
                 }
             });
         },
-        Viewbranchemployee(data){
-            lStore.set('branchidemp',data);
-            this.$router.replace('/branch/assignedemployee');
-        },
         fileType(filename){
             if(typeof filename != 'string') return;
             let fileSplit = filename.toLowerCase().split('.');
@@ -244,44 +275,61 @@ export default ({
             if(doc.includes(ext)) return 'document';
             return '';
         },
-        DelBranch(data){
-            this.branchid = data;
+        // DelBranch(data){
+        //     this.branchid = data;
 
-        },
-        DeleteBranch(data){
-            this.clearVariable();
-            if(data == "")
-            {
-                document.querySelector(".toast").id = "toaster";
-                this.callToaster("toast-top-right",2);
-            }
-            else
-            {
-                document.querySelector(".toast").id = "toaster";
-                axios.post("branches/delete?id="+data).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",3);
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-            }
-        },
+        // },
+        // DeleteBranch(data){
+        //     this.clearVariable();
+        //     if(data == "")
+        //     {
+        //         document.querySelector(".toast").id = "toaster";
+        //         this.callToaster("toast-top-right",2);
+        //     }
+        //     else
+        //     {
+        //         document.querySelector(".toast").id = "toaster";
+        //         axios.post("branches/delete?id="+data).catch(res=>{
+        //             this.callToaster("toast-top-right",2);
+        //         }).then(res=>{
+        //             if(res.data.success)
+        //             {
+        //                 this.callToaster("toast-top-right",3);
+        //                 setTimeout(() => {
+        //                     this.$router.go(0);
+        //                 }, 2000);
+        //             }
+        //             else
+        //             {
+        //                 this.callToaster("toast-top-right",2);
+        //             }
+        //         });
+        //     }
+        // },
         EditBranch(data){
+            this.clearVariable();
             axios.post("branches?id="+data).catch(res=>{
 
             }).then(res=>{
-                this.branchname = res.data.result.name;
-                this.branchloc = res.data.result.location;
+                this.branchname = res.data.result.facility_name;
+                this.branchloc = res.data.result.facility_location;
                 this.branchid = data;
+                this.long = res.data.result.facility_location_long;
+                this.lat = res.data.result.facility_location_lat;
+            });
+        },
+        ViewBranch(data){
+            this.clearVariable();
+            axios.post("branches?id="+data).catch(res=>{
+
+            }).then(res=>{
+                this.branchname = res.data.result.facility_name;
+                this.branchloc = res.data.result.facility_location;
+                this.branchid = data;
+                this.long = res.data.result.facility_location_long;
+                this.lat = res.data.result.facility_location_lat;
+                this.branchimg = res.data.result.facility_image;
+                console.log(res.data.result.facility_image)
             });
         },
         SaveBranch(data){
@@ -291,18 +339,25 @@ export default ({
                 document.querySelector(".feedback6").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
                 if( document.getElementById("uploadFile1").files.length == 0 ){
-                    axios.post("branches/create",null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
+                    axios.post("branches/create",null,{facility_name: this.branchname,facility_location_long: this.long,facility_location_lat: this.lat, facility_location: this.branchloc,facility_image: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
                         if(res.data.success)
                         {
-                            this.clearVariable();
-                            this.callToaster("toast-top-right",1);
-                            document.querySelector("#modal-add-contact").style.display = "none";
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
+                            let facilityid = res.data.result.facility_id;
+                            let userid = lStore.get("users_id");
+                            axios.post("branches/createpermit",null,{permission_facility_id: facilityid,permission_user_id: userid}).catch(ress=>{
+                                this.clearVariable();
+                                this.callToaster("toast-top-right",2);
+                            }).then(ress=>{
+                                this.clearVariable();
+                                this.callToaster("toast-top-right",1);
+                                document.querySelector("#modal-add-contact").style.display = "none";
+                                setTimeout(() => {
+                                    this.$router.go(0);
+                                }, 2000);
+                            })
                         }
                         else
                         {
@@ -321,24 +376,33 @@ export default ({
                     this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
                 }}).catch(ress=>{
                     console.log(ress.data);
+                    console.log('aw2');
                 }).then(ress=>{
                     console.log(ress.data);
                     if(!ress.data.success){
                         alert('Error Uploading File!');
+                        return;
                     }
                     this.filesrc = ress.data.file_name;
-                    axios.post("branches/create",null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc,branch_img: "https://www.4angelshc.com/mobile/filesystem/"+ this.filesrc}).catch(res=>{
+                    axios.post("branches/create",null,{facility_name: this.branchname,facility_location_long: this.long,facility_location_lat: this.lat, facility_location: this.branchloc,facility_image: "https://www.4angelshc.com/mobile/filesystem/"+ this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
                         if(res.data.success)
                         {
-                            this.clearVariable();
-                            this.callToaster("toast-top-right",1);
-                            document.querySelector("#modal-add-contact").style.display = "none";
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
+                            let facilityid = res.data.result.facility_id;
+                            let userid = lStore.get("users_id");
+                            axios.post("branches/createpermit",null,{permission_facility_id: facilityid,permission_user_id: userid}).catch(ress=>{
+                                this.clearVariable();
+                                this.callToaster("toast-top-right",2);
+                            }).then(ress=>{
+                                this.clearVariable();
+                                this.callToaster("toast-top-right",1);
+                                document.querySelector("#modal-add-contact").style.display = "none";
+                                setTimeout(() => {
+                                    this.$router.go(0);
+                                }, 2000);
+                            })
                         }
                         else
                         {
@@ -354,11 +418,10 @@ export default ({
                 document.querySelector(".feedback3").style.display = "none";
                 document.querySelector(".toast").id = "toaster";
                  if( document.getElementById("uploadFile2").files.length == 0 ){
-                    axios.post("branches/update?id="+data,null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc, created_at: ""}).catch(res=>{
+                    axios.post("branches/update?id="+data,null,{facility_name: this.branchname,facility_location_long: this.long,facility_location_lat: this.lat, facility_location: this.branchloc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
-                        console.log(this.branchname)
                         if(res.data.success)
                         {
                             this.clearVariable();
@@ -391,10 +454,11 @@ export default ({
                         alert('Error Uploading File!');
                     }
                     this.filesrc = ress.data.file_name;
-                    axios.post("branches/update?id="+data,null,{name: this.branchname,location_long: this.long,location_lat: this.lat, location: this.branchloc, created_at: "",branch_img: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
+                    axios.post("branches/update?id="+data,null,{facility_name: this.branchname,facility_location_long: this.long,facility_location_lat: this.lat, facility_location: this.branchloc,facility_image: "https://www.4angelshc.com/mobile/filesystem/"+this.filesrc}).catch(res=>{
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
+                        console.log(res.data);
                         if(res.data.success)
                         {
                             this.clearVariable();
@@ -417,7 +481,7 @@ export default ({
             var val = 0;
             if(this.branchname == "" && data == 2)
             {
-                document.querySelector(".feedback2").textContent = "Branch name is required!";
+                document.querySelector(".feedback2").textContent = "Facility name is required!";
                 document.querySelector(".feedback2").style.display = "block";
                 val = 1;
             }
@@ -428,7 +492,7 @@ export default ({
             }
             if(this.branchname == "" && data == 1)
             {
-                document.querySelector(".feedback5").textContent = "Branch name is required!";
+                document.querySelector(".feedback5").textContent = "Facility name is required!";
                 document.querySelector(".feedback5").style.display = "block";
                 val = 1;
             }
@@ -439,7 +503,7 @@ export default ({
             }
             if(this.branchloc == "" && data == 1)
             {
-                document.querySelector(".feedback6").textContent = "Branch name is required!";
+                document.querySelector(".feedback6").textContent = "Facility name is required!";
                 document.querySelector(".feedback6").style.display = "block";
                 val = 1;
             }
@@ -450,7 +514,7 @@ export default ({
             }
             if(this.branchloc == "" && data == 2)
             {
-                document.querySelector(".feedback3").textContent = "Location is required!";
+                document.querySelector(".feedback3").textContent = "Facility location is required!";
                 document.querySelector(".feedback3").style.display = "block";
                 val = 1;
             }
@@ -514,17 +578,19 @@ export default ({
            this.filesrc = "";
            this.long = "";
            this.lat = "";
+           this.branchimg = "";
         }
     },
     mounted() {
         //mapbox Start
+        let permiss = lStore.get('users_info')
+        this.permi = permiss.users_permission_status;
         mapboxgl.accessToken = this.mapToken;
 
         const geocoder1 = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
         });
-        console.log(geocoder1);
         const geocoder2 = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
@@ -539,14 +605,12 @@ export default ({
         });
 
         geocoder1.on('result', e => {
-            console.log(e);
             this.branchloc = e.result.place_name;
             this.long = e.result.center[0];
             this.lat = e.result.center[1];
         });
 
         geocoder2.on('result', e => {
-            console.log(e);
             this.branchloc = e.result.place_name;
             this.long = e.result.center[0];
             this.lat = e.result.center[1];
@@ -558,7 +622,23 @@ export default ({
 
         }).then(res=>{
             if(res.data.success){
-                this.branches = res.data.result;
+                let br = res.data.result;
+                let obj = {};
+                axios.post("branches/viewpermit?_batch=true").catch(ress=>{
+
+                }).then(ress=>{
+                    br.forEach(element => {
+                        ress.data.result.forEach(el => {
+                            if(element.facility_id == el.permission_facility_id && el.permission_user_id == lStore.get('users_id'))
+                            {
+                                obj = JSON.parse(JSON.stringify(element));
+                                this.branches.push(obj);
+                                console.log(this.branches);
+                            }
+                        });
+                    });
+                });
+                console.log(this.branches);
                 document.querySelector(".textcenter").style.display = "none";
             }
             else{
@@ -582,7 +662,7 @@ export default ({
 }
 .img-fluid{
     width: 100px;
-    height: 100px !important;
+    height: 100px;
 }
 .btn-dots-icon
 {
@@ -590,5 +670,9 @@ export default ({
     top: -26px;
     right: -8px;
     font-size: 25px;
+}
+.modal-body .img-fluid{
+    width: 100%;
+    height: auto;
 }
 </style>

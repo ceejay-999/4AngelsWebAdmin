@@ -43,19 +43,18 @@ export default({
   name: 'LoginPage',
   data() {
       return{
-          loginInput: "",
-          password: "",
+        loginInput: "",
+        password: "",
       };
   },
   methods: {
     login(){
       document.querySelector(".toast").id = "toaster";
-      // console.log('aw');
       let rules = {password:{isRequired:true}};
       let input = {password:this.password};
-      rules.email = {isRequired:true,callback:()=>{this.callToaster("toast-top-right",4)}};
+      rules.email = {isRequired:true};
       input.email = this.loginInput;
-      rules.callback = ()=>{this.callToaster("toast-top-right",5)};
+      rules.email.callback = ()=>{this.callToaster("toast-top-right",5)};
       const valid = validateForm(input,rules);
         if(!valid.allValid) return;
 
@@ -67,33 +66,48 @@ export default({
         }).catch(err=>{
             this.callToaster("toast-top-right",5);
         }).then(res=>{
-            console.log(res.data);
-            if(res.data.msg === 'user not found')
+            if(res.data.success == false && res.data.msg === 'user not found')
             {
               this.callToaster("toast-top-right",6);
             }
-            if(res.data.msg == 'wrong password'){
+            else if(res.data.success == false && res.data.msg == 'wrong password'){
               this.callToaster("toast-top-right",6);
             }
-            if(res.data.success == true) {
-                if(res.data.result.role == "Admin"){
-                  lStore.set('user_id',res.data.result.id);
-                  lStore.set('user_token',res.data.token);
-                  lStore.set('user_info', res.data.result);
-                  this.callToaster("toast-top-right",1);
-                  this.$router.replace('/jobschedule');
-                }
-                else if(res.data.result.role == "Supervisor"){
-                  lStore.set('user_id',res.data.result.id);
-                  lStore.set('user_token',res.data.token);
-                  lStore.set('user_info', res.data.result);
-                  this.callToaster("toast-top-right",1);
-                  this.$router.replace('/jobschedule');
-                }
-                else
-                {
-                  this.callToaster("toast-top-right",6);
-                }
+            else if(res.data.success == true){
+              if(res.data.result.users_permission_status == 1)
+              {
+                lStore.remove('selected_facility');
+                lStore.set('users_id',res.data.result.users_id);
+                lStore.set('users_token',res.data.token);
+                lStore.set('users_info', res.data.result);
+                console.log(res.data.result);
+                this.callToaster("toast-top-right",1);
+                this.$router.replace('/dashboard');
+              }
+              if(res.data.result.users_permission_status == 2)
+              {
+                lStore.remove('selected_facility');
+                lStore.set('users_id',res.data.result.users_id);
+                lStore.set('users_token',res.data.token);
+                lStore.set('users_info', res.data.result);
+                console.log(res.data.result);
+                this.callToaster("toast-top-right",1);
+                this.$router.replace('/dashboard');
+              }
+              if(res.data.result.users_permission_status == 3)
+              {
+                lStore.remove('selected_facility');
+                lStore.set('users_id',res.data.result.users_id);
+                lStore.set('users_token',res.data.token);
+                lStore.set('users_info', res.data.result);
+                console.log(res.data.result);
+                this.callToaster("toast-top-right",1);
+                this.$router.replace('/dashboard');
+              }
+            }
+            else
+            {
+              this.callToaster("toast-top-right",2);
             }
       });
     },
@@ -120,23 +134,23 @@ export default({
                 {
                     toastr.success("Login successfully!", "Login Successfully!");
                 }
-                if(reserror == 2)
+                else if(reserror == 2)
                 {
                     toastr.error("Something went Wrong!", "Error!");
                 }
-                if(reserror == 3)
+                else if(reserror == 3)
                 {
                     toastr.error("Password must be more than 8 characters!", "Error!");
                 }
-                if(reserror == 4)
+                else if(reserror == 4)
                 {
                   toastr.error("Email must be in valid format!", "Error!");
                 }
-                if(reserror == 5)
+                else if(reserror == 5)
                 {
                   toastr.error("All fields are required!", "Error!");
                 }
-                if(reserror == 6)
+                else if(reserror == 6)
                 {
                   toastr.error("Username or password doesn`t match!","Error!");
                 }

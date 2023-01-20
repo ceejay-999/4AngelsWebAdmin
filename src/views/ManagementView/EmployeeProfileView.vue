@@ -19,7 +19,7 @@
                             <div class="form-group">
                                 <label>Reason</label>
                                 <textarea id="comments" class="form-control"></textarea>
-                                <div class="invalid-feedback feedback1">
+                                <div class="invalid-feedback feedback">
                                     
                                 </div>
                             </div>
@@ -112,12 +112,8 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Gender</label>
-                                <select class="form-control" id="gender">
-                                    <option value="">Please select gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
+                                <label>Birthdate</label>
+                                <input type="date" class="form-control" v-model="birthdate">
                                 <div class="invalid-feedback feedback5">
                                     
                                 </div>
@@ -127,14 +123,6 @@
                                 <label>Username</label>
                                 <input type="text" class="form-control" v-model="username" placeholder="Enter username">
                                 <div class="invalid-feedback feedback6">
-                                    
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Address</label>
-                                <div id="geocoder3"></div>
-                                <div class="invalid-feedback feedback7">
                                     
                                 </div>
                             </div>
@@ -174,7 +162,7 @@
                                 <label>Role</label>
                                 <select class="form-control" id="desss">
                                     <option value="">Please Select Role</option>
-                                    <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
+                                    <option v-for="desig in designation" :value="desig.role_id">{{desig.role_name}}</option>
                                 </select>
                                 <div class="invalid-feedback feedback14">
                                     
@@ -216,7 +204,7 @@
                                 <label>Facility</label>
                                 <select class="form-control" id="branchs">
                                     <option value="">Please Select Facilities</option>
-                                    <option v-for="br in branches" :value="br.id">{{br.name}}</option>
+                                    <option v-for="br in branches" :value="br.facility_id">{{br.facility_name}}</option>
                                 </select>
                                 <div class="invalid-feedback feedback9">
                                     
@@ -240,7 +228,7 @@
                                 <label>Role</label>
                                 <select class="form-control" id="dess">
                                     <option value="">Please Select Role</option>
-                                    <option v-for="desig in designation" :value="desig.id">{{desig.position}}</option>
+                                    <option v-for="desig in designation" :value="desig.role_id">{{desig.role_name}}</option>
                                 </select>
                                 <div class="invalid-feedback feedback11">
                                     
@@ -283,14 +271,15 @@
         </div>
         <div class="alert alert-danger" role="alert">
             Reason of Terminate: <br />
-            {{viewusers.comments}}
+            {{viewusers.employee_comment}}
         </div>  
         <div class="invoice-wrapper rounded border bg-white py-5 px-3 px-md-4 px-lg-5">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img :src="viewusers.profile_img" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-if="employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'" :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-else src="../../assets/users.png" class="mr-3 img-fluid rounded" alt="Avatar Image" />
                     <div>
-                        <h2 class="text-dark font-weight-medium">{{viewusers.firstname}} {{viewusers.lastname}}</h2>
+                        <h2 class="text-dark font-weight-medium">{{viewusers.employee_firstname}} {{viewusers.employee_lastname}}</h2>
                         <ul class="list-unstyled">
                         <li class="d-flex mb-1">
                         <i class="mdi mdi-map mr-1"></i>
@@ -299,7 +288,7 @@
 
                         <li class="d-flex mb-1">
                         <i class="mdi mdi-phone mr-1"></i>
-                        <span>{{viewusers.phonenumber}} | <i class="mdi mdi-email mr-1"></i> {{viewusers.email_address}}</span>
+                        <span>{{viewusers.employee_phonenumber}} | <i class="mdi mdi-email mr-1"></i> {{viewusers.employee_emailaddress}}</span>
                         </li>
                     </ul>
                     </div>
@@ -349,19 +338,16 @@
                                         <div class="card" v-for="r in usersroleb">
                                             <div class="card-header d-flex justify-content-between border-bottom" id="heading1">
                                                 <div class="p-4">
-                                                    {{r.name}}
+                                                    {{r.facility_name}}
                                                 </div>
                                                 <div>
-                                                    <a href="" data-toggle="modal" data-target="#EditRoleModalForm" @click="EditRoleInfo(r.branch_id)"><span class="mdi mdi-pencil"></span></a>
+                                                    <a href="" data-toggle="modal" data-target="#EditRoleModalForm" @click="EditRoleInfo(r.assigndesignation_id)"><span class="mdi mdi-pencil"></span></a>
                                                 </div>
                                             </div>
 
                                             <div id="collapse1" class="collapse show" aria-labelledby="heading1" data-parent="#accordion3">
                                                 <div class="card-body">
                                                     <div class="row">
-                                                        <div class="col-sm font-weight-bold">
-                                                        Access level
-                                                        </div>
                                                         <div class="col-sm font-weight-bold">
                                                         Role
                                                         </div>
@@ -371,13 +357,10 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm text-uppercase">
-                                                        {{viewusers.role}}
+                                                        {{r.role_name}}
                                                         </div>
                                                         <div class="col-sm text-uppercase">
-                                                        {{r.position}}
-                                                        </div>
-                                                        <div class="col-sm text-uppercase">
-                                                        ${{r.hourly_rate}}
+                                                        ${{r.assigndesignation_wagerate}}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -403,7 +386,7 @@
                                             Preferred Name:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.firstname}} {{viewusers.lastname}}
+                                            {{viewusers.employee_firstname}} {{viewusers.employee_lastname}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -411,7 +394,7 @@
                                             Personal Email:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.email_address}}
+                                            {{viewusers.employee_emailaddress}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -419,7 +402,7 @@
                                             Phone Number:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.phonenumber}}
+                                            {{viewusers.employee_phonenumber}}
                                             </div>
                                         </div>
                                     </div>
@@ -435,10 +418,10 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm font-weight-bold">
-                                            Gender:
+                                            Birthday:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.gender}}
+                                            {{viewusers.employee_birthday}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -446,15 +429,7 @@
                                             Username:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.username}}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm font-weight-bold">
-                                            Address:
-                                            </div>
-                                            <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.address}}
+                                            {{viewusers.employee_username}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -462,7 +437,7 @@
                                             Date Hired:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.date_hired}}
+                                            {{viewusers.employee_hiredate}}
                                             </div>
                                         </div>
                                     </div>
@@ -500,7 +475,7 @@ export default({
             gender: "",
             datehired: "",
             rate: "",
-            address: "",
+            birthdate: "",
             username: "",
             email: "",
             password: "",
@@ -528,9 +503,11 @@ export default({
     }).then(res=>{
         if(res.data.success){
             this.designation = res.data.result;
+            console.log('aw');
+            console.log(this.designation);
         }
     });
-    axios.post("branches?name="+this.search+"&_like=true&_batch=true").catch(res=>{
+    axios.post("branches?&_batch=true").catch(res=>{
 
     }).then(res=>{
             if(res.data.success){
@@ -561,15 +538,15 @@ export default({
             }
          });
 
-        geocoder3.on('result', e => {
-            console.log(e);
-            this.address = e.result.place_name;
-        });
+        // geocoder3.on('result', e => {
+        //     console.log(e);
+        //     this.address = e.result.place_name;
+        // });
 
-        geocoder4.on('result', e => {
-            console.log(e);
-            this.address = e.result.place_name;
-        });
+        // geocoder4.on('result', e => {
+        //     console.log(e);
+        //     this.address = e.result.place_name;
+        // });
         axios.post("designation?_batch=true").catch(res=>{
         }).then(res=>{
             if(res.data.success){
@@ -577,12 +554,11 @@ export default({
             }
         });
     this.viewusers = ""
-    axios.post("users?id="+lStore.get("userdetails")+"&_batch=true",null,{}).catch(res=>{
+    axios.post("employee?employee_id="+lStore.get("userdetails"),null,{}).catch(res=>{
             this.callToaster("toast-top-right",2);
         }).then(res=>{
-            res.data.result.forEach(el => {
-                this.viewusers = el;
-                if(this.viewusers.status == 0)
+                this.viewusers = res.data.result;
+                if(this.viewusers.employee_status == 0)
                 {
                     this.value = 0;
                 }
@@ -590,14 +566,14 @@ export default({
                 {
                     this.value = 1;
                 }
-                if(this.viewusers.comments == null && this.viewusers.status == 1 || this.viewusers.comments == "" && this.viewusers.status == 1)
+                if(this.viewusers.employee_comment == null && this.viewusers.employee_status == 1 || this.viewusers.employee_comment == "" && this.viewusers.employee_status == 1)
                 {
                   elementLoad('.alert').then(()=>{
                     document.querySelector(".alert").style.display = "block";
                     document.querySelector(".alert").textContent = "No reason added for the termination of this employee";
                   });
                 }
-                else if(this.viewusers.comments == null && this.viewusers.status == 0 || this.viewusers.comments == "" && this.viewusers.status == 0)
+                else if(this.viewusers.employee_comment == null && this.viewusers.employee_status == 0 || this.viewusers.employee_comment == "" && this.viewusers.employee_status == 0)
                 {
                   elementLoad('.alert').then(()=>{
                     document.querySelector(".alert").style.display = "none";
@@ -609,9 +585,8 @@ export default({
                   });
                 }
                 return;
-            });
         });
-    axios.post("userDesignations?user_id="+lStore.get("userdetails")+"&_joins=mobile_branches,mobile_designation&_on=mobile_userdesignations.branch_id=mobile_branches.id,mobile_userdesignations.designation_id=mobile_designation.id&_batch=true",null,{}).catch(res=>{
+    axios.post("userDesignations?assigndesignation_employeeid="+lStore.get("userdetails")+"&_joins=facility,role&_on=assigndesignation_facilityid=facility_id,assigndesignation_roleid=role_id&_batch=true",null,{}).catch(res=>{
         this.callToaster("toast-top-right",2);
     }).then(res=>{
         if(res.data.success == true)
@@ -633,7 +608,7 @@ export default({
             this.phonenumber = "";
             this.gender = "";
             this.datehired = "";
-            this.address = "";
+            this.birthdate = "";
             this.username = "";
             this.email = "";
             this.password = "";
@@ -650,7 +625,7 @@ export default({
             {
                 this.comments = "";
                 this.value = 0;
-                axios.post("users/update?id="+lStore.get("userdetails"),null,{status: 0, comments: this.comments}).catch(res=>{
+                axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_status: 0, employee_comment: this.comments}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
@@ -673,7 +648,7 @@ export default({
             {
                 this.comments = document.querySelector("#comments").value;
                 this.value = 1;
-                axios.post("users/update?id="+lStore.get("userdetails"),null,{status: 1, comments: this.comments}).catch(res=>{
+                axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_status: 1, employee_comment: this.comments}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
@@ -693,7 +668,7 @@ export default({
             }
         },
         EditRoleInfoSave(){
-            console.log('aw');            
+     
             document.querySelector('.feedback14').style.display = "none";
             document.querySelector('.feedback15').style.display = "none";
             let newRole={
@@ -718,12 +693,12 @@ export default({
             });
             if(valid.allValid)
             {
-                axios.post("userDesignations/update?user_id="+lStore.get("userdetails")+"&branch_id="+lStore.get("editrolebranchid"),null,{designation_id: newRole.roles,hourly_rate: newRole.rate}).catch(res=>{
+                console.log(document.querySelector('#dess').value);
+                axios.post("userDesignations/update?employeeid="+lStore.get("userdetails")+"&id="+lStore.get("editrolebranchid"),null,{assigndesignation_roleid:newRole.roles,assigndesignation_wagerate: newRole.rate}).catch(res=>{
 
                 }).then(res=>{
                     if(res.data.success)
-                    {
-                        console.log("aw");
+                    {   
                         this.callToaster("toast-top-right",1);
                         document.querySelector('#EditRoleModalForm').style.display = "none";
                         this.cleardata();
@@ -772,7 +747,7 @@ export default({
             });
             if(valid.allValid == true)
             {
-                axios.post("userDesignations/create",null,{branch_id: newRole.facility,designation_id: newRole.roles,hourly_rate: newRole.rate,user_id: lStore.get("userdetails")}).catch(res=>{
+                axios.post("userDesignations/create",null,{assigndesignation_facilityid: newRole.facility,assigndesignation_roleid: newRole.roles,assigndesignation_wagerate: newRole.rate,assigndesignation_employeeid: lStore.get("userdetails")}).catch(res=>{
 
                 }).then(res=>{
                     if(res.data.success)
@@ -796,51 +771,42 @@ export default({
         {
             document.querySelector('.feedback5').style.display = "none";
             document.querySelector('.feedback6').style.display = "none";
-            document.querySelector('.feedback7').style.display = "none";
             document.querySelector('.feedback8').style.display = "none";
             let newUser = {}
             if(document.getElementById('uploadFile1').files.length > 0)
             {
                 newUser = {
-                gender: document.querySelector("#gender").value,
-                username: this.username,
-                date_hired: this.datehired,
-                address: this.address,
-                file: document.getElementById('uploadFile1').files[0]
+                employee_username: this.username,
+                employee_hiredate: this.datehired,
+                employee_birthday: this.birthdate,
+                employee_profilepicture: document.getElementById('uploadFile1').files[0]
                 }
             }
             else
             {
                 newUser = {
-                gender: document.querySelector("#gender").value,
-                username: this.username,
-                date_hired: this.datehired,
-                address: this.address,
+                employee_username: this.username,
+                employee_hiredate: this.datehired,
+                employee_birthday: this.birthdate,
                 }
             }
 
             const valid = validateForm(newUser,{
-                gender:"required",
-                username:"required",
-                date_hired: "required",
-                address: "required",
+                employee_username:"required",
+                employee_hiredate: "required",
+                employee_birthday: "required",
                 callback: (a)=>{
-                    if(a == "gender")
-                    {
-                        document.querySelector('.feedback5').textContent = "Gender is required";
-                        document.querySelector('.feedback5').style.display = "block";
-                    }
-                    if(a == "username")
+                    if(a == "employee_username")
                     {
                         document.querySelector('.feedback6').textContent = "Username is required";
                         document.querySelector('.feedback6').style.display = "block";
                     }
-                    if(a == "address")
+                    if(a == "employee_birthday")
                     {
                         document.querySelector('.feedback7').textContent = "Address is required";
                         document.querySelector('.feedback7').style.display = "block";
                     }
-                    if(a == "date_hired")
+                    if(a == "employee_hiredate")
                     {
                         document.querySelector('.feedback8').textContent = "Date Hired is required";
                         document.querySelector('.feedback8').style.display = "block";
@@ -849,8 +815,7 @@ export default({
             });
             if(valid.allValid == true)
             {
-                this.gender = document.querySelector("#gender").value;
-                axios.post("users/update?id="+lStore.get("userdetails"),null,newUser).catch(res=>{
+                axios.post("employee/update?id="+lStore.get("userdetails"),null,newUser).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
@@ -878,16 +843,16 @@ export default({
             document.querySelector('.feedback3').style.display = "none";
             document.querySelector('.feedback4').style.display = "none";
             let newUser = {
-                firstname: this.firstname,
-                lastname: this.lastname,
-                email_address: this.email,
-                phonenumber: this.phonenumber
+                employee_firstname: this.firstname,
+                employee_lastname: this.lastname,
+                employee_emailaddress: this.email,
+                employee_phonenumber: this.phonenumber
             }
             const valid = validateForm(newUser,{
-                firstname:"required",
-                lastname:"required",
-                phonenumber: "required",
-                email_address: {
+                employee_firstname:"required",
+                employee_lastname:"required",
+                employee_phonenumber: "required",
+                employee_emailaddress: {
                     isEmail: true,
                     isRequired:true,
                     callback: res=>{
@@ -897,22 +862,22 @@ export default({
                     }
                 },
                 callback: (a)=>{
-                    if(a == "firstname")
+                    if(a == "employee_firstname")
                     {
                         document.querySelector('.feedback1').textContent = "Firstname is required";
                         document.querySelector('.feedback1').style.display = "block";
                     }
-                    if(a == "lastname")
+                    if(a == "employee_lastname")
                     {
                         document.querySelector('.feedback2').textContent = "Lastname is required";
                         document.querySelector('.feedback2').style.display = "block";
                     }
-                    if(a == "phonenumber")
+                    if(a == "employee_phonenumber")
                     {
                         document.querySelector('.feedback4').textContent = "Phone number is required";
                         document.querySelector('.feedback4').style.display = "block";
                     }
-                    if(a == "email_address")
+                    if(a == "employee_emailaddress")
                     {
                         document.querySelector('.feedback3').textContent = "Email is required";
                         document.querySelector('.feedback3').style.display = "block";
@@ -921,7 +886,7 @@ export default({
             });
             if(valid.allValid == true)
             {
-                axios.post("users/update?id="+lStore.get("userdetails"),null,{firstname: this.firstname,lastname: this.lastname,email_address: this.email, phonenumber: this.phonenumber}).catch(res=>{
+                axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_firstname: this.firstname,employee_lastname: this.lastname,employee_emailaddress: this.email, employee_phonenumber: this.phonenumber}).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
                     if(res.data.success)
@@ -942,29 +907,35 @@ export default({
             }
         },
         EditRoleInfo(data){
-            console.log(data);
-            axios.post("userDesignations?branch_id="+data+"&_joins=mobile_branches,mobile_designation&_on=mobile_userdesignations.branch_id=mobile_branches.id,mobile_userdesignations.designation_id=mobile_designation.id&_batch=true",null,{}).catch(res=>{
+            axios.post("userDesignations?assigndesignation_id="+data+"&_joins=facility,role&_on=assigndesignation_facilityid=facility_id,assigndesignation_roleid=role_id",null,{}).catch(res=>{
             }).then(res=>{
                 if(res.data.success == true)
                 {
-                    let arr = [];
-                    arr = res.data.result;
-                    arr.forEach(element => {
-                        if(element.branch_id == data)
-                        {
-                            this.editrole = {
-                                position: element.position,
-                                designation_id: element.designation_id,
-                                hourly_rate: element.hourly_rate,
-                            }
-                            lStore.set("editrolebranchid",data);
-                            var dessselected = document.getElementById('desss');
-                            dessselected.options[dessselected.selectedIndex].text = this.editrole.position;
-                            dessselected.options[dessselected.selectedIndex].value = this.editrole.designation_id;
-                            dessselected.options[dessselected.selectedIndex].disabled = true;
-                            this.rates = this.editrole.hourly_rate;
-                        }
-                    });
+                    // arr = res.data.result;
+                    // arr.forEach(element => {
+                    //     if(element.branch_id == data)
+                    //     {
+                    //         this.editrole = {
+                    //             position: element.position,
+                    //             designation_id: element.designation_id,
+                    //             hourly_rate: element.hourly_rate,
+                    //         }
+                    //         lStore.set("editrolebranchid",data);
+                    //         var dessselected = document.getElementById('desss');
+                    //         dessselected.options[dessselected.selectedIndex].text = this.editrole.position;
+                    //         dessselected.options[dessselected.selectedIndex].value = this.editrole.designation_id;
+                    //         dessselected.options[dessselected.selectedIndex].disabled = true;
+                    //         this.rates = this.editrole.hourly_rate;
+                    //     }
+                    // });
+                    lStore.set("editrolebranchid",data);
+                    var dessselected = document.getElementById('desss');
+                    this.editrole.position = res.data.result.role_name;
+                    dessselected.options[dessselected.selectedIndex].text = this.editrole.position;
+                    dessselected.options[dessselected.selectedIndex].value = this.editrole.designation_id;
+                    dessselected.options[dessselected.selectedIndex].disabled = true;
+                    this.editrole.hourly_rate = res.data.result.assigndesignation_wagerate;
+                    this.rates = this.editrole.hourly_rate
                 }
                 else
                 {
@@ -975,20 +946,20 @@ export default({
         },
         EditPersonalInfo(){
             this.cleardata();
-            var genderselected = document.getElementById('gender');
-            genderselected.options[genderselected.selectedIndex].text = this.viewusers.gender;
-            genderselected.options[genderselected.selectedIndex].value = this.viewusers.gender;
-            genderselected.options[genderselected.selectedIndex].disabled = true;
-            this.username = this.viewusers.username;
-            this.address = this.viewusers.address;
-            this.datehired = this.viewusers.date_hired;
+            // var genderselected = document.getElementById('gender');
+            // genderselected.options[genderselected.selectedIndex].text = this.viewusers.gender;
+            // genderselected.options[genderselected.selectedIndex].value = this.viewusers.gender;
+            // genderselected.options[genderselected.selectedIndex].disabled = true;
+            this.username = this.viewusers.employee_username;
+            this.birthdate = this.viewusers.employee_birthday;
+            this.datehired = this.viewusers.employee_hiredate;
         },
         EditcontactInfo(){
             this.cleardata();
-            this.firstname =  this.viewusers.firstname;
-            this.lastname = this.viewusers.lastname;
-            this.phonenumber = this.viewusers.phonenumber;
-            this.email = this.viewusers.email_address;
+            this.firstname =  this.viewusers.employee_firstname;
+            this.lastname = this.viewusers.employee_lastname;
+            this.phonenumber = this.viewusers.employee_phonenumber;
+            this.email = this.viewusers.employee_emailaddress;
             
         },
     EditEmployee(){
@@ -999,7 +970,7 @@ export default({
         this.phonenumber = this.viewusers.phonenumber;
         this.gender = this.viewusers.gender;
         this.datehired = this.viewusers.date_hired;
-        this.address = this.viewusers.address;
+        this.birthdate = this.viewusers.employee_birthday;
         this.username = this.viewusers.username;
         this.email = this.viewusers.email_address;
         this.userid = this.viewusers.user_id;
