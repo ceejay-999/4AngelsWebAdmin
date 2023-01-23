@@ -100,7 +100,6 @@ export default ({
             });
 
             setTimeout(()=>{
-                console.log(arr)
 
                 $('#hoverable-data-table').DataTable({
                     aLengthMenu: [[20, 30, 50, 75, -1], [20, 30, 50, 75, "All"]],

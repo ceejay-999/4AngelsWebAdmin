@@ -128,23 +128,24 @@
                                 </div>
                                 <div v-else>
                                     <div v-for="arr in assignschedules">
-                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status < 5 && arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() <= new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()">
+                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status == 6">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
                                                     <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() <= new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
+                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small> <!--If On Time-->
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
+                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) <= (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small>
 
-                                                    <small v-if="arr.assignschedules_timeout != ''">Clockout: {{ arr.assignschedules_timeout }}</small> 
-                                                    <small v-else>Clockin: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
+                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-else>Clockout: </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -166,23 +167,23 @@
                                                 </div>
                                             </div>
                                         </div><!--IF NO PROBLEM SA CLOCKIN-->
-                                        <div class="bd-callout mt-4 bd-callout-warning" v-if="arr.assignschedules_status < 5 && arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)">
+                                        <div class="bd-callout mt-4 bd-callout-warning" v-if="arr.assignschedules_status == 7">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
                                                     <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() <= new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
+                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small> <!--If On Time-->
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
+                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) <= (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_timeout != ''">Clockout: {{ arr.assignschedules_timeout }}</small> 
-                                                    <small v-else>Clockin: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small><!--if not yet Clocked In-->
+                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
+                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-else>Clockout: </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -204,23 +205,23 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status < 5 && arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)">
+                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status == 8">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
                                                     <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() <= new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
+                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
+                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) <= (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_timeout != ''">Clockout: {{ arr.assignschedules_timeout }}</small> 
-                                                    <small v-else>Clockin: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
+                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
+                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-else>Clockout: </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -242,23 +243,24 @@
                                                 </div>
                                             </div>
                                         </div><!--Missing Clock In-->
-                                        <div class="bd-callout mt-4 bd-callout-primary" v-if="arr.assignschedules_status < 5 && arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')).getTime() <= (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)">
+                                        <div class="bd-callout mt-4 bd-callout-primary" v-if="(arr.assignschedules_status < 5)">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
                                                     <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() <= new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
+                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
 
-                                                    <small v-if="arr.assignschedules_timein != null && new Date(arr.schedules_dates+' '+arr.assignschedules_timein).getTime() > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
-                                                    
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) > (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
 
-                                                    <small v-if="arr.assignschedules_timein == null && new Date(arr.schedules_dates+' '+new Date().toLocaleTimeString('zh-Hans-CN')) <= (new Date(arr.schedules_dates+' '+arr.schedules_timestart).getTime()+1*60000)" >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
+                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
 
-                                                    <small v-if="arr.assignschedules_timeout != ''">Clockout: {{ arr.assignschedules_timeout }}</small> 
-                                                    <small v-else>Clockin: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
+
+                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
+                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
+                                                    <small v-else>Clockout: </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -297,7 +299,7 @@
                                 </div>
                                 <div v-else>
                                     <div v-for="arr in assignschedules">
-                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout == '' || arr.assignschedules_status == 5 && arr.assignschedules_timeout == null">
+                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout == '' ||arr.assignschedules_status == 5 && arr.assignschedules_timein == '' || arr.assignschedules_status == 5 && arr.assignschedules_timeout == null ||arr.assignschedules_status == 5 && arr.assignschedules_timein == null ">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
@@ -328,7 +330,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout != '' && arr.assignschedules_timein != null || arr.assignschedules_status == 5 && arr.assignschedules_timeout != null && arr.assignschedules_timein != null">
+                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout != null && arr.assignschedules_timein != null">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
@@ -451,6 +453,10 @@ export default ({
             axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid&_batch=true").catch(res=>{
 
             }).then(res=>{
+                if(res.data.result == null)
+                {
+                    return;
+                }
                 if(res.data.success)
                 {
                     this.totalhoursb = 0;
@@ -462,7 +468,7 @@ export default ({
                         //first checking if ang data is karon nga date
                         if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString())
                         {
-                            console.log(new Date().toLocaleTimeString(),element.schedules_timeend+'|'+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime(), new Date().getTime());
+                            // console.log(new Date().toLocaleTimeString(),element.schedules_timeend+'|'+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime(), new Date().getTime());
                             if(new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             {
                                 element.assignschedules_status = 5;
@@ -519,7 +525,7 @@ export default ({
 
                                 regularHours = regularHours - (lateHours + underHours);
 
-                                console.log(regularHours,lateHours,underHours);
+                                // console.log(regularHours,lateHours,underHours);
 
                                 if(regularHours <= 0.5) regularHours = 0;
                                 if(clockTimeStart == null || clockTimeEnd == null)
@@ -607,6 +613,16 @@ export default ({
 
                                 });
                             }
+                            if(element.assignschedules_timein == null && new Date(element.schedules_dates+' '+new Date().toLocaleTimeString('en-US',{hour12:false,hour:'numeric',minute:'2-digit',second:'2-digit'})).getTime() > (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) && element.assignschedules_status != 2)
+                            {
+                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
+
+                                }).then(res=>{
+                                    return;
+                                });
+                            }
+
+
                             if(element.assignschedules_totalhours == null || element.assignschedules_totalwage == null)
                             {
                                 this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(0);
