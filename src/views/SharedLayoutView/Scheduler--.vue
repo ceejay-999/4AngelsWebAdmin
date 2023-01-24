@@ -1,5 +1,5 @@
 <script>
-import {dateFormat,formatDateString,axios,validateForm,elementLoad} from '../../functions';
+import {dateFormat,formatDateString,axios,validateForm} from '../../functions';
 
 export default({
     props:{
@@ -50,13 +50,7 @@ export default({
             employees:{},
             invalidInput:[],
             alertMsg:'',
-            editDisabled:false,
-            isSaving:false,
-            expanded:[],
-            employeeFilter:{
-                search:'',
-                byRole:[-1]
-            }
+            editDisabled:false
         }
     },
     mounted(){
@@ -67,10 +61,6 @@ export default({
         this.initScheduler();
 
         this.buildCalendar();
-
-        window.onscroll = ()=>{
-
-        }
         
     },
     computed:{
@@ -79,39 +69,11 @@ export default({
                 return el.role_name.toLowerCase().includes(this.searchDesignations.toLowerCase()) && !this.queSched.designation.includes(el.id);
             });
             return filtered;
-        },
-        filteredEmployees(){
-            let filtered = {};
-            for(let e in this.employees){
-                let el = this.employees[e];
-                let name1 = (el.employee_firstname+' '+el.employee_lastname).toLowerCase().includes(this.employeeFilter.search);
-                let name2 = (el.employee_lastname+' '+el.employee_firstname).toLowerCase().includes(this.employeeFilter.search);
-                if(((name1 || name2) || this.employeeFilter.search == '') && 
-                (this.employeeFilter.byRole.includes(el.assigndesignation_roleid) || this.employeeFilter.byRole[0] == -1)){
-                    filtered[e] = this.employees[e];
-                }
-            }
-            return filtered;
         }
     },
     methods:{
         dateFormat,
         formatDateString,
-        async getRelativeFoldHeight(index){
-            elementLoad('#'+index).then(el=>{
-                elementLoad('#'+index+ ' .dayScheds').then(()=>{
-                    let children = document.querySelectorAll('#'+index+ ' .dayScheds');
-                    if(children.length < 2) {el.style.maxHeight = "max-height";return;}
-                    let height = children[0].offsetHeight + children[1].offsetHeight + 10;
-                    document.getElementById(index).style.maxHeight = height+"px";
-                })
-            })
-            
-        },
-        toggleExpand(el){
-            if(!this.expanded.includes(el)) this.expanded.push(el);
-            else this.expanded.splice(this.expanded.indexOf(el),1);
-        },
         prepareEdit(ds){
             if(new Date(ds.shift_date+' '+ds.shift_start).getTime() <= new Date().getTime()) this.editDisabled = true;
             if(this.facilityId != ds.branch_id) this.editDisabled = true;
@@ -140,6 +102,7 @@ export default({
                 res.data.result.forEach(el=>{
                     this.employees[el.employee_id] = el;
                 });
+                
             });
 
             const processAssignedEmps = arr =>{
@@ -200,7 +163,6 @@ export default({
         isScheduleDone(ds){
             let date = new Date(ds.shift_date+' '+ds.shift_start).getTime();
             let ndate = new Date().getTime();
-            console.log(new Date(ds.shift_date+' '+ds.shift_start),new Date());
             return date <= ndate;
         },
         dropSched(e){
@@ -301,26 +263,23 @@ export default({
             })
             return match;
         },
-        checkConflicts(ds,empid,conflictId){
+        checkConflicts(dateString,ds){
+            let schedules = this.getDayScheds(dateString);
             let hasConflict = false;
 
-            setTimeout(()=>{
-                for(let s in this.schedules){
-                    let el = this.schedules[s];
-                    let startA = new Date(ds.shift_date+' '+ds.shift_start);
-                    let startB = new Date(el.shift_date+' '+el.shift_start);
-                    let endA = new Date(ds.shift_date+' '+ds.shift_end);
-                    let endB = new Date(el.shift_date+' '+el.shift_end);
-                    let assignedEmps = ds.assignedEmps.filter(el=>el.assigndesignation_employeeid==empid);
+            schedules.forEach(el=>{
+                let startA = new Date(ds.shift_date+' '+ds.shift_start);
+                let startB = new Date(el.shift_date+' '+el.shift_start);
+                let endA = new Date(ds.shift_date+' '+ds.shift_end);
+                let endB = new Date(el.shift_date+' '+el.shift_end);
 
-                    if(ds.id != el.id) 
-                        if((startA <= startB && endA > startB) || (startA >= startB && endB > startA))
-                            if(assignedEmps.length > 0)
-                                hasConflict = true;
-                }
+                if(ds.id != el.id) 
+                    if((startA <= startB && endA > startB) || (startA >= startB && endB > startA))
+                        if(ds.branch_id == el.branch_id && ds.designation == el.designation)
+                            hasConflict = true;
+            }); 
 
-                if(!hasConflict) document.getElementById(conflictId).style.display = "none";
-            },100)
+            return hasConflict;
         },
         setSchedule(){
             let q = this.queSched;
@@ -478,7 +437,6 @@ export default({
             
         },
         jumpToDate(e){
-            this.expanded = [];
             let date = new Date(e.target.value);
             this.currentCalendar.y = date.getFullYear();
             this.currentCalendar.m = date.getMonth();
@@ -486,7 +444,6 @@ export default({
             this.buildCalendar();
         },
         next(mos){
-            this.expanded = [];
             let cc = this.currentCalendar;
             let date = new Date(cc.y,cc.m,cc.d);
             date.setMonth(date.getMonth()+mos);
@@ -496,7 +453,6 @@ export default({
             this.buildCalendar();
         },
         nextDay(days){
-            this.expanded = [];
             let cc = this.currentCalendar;
             let date = new Date(cc.y,cc.m,cc.d);
             date.setDate(date.getDate()+days);
@@ -544,8 +500,6 @@ export default({
         saveChanges(){
             let created = [];
             let updated = [];
-            if(this.isSaving) return;
-            this.isSaving = true;
             
             const getAssignDesignationID = (arr,schedid)=>{
                 let assigned = [];
@@ -622,8 +576,7 @@ export default({
 </script>
 
 <template>
-<div class="scheduler_parent">
-    <div class="requestsModal" v-if="requestsModal.shown">
+<div class="requestsModal" v-if="requestsModal.shown">
     <div class="requestsModalBox">
         <div class="requestsModalHeader">
             <h3>Schedule Requests</h3>
@@ -679,6 +632,8 @@ export default({
             
         </div>
     </div>
+
+    
 </div>
 
 <div class="setScheduleModal" v-if="showSetSchedModal">
@@ -753,17 +708,11 @@ export default({
                 <li @click="viewMode = 'Week View';buildCalendar();">Week View</li>
             </ul>
         </div>
-    <button class="calendarCtrlBtns green" @click="saveChanges" :class="{saving:isSaving}">
-        {{!isSaving ? 'Save Changes':''}}
-
-        <i class="loading-dots" v-if="isSaving">
-            <i class="loading-dots-inner"></i>
-        </i>
-    </button>
+    <button class="calendarCtrlBtns green" @click="saveChanges">Save Changes</button>
 </div>
 
 
-<div class="scheduler_view" :class="{week:viewMode == 'Week View'}">
+<div class="scheduler_view">
     <div class="scheduler_item title">Sun</div>
     <div class="scheduler_item title">Mon</div>
     <div class="scheduler_item title">Tue</div>
@@ -772,80 +721,47 @@ export default({
     <div class="scheduler_item title">Fri</div>
     <div class="scheduler_item title">Sat</div>
 
-    <div class="scheduler_item" :class="{blank: c.dateNum == null,active:c.dateNum==currentCalendar.d,today:c.today===true}" v-for="c,ind in calendarBox" :key="c" @click="e=>(c.onclick() != null) ? c.onclick() : false" :data-dateString="c.dateString" @dragenter.prevent @dragover.prevent @drop="dropSched">
+    <div class="scheduler_item" :class="{blank: c.dateNum == null,active:c.dateNum==currentCalendar.d,today:c.today===true}" v-for="c in calendarBox" :key="c" @click="e=>(c.onclick() != null) ? c.onclick() : false" :data-dateString="c.dateString" @dragenter.prevent @dragover.prevent @drop="dropSched">
         <span class="dateNum" v-if="c.dateNum != null">{{c.dateNum}}</span>
         <div class="scheduler_item_actions"  v-if="c.dateNum != null && c.dateNum==currentCalendar.d">
             <img class="icon" @click="showSetSchedModal = true;resetQueSched();queSched.shift_date_end = queSched.shift_date = formatDateString(currentCalendar.y+'-'+(currentCalendar.m+1)+'-'+currentCalendar.d).replaceAll(' ','');" title="Add Schedule" src="../../assets/add-icon.svg"/>
+        </div>       
+        <div class="dayScheds" :class="{unclickable:isScheduleDone(ds),notCurrentBranch: facilityId != ds.branch_id}" draggable="true" v-for="ds,i in c.dayScheds" :key="i" :data-schedule="stringify(ds)" @click="prepareEdit(ds)" @dragstart="dragSched($event,ds)">
+            <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}} <span title="Conflicting schedules!" v-if="checkConflicts(c.dateString,ds)" class="conflict">!</span></h4>
+            <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
+                {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
+            </p>
+            <strong class="notCurrentBranchIndicator" v-if="facilityId != ds.branch_id">Branch: {{ds.branch_name}}</strong>
+            <div class="color" :style="'background:'+ds.color"></div>
         </div>
-        <div class="dayScheds_con" :id="'dayScheds_con_'+ind" :class="{expanded: expanded.includes('dayScheds_con_'+ind)}" :data-call="getRelativeFoldHeight('dayScheds_con_'+ind)">
-            <div class="dayScheds" :class="{unclickable:isScheduleDone(ds),notCurrentBranch: facilityId != ds.branch_id}" draggable="true" v-for="ds,i in c.dayScheds" :key="i" :data-schedule="stringify(ds)" @click="prepareEdit(ds)" @dragstart="dragSched($event,ds)">
-                <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}}
-                    <!-- <span title="Conflicting schedules!" v-if="checkConflicts(c.dateString,ds)" class="conflict">!</span> -->
-                </h4>
-                <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
-                    {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
-                </p>
-                <strong class="notCurrentBranchIndicator" v-if="facilityId != ds.branch_id">Branch: {{ds.branch_name}}</strong>
-                <div class="color" :style="'background:'+ds.color"></div>
-            </div>
-        </div> 
-        
-    {{c.text}}
-    <div @click="toggleExpand('dayScheds_con_'+ind)" v-if="c.dayScheds != null && c.dayScheds.length > 2" class="icon expand_icon" :class="{expanded: expanded.includes('dayScheds_con_'+ind)}">
-        <img src="../../assets/caret-down.svg"/> {{ !expanded.includes('dayScheds_con_'+ind) ? (c.dayScheds.length - 2) + ' more' : 'Collapse'}}
+    {{c.text}}</div>
+</div>
+<div class="employee_view" v-if="viewMode == 'Week View'">
+    <div class="employee_item">
+        <div class="employee_scheduler_item">
+            Employee
+        </div>
+        <div class="employee_scheduler_item" v-for="c in calendarBox" :key="c">{{daysOfWeek[new Date(c.dateString).getDay()]}} - {{c.dateNum}}</div>
+    </div>
+    <div class="employee_item" v-for="e,i in employees" :key="i">
+        <div class="employee_scheduler_item">
+            <h4>{{e.employee_firstname}} {{e.employee_lastname}} <small :style="{border: '2px solid '+e.role_color}">{{e.role_name}}</small></h4>
+        </div>
+        <div class="employee_scheduler_item" v-for="c in calendarBox" :key="c" :data-employee="i" @dragenter.prevent @dragover.prevent @drop="dropSchedToEmp($event,e.employee_id)">
+            <div class="dayScheds" :class="{unclickable:isScheduleDone(ds)}" draggable="true" v-for="ds,i in filteredDayScheds(c.dayScheds,i)" :key="i" :data-schedule="stringify(ds)" @dragstart="dragSched($event,ds)">
+                {{ds.status}}
+            <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}}</h4>
+            <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
+                {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
+            </p>
+            <a v-if="!isScheduleDone(ds)" href="javascript:;" @click="removeSchedFromEmp(ds.id,e.employee_id)">Remove (x)</a>
+            <div class="color" :style="'background:'+ds.color"></div>
+        </div>
+        </div>
     </div>
     
-    </div>
 </div>
-
-<div class="employee_view_cont" v-if="viewMode == 'Week View'">
-    <div class="employee_view_header">
-        <h4>Employees in this facility</h4>
-        <div class="employee_view_header_right">
-            <select id="designations_select" @change="e=>employeeFilter.byRole = [e.target.value]">
-                <option :value=[-1]>All</option>
-                <option v-for="d in designations" :value="d.role_id" :key="d.role_id">{{d.role_name}}</option>
-            </select>
-            <input v-model="employeeFilter.search" placeholder="Search Employee Name">
-
-        </div>
-    </div>
-    
-    <div class="employee_view">
-        <div class="employee_item">
-            <div class="employee_scheduler_item">
-                Employee
-            </div>
-            <div class="employee_scheduler_item" v-for="c in calendarBox" :key="c">{{daysOfWeek[new Date(c.dateString).getDay()]}} - {{c.dateNum}}</div>
-        </div>
-        <div class="employee_item" v-for="e,i in filteredEmployees" :key="i">
-            <div class="employee_scheduler_item">
-                <h4>{{e.employee_firstname}} {{e.employee_lastname}} <small :style="{border: '2px solid '+e.role_color}">{{e.role_name}}</small></h4>
-            </div>
-            <div class="employee_scheduler_item" v-for="c,ind in calendarBox" :key="c" :data-employee="i" @dragenter.prevent @dragover.prevent @drop="dropSchedToEmp($event,e.employee_id)">
-                <div class="dayScheds_con" :id="'dayScheds_con_emp_'+ind" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind)}" :data-call="getRelativeFoldHeight('dayScheds_con_emp_'+ind)">
-                    <div class="dayScheds" draggable="true" v-for="ds,i in filteredDayScheds(c.dayScheds,i)" :key="i" :data-schedule="stringify(ds)" @dragstart="dragSched($event,ds)" :class="{notCurrentBranch: facilityId != ds.branch_id}">
-                        {{ds.status}}
-                    <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}}
-                        <span :id="'conflict_'+ds.id+'_'+e.assigndesignation_employeeid" title="Conflicting schedules!" :data-call="checkConflicts(ds,e.employee_id,'conflict_'+ds.id+'_'+e.assigndesignation_employeeid)" class="conflict">!</span>
-                    </h4>
-                    <p>{{new Date(ds.shift_date+' '+ds.shift_start).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}} to 
-                        {{new Date(ds.shift_date+' '+ds.shift_end).toLocaleTimeString('en-US',{hour12:true,hour: '2-digit', minute: '2-digit'})}}
-                    </p>
-                    
-                    <a href="javascript:;" @click="prepareEdit(ds)">View / Edit</a>
-                    <a class="remove" v-if="!isScheduleDone(ds) && facilityId == ds.branch_id" href="javascript:;" @click="removeSchedFromEmp(ds.id,e.employee_id)">Remove (x)</a>
-                    <strong class="notCurrentBranchIndicator" v-if="facilityId != ds.branch_id">Branch: {{ds.branch_name}}</strong>
-                    <div class="color" :style="'background:'+ds.color"></div>
-                    </div>
-                </div>
-                <div @click="toggleExpand('dayScheds_con_emp_'+ind)" v-if="filteredDayScheds(c.dayScheds,i).length != null && filteredDayScheds(c.dayScheds,i).length > 2" class="icon expand_icon" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind)}">
-                    <img src="../../assets/caret-down.svg"/> {{ !expanded.includes('dayScheds_con_emp_'+ind) ? (filteredDayScheds(c.dayScheds,i).length - 2) + ' more' : 'Collapse'}}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="scheduleAlert" :class="{alertShow:alertMsg!=''}" v-html="alertMsg">
 </div>
 </template>
 
@@ -874,22 +790,14 @@ h3,p{margin: 0;}
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     border:1px solid #ccc;
     border-bottom: none;
-    
-}
-
-.scheduler_view.week{
-    resize: vertical;
-    overflow-y: auto;
-    grid-template-rows: 30px 1fr;
 }
 
 .scheduler_item{
     border-right:1px solid #ccc;
     border-bottom:1px solid #ccc;
+    min-height: 100px;
     position: relative;
     padding-bottom: 40px;
-    transition: 0.2s;
-    min-height: 100px;
 }
 
 .scheduler_item:nth-child(7n){border-right:none}
@@ -928,7 +836,6 @@ h3,p{margin: 0;}
     text-align: center;
     min-height: unset;
     padding: 5px;
-    max-height: 30px;
 }
 
 .scheduler_item_actions{
@@ -941,40 +848,17 @@ h3,p{margin: 0;}
     border-radius: 20px 0 0 0;
     border-right: none;
     border-bottom: none;
-    background: #fff;
-    z-index: 1;
 }
 
-
-
-.scheduler_item .icon, .employee_scheduler_item .icon{
+.scheduler_item .icon{
     width: 30px;
     display: block;
-    opacity: 0.8;
-    transition: 0.2s;
-}
-
-.scheduler_item .expand_icon.icon, .employee_scheduler_item .expand_icon.icon{
-    width: max-content;
-    margin: 20px auto -30px 10px;
-    box-shadow: 0 0 2px #000;
-    padding: 7px;
-    border-radius: 5px;
-    line-height: 100%;
-}
-
-.employee_scheduler_item .expand_icon.icon{
-    margin: 20px auto 10px 10px;
-}
-
-.scheduler_item .expand_icon.icon img, .employee_scheduler_item .expand_icon.icon img{object-fit: contain;width: 10px;vertical-align:middle;margin-bottom: 3px;margin-right: 5px;transition: 0.2s;transform: scale(1);}
-
-.scheduler_item .expand_icon.expanded img, .employee_scheduler_item .expand_icon.icon.expanded img{
-    transform: scale(-1);
+    opacity: 0.6;
+    transition: 0.4s;
 }
 
 .scheduler_item .icon:hover{
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 .scheduler_ctrl{
@@ -995,14 +879,9 @@ h3,p{margin: 0;}
     border-radius: 10px;
     transition: 0.2s;
 }
-
-.calendarCtrlBtns.saving{
-    opacity: 0.7;
-}
-
 .calendarCtrlBtns:hover{background: #1875ab;}
 .calendarCtrlBtns:active{background: #135b85;}
-.calendarCtrlBtns.green{background: #017c3a;min-width:130px}
+.calendarCtrlBtns.green{background: #017c3a;}
 .calendarCtrlBtns.green:hover{background: #00632e;}
 .calendarCtrlBtns.green:active{background: #004d24;}
 .calendarCtrlBtns.red{background: #b94d37;}
@@ -1028,16 +907,6 @@ h3,p{margin: 0;}
     margin-top: 7px;
     padding-top: 4px;
 }
-.dayScheds_con{
-    overflow: hidden;
-    transition: max-height 0.4s;
-    max-height: max-content;
-}
-
-
-.dayScheds_con.expanded,.employee_scheduler_item .dayScheds_con.expanded{
-    max-height: max-content !important;
-}
 
 .dayScheds{
     padding: 5px 5px 0;
@@ -1045,15 +914,14 @@ h3,p{margin: 0;}
     text-align: center;
     margin:5px 0;
 }
-.dayScheds h4,.dayScheds p{margin: 0;font-size:18px}
+.dayScheds h4,.dayScheds p{margin: 0;}
 .dayScheds h4 span.conflict{background: #e67523;
 width: 15px;
 height: 15px;
 display: inline-block;
 border-radius: 50%;
 text-align: center;
-font-size: 12px;
-line-height:15px}
+font-size: 12px;}
 .dayScheds p{font-size: 14px;}
 .dayScheds .color{
     margin: 5px -5px 0 -5px;
@@ -1362,35 +1230,10 @@ line-height:15px}
 }
 .maxEmpInput{margin-left: 20px;width: 50px;}
 
-.employee_view_cont{
-    margin:20px 0 0;
-}
-
-.employee_view_header{
-    margin: 0 0 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.employee_view_header_right{
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.employee_view_header_right input,select{
-    border: 1px solid #aaa;
-    background: #fff;
-    display: block;
-    padding: 9px;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-.employee_view_header_right .calendarCtrlBtns{margin-left: -5px;}
 .employee_view{
+    margin-top:20px;
     border:1px solid #ccc;
-    resize: vertical;
+    max-height: 300px !important;
     overflow-y: scroll;
 }
 
@@ -1429,24 +1272,12 @@ line-height:15px}
 }
 
 .employee_scheduler_item .dayScheds a{
-    font-size: 12px;
+    font-size: 14px;
     text-decoration: none;
     margin: 10px 0;
-    display: inline-block;
-    margin: 10px 5px 0;
-    background: #2095db;
-    color:#fff;
-    padding: 5px;
-    border-radius: 5px;
-    transition: 0.2s;
+    display: block;
+    color: #777;
 }
-
-.employee_scheduler_item .dayScheds a.remove{
-    background:#ab2828;
-}
-
-.employee_scheduler_item .dayScheds a:hover{background: #205e82}
-.employee_scheduler_item .dayScheds a.remove:hover{background: #812c2c}
 
 .employee_scheduler_item h4{
     line-height: 100%;
@@ -1455,7 +1286,7 @@ line-height:15px}
 
 .employee_scheduler_item h4 small{
     padding: 3px 8px;
-    margin: 7px 0 0 -10px;
+    margin: 7px 0 0;
     display: block;
     color: #000;
     font-size: 14px;
@@ -1631,19 +1462,6 @@ line-height:15px}
     display: block;
     margin: 10px 0;
 }
-
-.loading-dots{text-align:center;width:31px;display:inline-block}
-.loading-dots-inner{width:7px;height:7px;background:#fff;display:inline-block;border-radius:50%;position:relative;animation-name:loadingDot1;animation-duration: 1s;animation-iteration-count:infinite;animation-delay:0.33s}
-.loading-dots-inner::before{content:"";position:absolute;width:7px;height:7px;background:#fff;display:inline-block;border-radius:50%;left:-12px;animation-name:loadingDot1;animation-duration: 1s;animation-iteration-count:infinite;}
-.loading-dots-inner::after{content:"";position:absolute;width:7px;height:7px;background:#fff;display:inline-block;border-radius:50%;right:-12px;animation-name:loadingDot1;animation-duration: 1s;animation-iteration-count:infinite;animation-delay:0.66s}
-
-@keyframes loadingDot1{
-  0%{opacity:1;scale:0}
-  30%{scale:1;opacity:1}
-  50%{opacity:1}
-  100%{opacity:0;}
-}
-
 
 </style>
 

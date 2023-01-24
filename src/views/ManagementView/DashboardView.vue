@@ -448,6 +448,38 @@ export default ({
         }, 3000);
     },
     methods:{
+        startAndEnd(element){
+            let scheduleDate = element.schedules_dates;
+            let scheduleTimeStart = element.schedules_timestart;
+            let scheduleTimeEnd = element.schedules_timeend;
+            let clockTimeEnd = element.assignschedules_timeout;
+            let clockTimeStart = element.assignschedules_timein;
+
+            let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
+            let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
+            let clockStart = new Date(scheduleDate+' '+clockTimeStart);
+            let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
+            let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
+            scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
+
+            const dayHrs = 1000 * 60 * 60;
+
+            //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
+            if(schedEnd.getTime() < schedStart.getTime()) {
+                //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
+            if(clockStart.getTime() < clockEnd.getTime()){
+                clockStart.setDate(clockStart.getDate() + 1);
+            }
+
+            //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
+            if(clockEnd.getTime() < schedStart.getTime()) {
+                clockEnd.setDate(clockEnd.getDate() + 1);
+            }
+                schedEnd.setDate(schedEnd.getDate() + 1);
+            }
+            
+            return [schedStart,schedEnd,clockStart,clockEnd];
+            },
         cleardata(){
             this.assignschedid = "";
             this.assignschedclockin = "";
@@ -474,7 +506,7 @@ export default ({
                         {
                             // console.log('First Condition: '+new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             // console.log('Second Condition: '+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
-                            if(new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
+                            if(this.startAndEnd(element)[1].getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             {
                                 console.log('aw');
                                 element.assignschedules_status = 5;
@@ -551,7 +583,7 @@ export default ({
 
                                 });
                             }
-                            else if(new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
+                            else if(this.startAndEnd(element)[1].getTime() < new Date().getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
                             {
                                 element.assignschedules_status = 5;
                                 let scheduleDate = element.schedules_dates;
