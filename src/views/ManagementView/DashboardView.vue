@@ -163,6 +163,10 @@
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockin Selfie</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockin Location</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockout Selfie</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockout Location</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -468,9 +472,11 @@ export default ({
                         //first checking if ang data is karon nga date
                         if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString())
                         {
-                            // console.log(new Date().toLocaleTimeString(),element.schedules_timeend+'|'+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime(), new Date().getTime());
+                            // console.log('First Condition: '+new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
+                            // console.log('Second Condition: '+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
                             if(new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             {
+                                console.log('aw');
                                 element.assignschedules_status = 5;
                                 let scheduleDate = element.schedules_dates;
                                 let scheduleTimeStart = element.schedules_timestart;
@@ -615,7 +621,8 @@ export default ({
                             }
                             if(element.assignschedules_timein == null && new Date(element.schedules_dates+' '+new Date().toLocaleTimeString('en-US',{hour12:false,hour:'numeric',minute:'2-digit',second:'2-digit'})).getTime() > (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) && element.assignschedules_status != 2)
                             {
-                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
+                                
+                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8,assignschedules_totalhours: 0, assignschedules_totalwage: 0,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
 
                                 }).then(res=>{
                                     return;
@@ -628,8 +635,10 @@ export default ({
                                 this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(0);
                                 this.totalwageb = parseFloat(this.totalwageb) + parseFloat(0);
                             }
-                            this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(element.assignschedules_totalhours);
-                            this.totalwageb = parseFloat(this.totalwageb) + parseFloat(element.assignschedules_totalwage);
+                            else{
+                                this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(element.assignschedules_totalhours);
+                                this.totalwageb = parseFloat(this.totalwageb) + parseFloat(element.assignschedules_totalwage);
+                            }
                             this.assignschedules.push(element);
                         }
                     });
