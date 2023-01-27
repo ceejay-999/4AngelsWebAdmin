@@ -1,8 +1,17 @@
 <template>
     <LayoutView>
-        <AppointView :facilityId=facilitychoosen>
-
-        </AppointView>
+         <div class="row">
+            <div class="col-12">
+                <div class="card card-default">
+                    <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
+                        <h2>Requests</h2>
+                    </div>
+                    <div class="card-body">
+                        <AppointView :facilityId=facilitychoosen></AppointView>
+                    </div>
+                </div>
+            </div>
+         </div>
     </LayoutView>
 </template>
 <script>

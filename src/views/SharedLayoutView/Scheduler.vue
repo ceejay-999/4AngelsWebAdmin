@@ -1,5 +1,5 @@
 <script>
-import {dateFormat,formatDateString,axios,validateForm,elementLoad} from '../../functions';
+import {formatDateString,axios,validateForm,elementLoad, lStore} from '../../functions';
 
 export default({
     props:{
@@ -56,7 +56,8 @@ export default({
             employeeFilter:{
                 search:'',
                 byRole:[-1]
-            }
+            },
+            urlParams:null
         }
     },
     mounted(){
@@ -64,14 +65,25 @@ export default({
         this.currentCalendar.y = date.getFullYear();
         this.currentCalendar.m = date.getMonth();
         this.currentCalendar.d = date.getDate();
+        this.urlParams = new URLSearchParams(window.location.search);
+        if(this.urlParams.get('date') != null) this.jumpToDate(this.urlParams.get('date'))
+
         this.initScheduler();
 
         this.buildCalendar();
 
-        window.onscroll = ()=>{
 
-        }
         
+
+    },
+    watch:{
+        currentCalendar:{
+            handler(change){
+                let date = new Date(change.y,change.m,change.d)
+                document.getElementById('gotoDate').value = date.toLocaleDateString('zh-Hans-CN',{year:'numeric',month:'2-digit',day:'2-digit'}).replaceAll('/','-');
+            },
+            deep:true
+        }
     },
     computed:{
         filteredDesignations(){
@@ -95,8 +107,10 @@ export default({
         }
     },
     methods:{
-        dateFormat,
         formatDateString,
+        clickGoToDate(){
+            document.getElementById('gotoDate').dispatchEvent(new Event('click'))
+        },
         async getRelativeFoldHeight(index){
             elementLoad('#'+index).then(el=>{
                 elementLoad('#'+index+ ' .dayScheds').then(()=>{
@@ -133,7 +147,9 @@ export default({
             assigndesignation_facilityid=${this.facilityId}
             &_batch=true
             &_joins=employee,role
-            &_on=employee.employee_id=assigndesignation.assigndesignation_employeeid,role.role_id=assigndesignation.assigndesignation_roleid`)
+            &_on=
+            employee.employee_id=assigndesignation.assigndesignation_employeeid,
+            role.role_id=assigndesignation.assigndesignation_roleid`)
             .then(res=>{
                 // res.data = axios.decryptToJSON(res.data);
                 // if(!res.data) return;
@@ -173,6 +189,16 @@ export default({
                         color:el.role_color
                     };
                 });
+
+                if(this.urlParams.get('schedule') != null) {
+                    let scheduleSelected = this.schedules[this.urlParams.get('schedule')];
+                    if(scheduleSelected != null){
+                        this.jumpToDate(scheduleSelected.shift_date);
+                        this.prepareEdit(scheduleSelected);
+                    }
+                    
+                }
+                    
                 this.buildCalendar();
             });
         },
@@ -190,9 +216,9 @@ export default({
             try{
                 e.dataTransfer.setData('schedData',JSON.stringify(ds));
 
-                if(new Date(ds.shift_date+' '+ds.shift_start).getTime() <= new Date().getTime()){
-                    e.preventDefault();
-                }
+                // if(new Date(ds.shift_date+' '+ds.shift_start).getTime() <= new Date().getTime()){
+                    // e.preventDefault();
+                // }
             }catch(err){return;}
         },
         fetchEmps(){
@@ -200,7 +226,6 @@ export default({
         isScheduleDone(ds){
             let date = new Date(ds.shift_date+' '+ds.shift_start).getTime();
             let ndate = new Date().getTime();
-            console.log(new Date(ds.shift_date+' '+ds.shift_start),new Date());
             return date <= ndate;
         },
         dropSched(e){
@@ -311,15 +336,22 @@ export default({
                     let startB = new Date(el.shift_date+' '+el.shift_start);
                     let endA = new Date(ds.shift_date+' '+ds.shift_end);
                     let endB = new Date(el.shift_date+' '+el.shift_end);
-                    let assignedEmps = ds.assignedEmps.filter(el=>el.assigndesignation_employeeid==empid);
+                    let assignedEmps = [];
 
-                    if(ds.id != el.id) 
-                        if((startA <= startB && endA > startB) || (startA >= startB && endB > startA))
-                            if(assignedEmps.length > 0)
-                                hasConflict = true;
+
+                    if((startA <= startB && endA > startB) || (startA >= startB && endB > startA))
+                        if(ds.id != el.id)
+                            if(el.assignedEmps != null)
+                                assignedEmps = el.assignedEmps.filter(el2=>el2.id==empid);
+
+                    
+                    if(assignedEmps.length > 0){
+                        document.getElementById(conflictId).style.display = "inline-block";
+                        document.getElementById("conflict_"+el.id+'_'+empid).style.display = "inline-block";
+                    }
                 }
 
-                if(!hasConflict) document.getElementById(conflictId).style.display = "none";
+                
             },100)
         },
         setSchedule(){
@@ -364,7 +396,7 @@ export default({
                     if(q.repeatDays.length > 0 && q.repeatDays.includes(includedDate.getDay()) || q.repeatDays.length == 0 || i == 0){
                         let newSched = JSON.parse(JSON.stringify(q));
                         // replace 1008 with lStore.get('user_id') once connected
-                        newSched.id = (1008).toString(32)+'-'+new Date().getTime().toString(32)+'-'+j;
+                        newSched.id = (lStore.get('users_id')).toString(32)+'-'+new Date().getTime().toString(32)+'-'+j;
                         let opts = {year:'numeric',month:'2-digit',day: "2-digit"};
                         newSched.shift_date = includedDate.toLocaleDateString('zh-Hans-CN',opts).replaceAll('/','-');
                         newSched.shift_date_end = includedDate.toLocaleDateString('zh-Hans-CN',opts).replaceAll('/','-');
@@ -467,7 +499,7 @@ export default({
                     onclick: ()=> {
                         this.currentCalendar.y = parseInt(el.split('-')[0]);
                         this.currentCalendar.m = parseInt(el.split('-')[1]) - 1;
-                        this.currentCalendar.d = parseInt(el.split('-')[2]);    
+                        this.currentCalendar.d = parseInt(el.split('-')[2]);
                     },
                     today: parseInt(date.getDate() == el.split('-')[el.split('-').length - 1])
                 });
@@ -479,11 +511,12 @@ export default({
         },
         jumpToDate(e){
             this.expanded = [];
-            let date = new Date(e.target.value);
+            let date = typeof e == 'object' ? new Date(e.target.value) : new Date(e);
             this.currentCalendar.y = date.getFullYear();
             this.currentCalendar.m = date.getMonth();
             this.currentCalendar.d = date.getDate();
             this.buildCalendar();
+            document.getElementById('gotoDate').value = date.toLocaleDateString('zh-Hans-CN',{year:'numeric',month:'2-digit',day:'2-digit'}).replaceAll('/','-');
         },
         next(mos){
             this.expanded = [];
@@ -546,6 +579,9 @@ export default({
             let updated = [];
             if(this.isSaving) return;
             this.isSaving = true;
+
+            let string = this.currentCalendar.y +'-'+ (this.currentCalendar.m+1) +'-'+ this.currentCalendar.d;
+            string = formatDateString(string).replaceAll(' ','');
             
             const getAssignDesignationID = (arr,schedid)=>{
                 let assigned = [];
@@ -586,36 +622,64 @@ export default({
                 if(this.schedules[s].crudStatus == 0) created.push(newData);
                 else updated.push(newData);
             }
+            let completeStatusCreated = [created.length,0];
+            let completeStatusUpdated = [updated.length,0];
+            let completeStatusCreated2 = {};
+            let completeStatusUpdated2 = {};
+            let deletedIndexes = 0;
 
-            created.forEach(el=>{
-                 axios.post('Schedule/create',null,el.schedule).then(()=>{
-                    if(el.assignedEmps == null) return;
-                    if(el.assignedEmps.length == 0) return;
+
+            created.forEach(el=>{;
+                if(el.assignedEmps != null && el.assignedEmps.length != 0) completeStatusCreated2[el.schedule.schedules_id] = [el.assignedEmps.length,0]
+                axios.encrypted('Schedule/create',null,el.schedule).then(()=>{
+                    if(el.assignedEmps == null || el.assignedEmps.length == 0) {completeStatusCreated[1]++;return;}
+                    
                     el.assignedEmps.forEach(el2=>{
-                        axios.post('Assign/create',null,el2);
+                        axios.post('Assign/create',null,el2).then(res=>{
+                            if(res.data.success) completeStatusCreated2[el.schedule.schedules_id][1]++
+                            if(completeStatusCreated2[el.schedule.schedules_id][0] == completeStatusCreated2[el.schedule.schedules_id][1]) completeStatusCreated[1]++
+                        });
                     })
                  });
             });
-
+            
             updated.forEach(el=>{
-                 axios.encrypted('Schedule/update?id='+el.schedule.schedules_id,null,el.schedule).then(()=>{
-                    axios.encrypted('Assign/delete?scheduleid='+el.schedule.schedules_id,null);
-                    if(el.assignedEmps == null) return;
-                    if(el.assignedEmps.length == 0) return;
-                    el.assignedEmps.forEach(el2=>{
-                        axios.post('Assign/create',null,el2);
-                    })
-                 });
+                if(el.assignedEmps != null && el.assignedEmps.length != 0) completeStatusUpdated2[el.schedule.schedules_id] = [el.assignedEmps.length,0]
+                axios.encrypted('Assign/delete?scheduleid='+el.schedule.schedules_id,null).then(res=>{
+                    axios.encrypted('Schedule/update?id='+el.schedule.schedules_id,null,el.schedule).then(()=>{
+                        if(el.assignedEmps == null || el.assignedEmps.length == 0) {completeStatusUpdated[1]++;return;}
+                        el.assignedEmps.forEach(el2=>{
+                            axios.post('Assign/create',null,el2).then(res=>{
+                                if(res.data.success) completeStatusUpdated2[el.schedule.schedules_id][1]++
+                                if(completeStatusUpdated2[el.schedule.schedules_id][0] == completeStatusUpdated2[el.schedule.schedules_id][1]) completeStatusUpdated[1]++
+                            });
+                        })
+                    });
+                });
             });
+
 
             this.deletedSchedIds.forEach(el=>{
-                axios.encrypted('Schedule/delete?id='+el);
-                axios.encrypted('Assign/delete?scheduleid='+el);
+                axios.encrypted('Assign/delete?scheduleid='+el).then(()=>{
+                    axios.encrypted('Schedule/delete?id='+el).then(()=>{
+                        deletedIndexes++;
+                    });
+                });
             });
 
-            setTimeout(()=>{
-                window.location.reload();
-            },3000);
+            let axiosChecker = setInterval(()=>{
+                let conditions = [false,false,false];
+
+                if(completeStatusCreated.length == 0) conditions[0] = true;
+                else if(completeStatusCreated[0] == completeStatusCreated[1]) conditions[0] = true;
+
+                if(completeStatusUpdated.length == 0) conditions[1] = true;
+                else if(completeStatusUpdated[0] == completeStatusUpdated[1]) conditions[1] = true;
+
+                if(deletedIndexes == this.deletedSchedIds.length) conditions[2] = true;
+                if(conditions[0] && conditions[1] && conditions[2]) window.location.replace('/adminapp/jobschedule?date='+string);
+
+            },500);
         }
     }
 })
@@ -740,10 +804,11 @@ export default({
     <button class="calendarCtrlBtns" @click="nextDay(7);" v-if="viewMode == 'Week View'">Next Week</button>
     <button class="calendarCtrlBtns" @click="next(1)">Next Month</button>
     <button class="calendarCtrlBtns" @click="next(12)" v-if="viewMode == 'Month View'">Next Year</button>
-    <label for="gotoDate" class="calendarLabel">
+    <label for="gotoDate" class="calendarLabel" @click="clickGoToDate">
         {{new Date(currentCalendar.y,currentCalendar.m,currentCalendar.d).toLocaleString('default', { month: 'long',year:'numeric' })}}
-        <small>Click to jump to date</small>
-        <input type="date" id="gotoDate" @change="jumpToDate" style="opacity:0;width:0;height:0;display:block">
+        <small></small>
+        <input type="date" id="gotoDate" @change="jumpToDate">
+        <!-- style="opacity:0;width:0;height:0;display:block" -->
     </label>
     <button class="calendarCtrlBtns" @click="copyMode=!copyMode" :class="{red:copyMode,black:!copyMode}">{{copyMode ? 'Move' : 'Copy'}} Mode</button>
     <div id="viewmode_select_con" class="full">
@@ -823,7 +888,7 @@ export default({
                 <h4>{{e.employee_firstname}} {{e.employee_lastname}} <small :style="{border: '2px solid '+e.role_color}">{{e.role_name}}</small></h4>
             </div>
             <div class="employee_scheduler_item" v-for="c,ind in calendarBox" :key="c" :data-employee="i" @dragenter.prevent @dragover.prevent @drop="dropSchedToEmp($event,e.employee_id)">
-                <div class="dayScheds_con" :id="'dayScheds_con_emp_'+ind" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind)}" :data-call="getRelativeFoldHeight('dayScheds_con_emp_'+ind)">
+                <div class="dayScheds_con" :id="'dayScheds_con_emp_'+ind+'_'+e.employee_id" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind+'_'+e.employee_id)}" :data-call="getRelativeFoldHeight('dayScheds_con_emp_'+ind+'_'+e.employee_id)">
                     <div class="dayScheds" draggable="true" v-for="ds,i in filteredDayScheds(c.dayScheds,i)" :key="i" :data-schedule="stringify(ds)" @dragstart="dragSched($event,ds)" :class="{notCurrentBranch: facilityId != ds.branch_id}">
                         {{ds.status}}
                     <h4>{{findPropInObjArray(designations,'role_id',ds.designation).role_name}}
@@ -839,8 +904,8 @@ export default({
                     <div class="color" :style="'background:'+ds.color"></div>
                     </div>
                 </div>
-                <div @click="toggleExpand('dayScheds_con_emp_'+ind)" v-if="filteredDayScheds(c.dayScheds,i).length != null && filteredDayScheds(c.dayScheds,i).length > 2" class="icon expand_icon" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind)}">
-                    <img src="../../assets/caret-down.svg"/> {{ !expanded.includes('dayScheds_con_emp_'+ind) ? (filteredDayScheds(c.dayScheds,i).length - 2) + ' more' : 'Collapse'}}
+                <div @click="toggleExpand('dayScheds_con_emp_'+ind+'_'+e.employee_id)" v-if="filteredDayScheds(c.dayScheds,i).length != null && filteredDayScheds(c.dayScheds,i).length > 2" class="icon expand_icon" :class="{expanded: expanded.includes('dayScheds_con_emp_'+ind+'_'+e.employee_id)}">
+                    <img src="../../assets/caret-down.svg"/> {{ !expanded.includes('dayScheds_con_emp_'+ind+'_'+e.employee_id) ? (filteredDayScheds(c.dayScheds,i).length - 2) + ' more' : 'Collapse'}}
                 </div>
             </div>
         </div>
@@ -881,6 +946,11 @@ h3,p{margin: 0;}
     resize: vertical;
     overflow-y: auto;
     grid-template-rows: 30px 1fr;
+    border-bottom: 1px solid #ccc;
+}
+
+.scheduler_view.week .scheduler_item{
+    min-height: auto;
 }
 
 .scheduler_item{
@@ -1053,7 +1123,8 @@ display: inline-block;
 border-radius: 50%;
 text-align: center;
 font-size: 12px;
-line-height:15px}
+line-height:15px;
+display: none;}
 .dayScheds p{font-size: 14px;}
 .dayScheds .color{
     margin: 5px -5px 0 -5px;
@@ -1386,12 +1457,13 @@ line-height:15px}
     padding: 9px;
     border-radius: 5px;
     margin-right: 10px;
+    height: 40px;
 }
 .employee_view_header_right .calendarCtrlBtns{margin-left: -5px;}
 .employee_view{
     border:1px solid #ccc;
     resize: vertical;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 
@@ -1431,12 +1503,11 @@ line-height:15px}
 .employee_scheduler_item .dayScheds a{
     font-size: 12px;
     text-decoration: none;
-    margin: 10px 0;
     display: inline-block;
-    margin: 10px 5px 0;
+    margin: 5px 5px 0;
     background: #2095db;
     color:#fff;
-    padding: 5px;
+    padding: 3px 5px;
     border-radius: 5px;
     transition: 0.2s;
 }
@@ -1451,6 +1522,16 @@ line-height:15px}
 .employee_scheduler_item h4{
     line-height: 100%;
     margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.employee_scheduler_item .dayScheds p{
+    font-size: 13px;
+}
+
+.employee_scheduler_item .dayScheds h4{
+    font-size: 15px;
 }
 
 .employee_scheduler_item h4 small{
@@ -1622,6 +1703,14 @@ line-height:15px}
     height: 2px;
     filter: grayscale(100%);
 }
+
+#gotoDate{
+    font-size: 17px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
 
 .notCurrentBranchIndicator{
     font-size: 11px;

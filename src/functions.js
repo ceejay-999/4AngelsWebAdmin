@@ -201,31 +201,86 @@ function formatDateString(dateString) {
     return newString;
 }
 
-function dateFormat(stringFormat, dateString) {
-    let dateParse = dateString.match(/([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+)|([0-9]+:[0-9]+:[0-9]+)|([0-9]+-[0-9]+-[0-9]+)/g)[0];
-    dateParse = dateParse.replaceAll('-','/');
-    let date = new Date(Date.parse(dateParse));
-    let months = ['January','February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    let dateFormat = stringFormat.replaceAll('%y',date.getFullYear());
-    dateFormat = dateFormat.replaceAll('%d',date.getDate());
-    dateFormat = dateFormat.replaceAll('%lm',months[date.getMonth()]);
-    dateFormat = dateFormat.replaceAll('%sm',months[date.getMonth()].substring(0,3));
-    dateFormat = dateFormat.replaceAll('%m',date.getMonth());
-    dateFormat = (date.getMinutes() >= 10) ?  dateFormat.replaceAll('%i',date.getMinutes()) : dateFormat.replaceAll('%i',"0"+date.getMinutes());
-    dateFormat = (date.getSeconds() >= 10) ?  dateFormat.replaceAll('%s',date.getSeconds()) : dateFormat.replaceAll('%s',"0"+date.getSeconds());
-    let hour = date.getHours();
-    if (hour > 12) {
-        dateFormat = dateFormat.replaceAll('%h',hour - 12);
-        dateFormat = dateFormat.replaceAll('%a','PM');
-    } else if (hour == 0) {
-        dateFormat = dateFormat.replaceAll('%h',12);
-        dateFormat = dateFormat.replaceAll('%a','AM');
-    } else {
-        dateFormat = dateFormat.replaceAll('%h',hour);
-        dateFormat = dateFormat.replaceAll('%a','AM');
+function dateFormat(format='',dateString='') {
+    if(dateString != '' && dateString.match(/[0-9]+-[0-9]+-[0-9]+/g) == null) dateString = '2000-01-01 '+dateString;
+    let date = (dateString != '') ? new Date(dateString) : new Date();
+    if(format=='') {
+        console.error('%cFunction.js[dateformat()]:%c format parameter is empty','font-weight:700','font-weight:400');
+        return;
     }
-    dateFormat = dateFormat.replaceAll('%H',hour);
-    return dateFormat;
+    let m2 = date.toLocaleString('en-US',{month:'2-digit'});
+    let lm = date.toLocaleString('en-US',{month:'long'});
+    let sm = date.toLocaleString('en-US',{month:'long'}).substring(0,3);
+    let d = date.toLocaleString('en-US',{day:'numeric'});
+    let D = date.toLocaleString('en-US',{day:'2-digit'});
+    let y = date.toLocaleString('en-US',{year:'numeric'});
+    let h = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/( AM)|( PM)/g,'');
+    let H = date.toLocaleTimeString('en-US',{hour12:false,hour:'2-digit'});
+    let HN = date.toLocaleTimeString('en-US',{hour12:false,hour:'numeric'});
+    let m = date.toLocaleTimeString('en-US',{minute:'numeric'});
+    let M = date.toLocaleTimeString('en-US',{minute:'2-digit'});
+    let s = date.toLocaleTimeString('en-US',{second:'numeric'});
+    let S = date.toLocaleTimeString('en-US',{second:'2-digit'});
+    let a = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/[0-9]+ /g,'').toLowerCase();
+    let A = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/[0-9]+ /g,'');
+
+    format = format.replace(/\%m/g,m2);
+    format = format.replace(/\%lm/g,lm);
+    format = format.replace(/\%sm/g,sm);
+    format = format.replace(/\%d/g,d);
+    format = format.replace(/\%D/g,D);
+    format = format.replace(/\%y/g,y);
+    format = format.replace(/\%h/g,h);
+    format = format.replace(/\%H/g,H);
+    format = format.replace(/\%H/g,HN);
+    format = format.replace(/\%i/g,m);
+    format = format.replace(/\%I/g,M);
+    format = format.replace(/\%s/g,s);
+    format = format.replace(/\%S/g,S);
+    format = format.replace(/\%a/g,a);
+    format = format.replace(/\%A/g,A);
+    return format;
+}
+
+function dateFormatV2(format='',dateString='') {
+    if(dateString != '' && dateString.match(/[0-9]+-[0-9]+-[0-9]+/g) == null) dateString = '2000-01-01 '+dateString;
+    let date = (dateString != '') ? new Date(dateString) : new Date();
+    if(format=='') {
+        console.error('%cFunction.js[dateformat()]:%c format parameter is empty','font-weight:700','font-weight:400');
+        return;
+    }
+    let m2 = date.toLocaleString('en-US',{month:'2-digit'});
+    let lm = date.toLocaleString('en-US',{month:'long'});
+    let sm = date.toLocaleString('en-US',{month:'long'}).substring(0,3);
+    let d = date.toLocaleString('en-US',{day:'numeric'});
+    let D = date.toLocaleString('en-US',{day:'2-digit'});
+    let y = date.toLocaleString('en-US',{year:'numeric'});
+    let h = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/( AM)|( PM)/g,'');
+    let H = date.toLocaleTimeString('en-US',{hour12:false,hour:'2-digit'});
+    let HN = date.toLocaleTimeString('en-US',{hour12:false,hour:'numeric'});
+    let m = date.toLocaleTimeString('en-US',{minute:'numeric'});
+    let M = date.toLocaleTimeString('en-US',{minute:'2-digit'});
+    let s = date.toLocaleTimeString('en-US',{second:'numeric'});
+    let S = date.toLocaleTimeString('en-US',{second:'2-digit'});
+    let a = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/[0-9]+ /g,'').toLowerCase();
+    let A = date.toLocaleTimeString('en-US',{hour12:true,hour:'numeric'}).replace(/[0-9]+ /g,'');
+
+    format = format.replace(/\%m/g,m2);
+    format = format.replace(/\%lm/g,lm);
+    format = format.replace(/\%sm/g,sm);
+    format = format.replace(/\%d/g,d);
+    format = format.replace(/\%D/g,D);
+    format = format.replace(/\%y/g,y);
+    format = format.replace(/\%h/g,h);
+    format = format.replace(/\%H/g,H);
+    format = format.replace(/\%H/g,HN);
+    format = format.replace(/\%i/g,m);
+    format = format.replace(/\%I/g,M);
+    format = format.replace(/\%s/g,s);
+    format = format.replace(/\%S/g,S);
+    format = format.replace(/\%a/g,a);
+    format = format.replace(/\%A/g,A);
+    return format;
 }
 
 function removeFix(object,fix) {
@@ -516,6 +571,7 @@ export {
     toFormData,
     local,
     dateFormat,
+    dateFormatV2,
     removeFix,
     toDataURL,
     optimizeImage,
