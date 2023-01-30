@@ -146,6 +146,7 @@
                                                     <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
                                                     <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
                                                     <small v-else>Clockout: </small>
+                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -188,6 +189,7 @@
                                                     <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
                                                     <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
                                                     <small v-else>Clockout: </small>
+                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -226,6 +228,7 @@
                                                     <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
                                                     <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
                                                     <small v-else>Clockout: </small>
+                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -265,6 +268,7 @@
                                                     <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
                                                     <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
                                                     <small v-else>Clockout: </small>
+                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
                                                     <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
@@ -401,6 +405,8 @@ export default ({
             assignschedid: "",
             assignschedclockin: "",
             assignschedclockout: "",
+            pastschedule:[],
+            timesheets: [],
         }
     },
     mounted(){
@@ -479,7 +485,7 @@ export default ({
             }
             
             return [schedStart,schedEnd,clockStart,clockEnd];
-            },
+        },
         cleardata(){
             this.assignschedid = "";
             this.assignschedclockin = "";
@@ -502,7 +508,7 @@ export default ({
                     allarr = res.data.result;
                     allarr.forEach(element => {
                         //first checking if ang data is karon nga date
-                        if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString())
+                        if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString()|| new Date(element.schedules_dates).toLocaleDateString() > new Date().toLocaleDateString())
                         {
                             // console.log('First Condition: '+new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             // console.log('Second Condition: '+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
@@ -651,15 +657,16 @@ export default ({
 
                                 });
                             }
-                            if(element.assignschedules_timein == null && new Date(element.schedules_dates+' '+new Date().toLocaleTimeString('en-US',{hour12:false,hour:'numeric',minute:'2-digit',second:'2-digit'})).getTime() > (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) && element.assignschedules_status != 2)
+                            if(element.assignschedules_timein == null && (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) < (new Date().getTime()) && element.assignschedules_status != '2' && element.assignschedules_status != '5')
                             {
                                 
-                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8,assignschedules_totalhours: 0, assignschedules_totalwage: 0,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
+                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
 
                                 }).then(res=>{
                                     return;
                                 });
                             }
+
 
 
                             if(element.assignschedules_totalhours == null || element.assignschedules_totalwage == null)
@@ -673,6 +680,11 @@ export default ({
                             }
                             this.assignschedules.push(element);
                         }
+                    });
+                    this.assignschedules.sort((a,b)=>{
+                        let timeA = new Date(a.schedules_dates+' '+a.schedules_timestart).getTime();
+                        let timeB = new Date(b.schedules_dates+' '+b.schedules_timestart).getTime();
+                        return timeA - timeB;
                     });
                 }
                 else
