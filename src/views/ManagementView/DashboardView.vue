@@ -449,8 +449,10 @@ export default ({
             }
         });
         this.gethourlydata();
+        this.GetTimesheetonpastschedules();
         setInterval(() => {
-            this.gethourlydata();
+            this.gethourlydata();this.GetTimesheetonpastschedules();
+            
         }, 3000);
     },
     methods:{
@@ -495,7 +497,7 @@ export default ({
             axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid&_batch=true").catch(res=>{
 
             }).then(res=>{
-                if(res.data.result == null)
+                if(!res.data.success)
                 {
                     return;
                 }
@@ -510,11 +512,8 @@ export default ({
                         //first checking if ang data is karon nga date
                         if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString()|| new Date(element.schedules_dates).toLocaleDateString() > new Date().toLocaleDateString())
                         {
-                            // console.log('First Condition: '+new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() < new Date().getTime() && element.assignschedules_status != 5)
-                            // console.log('Second Condition: '+ new Date(element.schedules_dates+" "+element.schedules_timeend).getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
                             if(this.startAndEnd(element)[1].getTime() < new Date().getTime() && element.assignschedules_status != 5)
                             {
-                                console.log('aw');
                                 element.assignschedules_status = 5;
                                 let scheduleDate = element.schedules_dates;
                                 let scheduleTimeStart = element.schedules_timestart;
@@ -569,7 +568,6 @@ export default ({
 
                                 regularHours = regularHours - (lateHours + underHours);
 
-                                // console.log(regularHours,lateHours,underHours);
 
                                 if(regularHours <= 0.5) regularHours = 0;
                                 if(clockTimeStart == null || clockTimeEnd == null)
@@ -680,6 +678,15 @@ export default ({
                             }
                             this.assignschedules.push(element);
                         }
+                        else
+                        {
+                            this.pastschedule.push(element);
+                            axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 4}).catch(res=>{
+
+                            }).then(res=>{
+                                return;
+                            });
+                        }
                     });
                     this.assignschedules.sort((a,b)=>{
                         let timeA = new Date(a.schedules_dates+' '+a.schedules_timestart).getTime();
@@ -690,6 +697,137 @@ export default ({
                 else
                 {
                     return;
+                }
+            });
+        },
+        GetTimesheetonpastschedules()
+        {
+            
+            axios.post("timesheet?_batch=true").catch(res=>{
+            }).then(res=>{
+                if(res.data.success != true)
+                {
+                    let flag = 0;
+                    let firstpast = {};
+                    for(let i = 0; i < this.pastschedule.length; i++)
+                    {
+                        if(this.pastschedule[i].assignschedules_recorded == 0)
+                        {
+                            this.pastschedule[i].assignschedules_recorded = 1;
+                            flag = 1;
+                            firstpast = this.pastschedule[i]
+                            break;
+                        }
+                    }
+                    if(flag == 1)
+                    {
+                        axios.post("timesheet/create?returnall=true",null,{timesheets_totalpaid: firstpast.assignschedules_totalwage,timesheets_totalhour: firstpast.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: firstpast.schedules_dates }).then(res=>{
+                            console.log('aw');
+                            this.timesheets = res.data.info.result;
+                            axios.post("assigned/update?id="+firstpast.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+
+                            }).then(res=>{
+                                
+                            });
+                        });
+                    }
+                }
+                else
+                {
+                    this.timesheets = res.data.result;
+                    //since masudlan nag usa kabuok dapat ma condition na nako
+                    this.pastschedule.forEach(element => {
+                    let flag = 0;
+                    let sheettime = {};
+                    let index = 0;
+                    let newtimesheet={
+                        timesheets_totalpaid: 0,
+                        timesheets_totalhour: 0,
+                        timesheets_totaltimecard: 0,
+                        timesheets_schedule:"",
+                    };
+                        for(let i = 0; i < this.timesheets.length; i++)
+                        {
+                            console.log(new Date(this.timesheets[i].timesheets_schedule),new Date(element.schedules_dates))
+                            console.log(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime());
+                            if(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime())
+                            {
+                                console.log('inner if sa loop',this.timesheets[i]);
+                                flag = 1;
+                                sheettime = this.timesheets[i];
+                                index = i;
+                                console.log('aw3');
+                                break;
+                            }
+                            console.log('outer if sa loop',this.timesheets[i]);
+                        }
+                        if(flag == 1)
+                        {
+                            if(element.assignschedules_recorded == 0)
+                            {
+                                console.log('aw1');
+                                let totwage = 0;
+                                let tothour = 0;
+                                let timecard = 0;
+                                if(element.assignschedules_totalhours == null)
+                                {
+                                    element.assignschedules_totalhours = 0;
+                                }
+                                if(element.assignschedules_totalwage == null)
+                                {
+                                    element.assignschedules_totalwage = 0;
+                                }
+                                totwage = parseFloat(sheettime.timesheets_totalpaid) + parseFloat(element.assignschedules_totalwage);
+                                tothour = parseFloat(sheettime.timesheets_totalhour) + parseFloat(element.assignschedules_totalhours);
+                                timecard = parseInt(sheettime.timesheets_totaltimecard) + 1;
+                                console.log('index',index)
+                                console.log('timesheet',this.timesheets[index]);
+                                this.timesheets[index].timesheets_totalpaid = totwage;
+                                this.timesheets[index].timesheets_totalhour = tothour;
+                                this.timesheets[index].timesheets_totaltimecard = timecard;
+                                this.timesheets[index].timesheets_schedule = element.schedules_dates;
+                                axios.post("timesheet/update?returnall=true&schedule="+element.schedules_dates,null,{timesheets_totalpaid: totwage,timesheets_totalhour: tothour,timesheets_totaltimecard: timecard }).then(res=>{
+                                    axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+
+                                    }).then(res=>{
+                                        
+                                    });
+                                });
+                            }
+                        }
+                        else
+                        {
+                            if(element.assignschedules_recorded == 0)
+                            {
+                                console.log('aw2');
+                                if(element.assignschedules_totalhours == null)
+                                {
+                                    element.assignschedules_totalhours = 0;
+                                }
+                                if(element.assignschedules_totalwage == null)
+                                {
+                                    element.assignschedules_totalwage = 0;
+                                }
+                                newtimesheet.timesheets_totalpaid = element.assignschedules_totalwage;
+                                newtimesheet.timesheets_totalhour = element.assignschedules_totalhours;
+                                newtimesheet.timesheets_totaltimecard = 1;
+                                newtimesheet.timesheets_schedule = element.schedules_dates;
+                                this.timesheets.push(newtimesheet);
+                                console.log(element.assignschedules_totalwage);
+                                console.log(element.assignschedules_totalhours);
+                                console.log('newtimesheetpaid',newtimesheet.timesheets_totalpaid);
+                                console.log('newtimesheethour',newtimesheet.timesheets_totalhour);
+                                console.log('timecard on aw2',newtimesheet.timesheets_totaltimecard);
+                                axios.post("timesheet/create?returnall",null,{timesheets_totalpaid: element.assignschedules_totalwage,timesheets_totalhour: element.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: element.schedules_dates }).then(res=>{
+                                    axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+
+                                    }).then(res=>{
+                                    });
+                                });
+                            }
+                        }
+                    });
+
                 }
             });
         },
