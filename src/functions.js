@@ -338,6 +338,7 @@ class AsyncStorage {
     }
     
     set(key,val) {
+        
         if (!key.includes('.')) {
             this.storage[key] = val;
             if (typeof val == 'object') localStorage.setItem('async_'+key, JSON.stringify(val));
@@ -442,58 +443,74 @@ function escapeHtml(unsafe) {
     .replace("&#39;", "'");
 }
 
-export class SegmentedFetch {
-    constructor(url, headers=null, body=null, callback=null) {
+export class SegmentedFetch{
+    constructor(url,headers=null, body=null, callback=null){
         this.count = 0;
+        this.segmentSize = 10;
+        this.currentSegment = 0;
         this.index = 0;
-        this.segSize = 0;
-        this.maxSegs = 0;
+        this.maxSegments = 0;
         this.request = {
             method: 'post',
             url,
-            headers,
+            headers,    
             body
         };
-        if(!this.request.url.includes('?')) this.request.url += '?';
-        axios.encrypted(this.request.url.replaceAll(/(?!(?:&_joins=[\w,:_ ]+|&_on=[\w,:_ ]+|&_searchconcat=[\w,:_ ]+|&_searchfrom=[\w,:_ ]+|&_search=[\w,:_ ]+))(\&_[a-zA-Z_]+=[\w,:_ ]+|\?_[a-z]+=[\w,:_ ]+)/g,'')+'&_select=count(*)',headers,body).then(res=>{
-            res.data = axios.decryptToJSON(res.data);
-            
-            if (res.data == false) return;
-            this.count = res.data.result['count(*)'];
-            if (callback != null) callback(this);
+
+        let requestUrl = this.request.url.replaceAll(/(?!(?:(&_joins|&_on|&_searchconcat|&_searchfrom|&_search|(&_GTE_|&_LSE_|&_GTR_|&_LSS_|&_NEQ_|&_ORW_|&_ORL_)[a-zA-Z0-9_]])=[\w,:_.= ]+))(\&_[a-zA-Z_]+=[\w,:_ ]+|\?_[a-z]+=[\w,:_ ]+)/g,'')+'&_select=count(*)+AS+count';
+        axios.post(requestUrl,headers,body).then(res=>{
+            if(res.data.result == null) return;
+            this.count = parseInt(res.data.result.count ?? 0);
+            this.maxSegments = Math.ceil(this.count / this.segmentSize);
         });
     }
 
-    segmentSize(divInto) {
-        this.segSize = divInto;
-        this.maxSegs = Math.ceil(this.count / divInto);
-        return this.maxSegs;
+    pageSize(dividedBy) {
+        this.segmentSize = dividedBy;
+        this.maxSegments = Math.ceil(this.count / dividedBy);
+        return this.maxSegments;
     }
 
     currentSegment() {
         return this.index / this.segSize;
     }
 
-    fetch(segment=null) {
-        if (segment != null) {
-            if (segment<this.maxSegs) this.index = this.segSize * segment;
-            else return;
-        }
+    nextFetch(urlextension=null){
+        this.currentSegment = (this.currentSegment == this.maxSegments - 1) ? 0 :this.currentSegment+1;
+        this.index = this.currentSegment * this.segmentSize;
         let tempObj = {...this.request};
-        tempObj.url = this.request.url+`&_offset=${ this.index }&_limit=${ this.segSize }&_batch=true`;
+        tempObj.url = this.request.url+`&_offset=${ this.index }&_limit=${ this.segmentSize }&_batch=true`+((urlextension != null) ? '&'+urlextension : '');
         this.index += this.segSize;
         
         return new Promise(resolve=>{
-            axios.encrypted(tempObj.url.replaceAll(axios.baseUrl,''),
+            axios.post(tempObj.url.replaceAll(axios.baseUrl,''),
                 this.request.headers,
                 this.request.body)
             .then(res=>{
-                res.data = axios.decryptToJSON(res.data);
-                if (res.data == false) return;
+                // res.data = axios.decryptToJSON(res.data);
+                // if (res.data == false) return;
                 resolve(res);
             });
         });
+    }
+
+    fetch(segment,urlextension=null){
+        this.index = segment * this.segmentSize;
+        this.currentSegment = segment;
+        let tempObj = {...this.request};
+        tempObj.url = this.request.url+`&_offset=${ this.index }&_limit=${ this.segmentSize }&_batch=true`+((urlextension != null) ? '&'+urlextension : '');
+        this.index += this.segSize;
         
+        return new Promise(resolve=>{
+            axios.post(tempObj.url.replaceAll(axios.baseUrl,''),
+                this.request.headers,
+                this.request.body)
+            .then(res=>{
+                // res.data = axios.decryptToJSON(res.data);
+                // if (res.data == false) return;
+                resolve(res);
+            });
+        });
     }
 }
 

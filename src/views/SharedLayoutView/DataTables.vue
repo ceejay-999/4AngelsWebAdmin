@@ -1,355 +1,179 @@
 <template>
-    <div class="dataTableCtrl">
-        <div>
-            Show Results:
-            <select @change="segmentSizeChange" class="endSelect">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="75">75</option>
-                <option value="100">100</option>
-                <option value="All">All</option>
-            </select>
-        </div>
-
-        <div>
-            Order by:
-            <select @change="e=>orderBy(e.target.value,orderDir)">
-                <option v-for="u,i in useColumns" :key="u" :value="u">{{columnLabels[i]}}</option>
-            </select>
-            <select class="endSelect" @change="e=>orderBy(orderCol,e.target.value)">
-                <option value="ASC">Ascending</option>
-                <option value="DESC">Descending</option>
-            </select>
-        </div>
-        <div>
-            <button class="exportbtn" @click="saveTableSettings" v-if="!expMode">Export Table</button>
-            <button class="exportbtn" @click="genXLSXTable" v-if="expMode">Export to XLSX</button>
-        </div>
-
-        <div v-if="!expMode">
-            <input placeholder="Enter some keywords..." v-model="keyword">
-            <button class="exportbtn" @click="search">Search</button>
-        </div>
-    </div>
-    <div class="dataTableCont_container">
-        <table class="dataTableCont" id="DataTable_Element">
-        <thead class="dataTableHead">
-            <th class="dataTableHeaders" v-for="(c) in columnLabels" :key="c">{{c}}
-            </th>
-        </thead>
-        
-        <tr class="dataTableCont" v-for="d in dataObj" :key="d.user_id">
-            <td class="dataTableCell" v-for="c in useColumns" :key="d.user_id+'_'+c" v-html="isTypeDate(processValues(d)[c],'%lm %d, %y')"></td>
-            <td class="dataTableCell" v-if="!(useColumns.length == 0 || useColumns[0] == '')"><slot :data="d" /></td>
-        </tr>
-    </table>
-    <em class="nodata" v-if="dataObj.length == 0">No data available...</em>
-    </div>
+    <div class="table_cont" :data-table="data_prefix">
+        <div class="table_ctrl">
+            <div>
+                Results:
+                <select>
+                    <option @click="pageSize(10)">10</option>
+                    <option @click="pageSize(25)">25</option>
+                    <option @click="pageSize(50)">50</option>
+                    <option @click="pageSize(100)">100</option>
+                    <option @click="pageSize(250)">250</option>
+                    <option @click="pageSize(500)">500</option>
+                    <option @click="pageSize(fetch.count ?? 0)">All</option>
+                </select>
+            </div>
     
-    <div class="segmentBtns">
-        <button v-for="i in segments" :key="i" @click="setFetch(i)" :class="{current:segFetch.currentSegment() == i}">{{i}}</button>
-    </div>
+            <button @click="genXLSXTable" class="btn btn-primary">Export</button>
     
-</template>
-
-<script>    
-import {SegmentedFetch,dateFormat,lStore} from '../../functions'
-import {utils,writeFileXLSX} from 'xlsx';
-
-export default({
-    props:{
-        url:String,
-        columns:String,
-        columnNames:String,
-        formatValues:Object,
-        generateMode:Boolean,
-        searchOn:String,
-        columnPrefix:String
-    },
-    data(){
-        return{
-            segFetch:null,
-            dataObj: [],
-            segments:0,
-            segSize: 0,
-            useColumns:[],
-            columnLabels:[],
-            orderDir:'ASC',
-            orderCol: '',
-            expMode: false,
-            format:{},
-            urlFetch:'',
-            returnURL:'',
-            keyword:''
-        }
-    },
-    watch:{
-        url(){
-            this.urlFetch = this.url;
-            this.dataObj = [];
-            this.fetchData();
-        }
-    },
-    mounted(){
-        this.useColumns = this.columns;
-        this.useColumns = this.useColumns.split(',');
-        this.columnLabels = this.columnNames;
-        this.columnLabels = this.columnLabels.split(',');
-        this.orderCol = this.useColumns[0];
-        this.expMode = this.generateMode == 'true';
-        this.format = this.formatValues;
-        this.urlFetch = this.url;
-        if(this.expMode){
-            let table_data = lStore.get('table_data');
-            if(table_data.formatValues != null) this.format = JSON.parse(table_data.formatValues);
-            this.urlFetch = table_data.url;
-            this.returnURL = table_data.origin;
-        }
-
-        window.onresize = this.responsiveTable();
+            
+        </div>
+        <table v-if="data != null && data.length != 0" id="DataTable_Element">
+            <thead>
+                <tr>
+                    <th v-for="cn,i in columnNames" :key="cn">
+                        <img title="Ascending" v-if="(i != columnNames.length - 1 && columnNames.length > columns.length) || columnNames.length == columns.length" @click="orderby(orderNames[columns[i]] ?? columns[i],'ASC');goToPage(1)" src="../../assets/caret-down.svg" class="caret-up">
+                        <img title="Descending" v-if="(i != columnNames.length - 1 && columnNames.length > columns.length) || columnNames.length == columns.length" @click="orderby(orderNames[columns[i]] ?? columns[i],'DESC');goToPage(1)" src="../../assets/caret-down.svg" class="caret-down">
+                        {{cn}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="d,i in data" :key="i">
+                    <td v-for="c,ic in columns" v-html="processValues(d)[c]" :key="ic"></td>
+                    <td><slot :data="d" /></td>
+                </tr>
+            </tbody>
+         </table>
+         <h6 v-if="data == null || data.length == 0">No data available...</h6>
+    
+         <div class="segment_buttons" v-if="fetch != null">
+            <button v-for="i in fetch.maxSegments" :key="i" @click="goToPage(i)" :class="{current: (i-1) == fetch.currentSegment}">{{i}}</button>
+        </div>
+    </div>
         
-        this.fetchData();
-    },
-    methods:{
-        dateFormat,
-        saveTableSettings(){
-            let tableData = {
-                formatValues: JSON.stringify(this.formatValues),
-                url: this.url,
-                origin: this.$route.path
-            };
-            lStore.set('table_data',tableData);
-            this.$router.push('/exporttable');
+    </template>
+    
+    <script>
+    import {SegmentedFetch} from '../../functions'
+    import {utils,writeFileXLSX} from 'xlsx';
+    
+    export default {
+        props:{
+            use: String,
+            url: String,
+            searchfrom: String,
+            labels: String,
+            format: Object
         },
-        genXLSXTable(){
-            const table = document.getElementById("DataTable_Element");
-            const wb = utils.table_to_book(table);
-            writeFileXLSX(wb,`speedyrepair-${new Date().getTime()}.xlsx`);
-            setTimeout(()=>{
-                lStore.remove('table_data');
-                this.$router.replace(this.returnURL);
-            },2000);
-        },
-        responsiveTable(){
-            if(document.querySelectorAll('.dataTableCtrl').length <= 1) return;
-            let container = document.querySelectorAll('.dataTableCtrl')[1];
-            let containerWidth = container.offsetWidth;
-            if(containerWidth <= 600){
-                container.classList.add('width_600');
-                container.classList.remove('width_1000');
-            }else if(containerWidth <= 1000){
-                container.classList.add('width_1000');
-                container.classList.remove('width_600');
-            }else{
-                container.classList.remove('width_1000');
-                container.classList.remove('width_600');
+        data(){
+            return {
+                columns:[],
+                columnNames:[],
+                fetch:null,
+                data:[],
+                data_prefix:'',
+                addedPrefix:'',
+                orderNames:{},
+                order:[],
+                currentPage:0
             }
         },
-        processValues(el){
-            el = JSON.parse(JSON.stringify(el));
-            for(let c in this.format){
-                if(this.format[c].currency != null){
-                    let a = parseFloat(el[c]).toFixed(2);
-                    el[c] = this.format[c].currency+a;
-                }
-    
-                if(this.format[c].replace != null){
-                    this.format[c].replace.forEach(el2=>{
-                        let value = el[c];
-                        el[c] = el[c].replaceAll(el2[0],el2[1]);
-                        el[c] = el[c].replaceAll('__value__',value);
-                    })
-                }
-
-                if(this.format[c].render != null){
-                    let value = el[c];
-                    el[c] = this.format[c].render(el[c],el)
-                }
+        watch:{
+            url(change){
+                this.fetch = new SegmentedFetch(change);
             }
-
-            return el;
         },
-        fetchData(){
-            return new Promise(resolve=>{
-                this.segFetch = new SegmentedFetch(this.urlFetch,'default',null,async ()=>{
-                    this.segments = this.segFetch.segmentSize(10);
-                    this.segSize = 10;
-                    let res = await this.segFetch.fetch();
-                    if(res.data.result == null) return;
-                    this.dataObj = res.data.result;
-                    //this.useColumns.length
-                    if(this.useColumns.length == 0 || this.useColumns[0] == ''){
-                        this.useColumns = Object.keys(this.dataObj[0]);
-                        this.columnLabels = Object.keys(this.dataObj[0]);
+        created(){
+            this.data_prefix = Math.floor(Math.random() * 1000).toString(32)+(new Date().getTime().toString(32));   
+        },
+        mounted(){
+            this.fetch = new SegmentedFetch(this.url);
+            this.columnNames = this.labels.split(',');
+            this.columns = this.use.split(',');
+            this.goToPage(1);
+    
+            // setInterval(()=>{
+            //     this.goToPage(this.currentPage);
+            // },1000);
+        },
+        methods:{
+            orderby(column,dir){
+                this.order = [column,dir];
+                console.log(column,dir);
+                this.addedPrefix = '&_orderedby='+column+'_'+dir;
+            },
+            async goToPage(num){
+                this.currentPage = num;
+                num--;
+                let res = await this.fetch.fetch(num,this.addedPrefix);
+                this.data = res.data.result
+            },
+            async pageSize(num){
+                this.fetch.pageSize(num);
+                this.goToPage(1)
+            },
+            genXLSXTable(){
+                const table = document.getElementById("DataTable_Element");
+                const wb = utils.table_to_book(table);
+                writeFileXLSX(wb,`speedyrepair-${new Date().getTime()}.xlsx`);
+            },
+            processValues(el){
+                el = JSON.parse(JSON.stringify(el));
+                for(let c in this.format){
+                    if(this.format[c].currency != null){
+                        let a = parseFloat(el[c]).toFixed(2);
+                        el[c] = this.format[c].currency+a;
                     }
-                    this.responsiveTable();
-                    resolve();
-                });
-            })
-        },
-        async setFetch(f=1){
-            let res = await this.segFetch.fetch(f-1);
-            if(res.data.result == null) return;
-            this.dataObj=[];
-            setTimeout(()=>this.dataObj = res.data.result,100);
-            return;
-        },
-        isTypeDate(d,format){
-            if(d==null) return d;
-            let dateRegex = /([0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+)|([0-9]+-[0-9]+-[0-9]+)|([0-9]+:[0-9]+:[0-9]+)/g;
-            if(d.match(dateRegex) == null) return d;
-            return dateFormat(format,d);
-        },
-        segmentSizeChange(e){
-            this.dataObj = [];
-            if(e.target.value == 'All') {
-                if(confirm(`This action will load ${this.segFetch.count} records and might crash your browser. Continue?`)){
-                    this.segSize = this.segFetch.count;
-                    this.segments = 1;
-                    this.segFetch.segmentSize(this.segSize);
+        
+                    if(this.format[c].replace != null){
+                        this.format[c].replace.forEach(el2=>{
+                            let value = el[c];
+                            el[c] = el[c].replaceAll(el2[0],el2[1]);
+                            el[c] = el[c].replaceAll('__value__',value);
+                        })
+                    }
+    
+                    if(this.format[c].render != null){
+                        let value = el[c];
+                        el[c] = this.format[c].render(el[c],el)
+                    }
+    
+                    if(this.format[c].orderName != null){
+                        this.orderNames[c] = this.format[c].orderName;
+                    }else{
+                        this.orderNames[c] = c;
+                    }
                 }
-                else return;
-            } 
-            else {
-                this.segSize = e.target.value;
-                this.segments = this.segFetch.segmentSize(this.segSize);
+    
+                return el;
             }
             
-            this.setFetch();
-        },
-        orderBy(col,dir){
-            col = col.replace(this.columnPrefix,'');
-            this.orderCol = col;
-            col = col.replaceAll('_','__');
-            col = col+'_'+dir;
-            this.segFetch = new SegmentedFetch(this.urlFetch+'&_orderby='+col,'default',null,async ()=>{
-                this.segments = this.segFetch.segmentSize(this.segSize);
-                let res = await this.segFetch.fetch(0);
-                if(res.data.result == null) return;
-                this.dataObj=[];
-                setTimeout(()=>this.dataObj = res.data.result,100);
-            });
-        },
-        search(){
-            let searchOriginArray = this.searchOn.split(',');
-            let concats = '';
-            let froms = '';
-            searchOriginArray.forEach(el=>{
-                if(el.match(':') != null) concats+=','+el;
-                else froms+=','+el;
-            });
-
-            this.segFetch.request.url = this.segFetch.request.url.replaceAll(/(?:&_searchconcat=[\w,:_ ]+|&_searchfrom=[\w,:_ ]+|&_search=[\w,:_ ]+)/g,'');
-            
-            this.segFetch = new SegmentedFetch(this.segFetch.request.url+`${(concats != '') ? '&_searchconcat='+concats.substring(1) : ''}${(froms != '') ? '&_searchfrom='+froms.substring(1) : ''}&_search=${this.keyword}`,'default',null,async ()=>{
-                this.segments = this.segFetch.segmentSize(this.segSize);
-                let res = await this.segFetch.fetch(0);
-                if(res == null){this.dataObj = []; return}
-                if(res.data.result == null) {this.dataObj = []; return}
-                this.dataObj = [];
-                setTimeout(()=>this.dataObj = res.data.result,100);
-                
-            });
         }
     }
-})
-</script>
-
-<style scoped>
-*{height: max-content !important;}
-select{
-    padding: 5px;
+    </script>
+    <style scoped>
+    table{width:100%;border-collapse: collapse;border:1px solid #e2e2e2}
+table th,table td{padding:10px;border:1px solid #e2e2e2;line-height: 100%;}
+table tr:nth-of-type(even) td{background: #ededed;}
+table tr:hover td{background: #ddd;}
+.segment_buttons button{
     background: #fff;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    margin: 0 5px;
-    
-}
-.endSelect{
-    margin-right: 20px;
-}
-
-.datatable[data-v-89e64447] {
-  background: #fff;
-}
-
-.dataTableHeaders{text-align: center;}
-.dataTableCont{width:100%;border-collapse: collapse;margin: 20px 0;}
-.dataTableCell,.dataTableHeaders{padding: 10px;border-bottom: 1px solid #e3e3e2;border-right:1px solid #e3e3e2;}
-.dataTableCell:last-child, .dataTableHeaders:last-child{border-right: none;}
-.dataTableCont:last-child .dataTableCell{border-bottom: none;}
-
-.dataTableCont:nth-of-type(even){background: #eee;}
-.dataTableCont:hover > .dataTableCell{background: #f0f0f0;}
-.dataTableCont:nth-of-type(even):hover > .dataTableCell{background: #e5e5e5;}
-.segmentBtns button{
-    padding: 5px;
-    padding: 5px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: 0.2s;
+    border-radius: 50%;
+    width: 27px;
+    height: 27px;
+    line-height: 100%;
+    padding: 4px;
     margin: 0 2px;
-}
-.segmentBtns button:hover{background: #ccc;}
-.segmentBtns button.current{
-    background: #555;
-    border: none;
-    color: #fff;
-}
-
-.exportbtn{
-    border: none;
-    background: #2095db;
-    padding: 10px;
-    border-radius: 5px;
-    color: #fff;
-    font-weight: 500;
     transition: 0.2s;
-    margin: 0 5px;
 }
 
-.nodata{text-align: center;display: block;}
-
-.dataTableCont_container{overflow-x:auto;margin-bottom: 10px;}
-
-.exportbtn:hover{background-color:#1a628b}
-q{quotes: none;}
-
-.dataTableCtrl{display: flex;align-items: center;}
-
-@media only screen and (max-width:1000px) {
-  .dataTableCtrl{justify-content: flex-start;gap:20px;align-items: flex-start;flex-wrap:wrap}
-    .dataTableCtrl select{display: block;width: 100%;}
-    .dataTableCtrl >div{width: 48%;}
-}
-
-@media only screen and (max-width:600px) {
-    .dataTableCtrl >div{width: 100%;}
-}
-
-.width_1000.dataTableCtrl,.width_600.dataTableCtrl{justify-content: flex-start;gap:20px;align-items: flex-start;flex-wrap:wrap}
-.width_1000.dataTableCtrl select,.width_600.dataTableCtrl select{display: block;width: 100%;}
-.width_1000.dataTableCtrl >div,.width_600.dataTableCtrl >div{width: 48%;}
-
-.width_600.dataTableCtrl >div{width: 100%;}
-
-.dataTableCtrl div:last-child{
-    margin-left: auto;
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-}
-
-.dataTableCtrl input{
-    padding: 10px;
+.segment_buttons{margin-top: 10px;}
+.segment_buttons button:hover{scale: 0.90;}
+.segment_buttons button.current,.segment_buttons button:active{border: 1px solid #444;background:#444;color:#fff}
+.table_ctrl{display: flex;gap:20px;margin: 0 0 20px;}
+.caret-up,.caret-down{width: 18px;height: 18px;margin: 2px;padding:5px;box-shadow: 0 0 2px #777;border-radius: 50%;transition:0.2s}
+.caret-up{rotate: 180deg;}
+.caret-down{margin-right: 5px;}
+.caret-up:hover,.caret-down:hover{scale:1.2}
+.table_ctrl select{
     background: #fff;
     border: 1px solid #ccc;
+    outline: none;
+    margin-left: 5px;
     border-radius: 5px;
-    margin: 0 5px;
 }
 
-
-</style>
-
-
+h6{text-align: center;padding: 10px 0;border:1px solid #e2e2e2;}
+    </style>

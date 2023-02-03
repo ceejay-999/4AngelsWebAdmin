@@ -1,20 +1,37 @@
 <template>
     <LayoutView>
-        <div class="breadcrumb-wrapper" v-if="branchselected != null">
-            <h1 class="text-dark">Facility Name: {{branchselected}}</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb p-0">
-                    <li class="breadcrumb-item">
-                    <RouterLink to="/dashboard">
-                        <span class="mdi mdi-home"></span>                
-                    </RouterLink>
-                    </li>
-                    <li class="breadcrumb-item" aria-current="page">Timesheets</li>
-                </ol>
+        <div class="toast" >
+
+        </div>
+        <div class="breadcrumb-wrapper d-flex justify-content-between" v-if="branchselected != null">
+            <div>
+                <h1 class="text-dark">Facility Name: {{branchselected}}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb p-0">
+                        <li class="breadcrumb-item">
+                        <RouterLink to="/dashboard">
+                            <span class="mdi mdi-home"></span>                
+                        </RouterLink>   
+                        </li>
+                        <li class="breadcrumb-item" aria-current="page">Timesheets</li>
+                    </ol>
                 </nav>
+            </div>
+            <div>
+                <RouterLink class="btn btn-primary" to="/timesheetexport" target="_blank"> Export to Excel</RouterLink>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4 mb-3 d-flex align-items-center">
+                <label for="validationTooltip01" class="mr-2">From: </label>
+                <input type="date" class="form-control" v-model="fromdate" required>
+                <label for="validationTooltip02" class="ml-2 mr-2">To: </label>
+                <input type="date" class="form-control" v-model="todate" required>
+                <button class="btn btn-info ml-2" @click="FilterDates(fromdate,todate)">Filter</button>
+            </div>
         </div>
         <div class="card card-default">
-            <table class="table table-hover">
+            <table class="table table-hover" id="DataTable_Element">
                 <thead>
                     <tr>
                         <th class="font-weight-bold">Employee Name</th>
@@ -56,6 +73,9 @@
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
 import { axios , validateForm,lStore } from '@/functions.js';
+import {utils,writeFileXLSX} from 'xlsx';
+import toastr from 'toastr';
+
 
 export default ({
     name: "App",
@@ -67,6 +87,8 @@ export default ({
             branchselected: lStore.get('selected_facility'),
             timesheets: [],
             pastschedules: [],
+            fromdate: "",
+            todate: "",
         }
     },
     mounted(){
@@ -94,6 +116,78 @@ export default ({
                 });
             } 
         });
+    },
+    methods:{
+        FilterDates(currentDateString,weekDateString){
+            this.pastschedules = [];
+            this.timesheets = [];
+            document.querySelector(".toast").id = "toaster";
+            if(currentDateString == null || currentDateString == "")
+            {
+                this.callToaster("toast-top-right",2);
+                console.log('aw');
+                return;
+            }
+            if(weekDateString == null || weekDateString == "")
+            {
+                this.callToaster("toast-top-right",2);
+                return;
+            }
+            axios.post(`timesheet?_batch=true&_GTE_timesheets_schedule=${currentDateString}&_LSE_timesheets_schedule=${weekDateString}`).then(res=>{
+                if(res.data.success == false)
+                {
+                    this.callToaster("toast-top-right",3);
+                    return;
+                }
+                this.timesheets = res.data.result;
+                console.log("on timesheetpage:",this.timesheets);
+                if(this.timesheets != null)
+                {
+                    let temp = []
+                    axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
+                        temp = res.data.result;
+                        this.timesheets.forEach(element => {
+                            temp.forEach(e => {
+                                if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
+                                {
+
+                                    this.pastschedules.push(e);
+                                }
+                            });
+                        });
+                    });
+                } 
+            });
+        },
+        callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: true,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror == 2)
+                {
+                    toastr.error("Error Dates", "Error!");
+                }
+                if(reserror == 3)
+                {
+                    toastr.error("No Timesheets Found", "Error!");
+                }
+            }
+        },
     }
 })
 </script>

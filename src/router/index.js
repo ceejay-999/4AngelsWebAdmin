@@ -13,6 +13,7 @@ import RequestVIew from '../views/ManagementView/RequestVIew.vue'
 import EmployeePrintable from '../views/ManagementView/EmployeePrintable.vue'
 import EmployeeExportToExcel from '../views/ManagementView/EmployeeExportToExcel.vue'
 import UsersView from '../views/ManagementView/ManageUsers.vue'
+import TimeSheetExport from '../views/ManagementView/TimsheetExportView.vue'
 import { lStore } from '../functions'
 
 const router = createRouter({
@@ -34,6 +35,15 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
+      beforeEnter: () => {
+        if (!lStore.isset('users_token')) return '/login';
+      },
+      
+    },
+    {
+      path: '/timesheetexport',
+      name: 'timesheetexport',
+      component: TimeSheetExport,
       beforeEnter: () => {
         if (!lStore.isset('users_token')) return '/login';
       },

@@ -110,45 +110,46 @@
                                     
                                 </div>
 
-                                <DataTables
-                                    :url="`requests?${(viewMode!=-1) ? '&requests_type='+viewMode : ''}&_joins=employee,schedules,role&_on=requests.requests_employeeid=employee.employee_id,requests.requests_schedulesid=schedules.schedules_id,role.role_id=schedules.schedules_roleid`"
-                                    columns="requests_type,requests_schedulesid,employee_lastname,requests_reason,requests_status"
-                                    columnNames="Type, Schedule ID, Employee, Reason, Status, Action" 
-                                    columnPrefix="requests_" 
+                                <data-tables
+                                    :url="`requests?${(viewMode!=-1) ? '&requests_type='+viewMode : ''}
+                                    &_joins=employee,schedules,facility,role
+                                    &_on=employee.employee_id=requests.requests_employeeid,schedules.schedules_id=requests.requests_schedulesid,facility.facility_id=schedules.schedules_facilityid,role.role_id=schedules.schedules_roleid`"
+                                    labels="Request ID, Schedule ID, Employee, Created, Action"
+                                    use="type,schedulesid,employee_lastname,created_at"
                                     v-slot="row"
-                                    :formatValues="{
-                                        requests_type:{
-                                            replace:[
-                                                ['0','Schedule Application'],
-                                                ['1','Reschedule Request'],
-                                                ['2','Reassign Request'],
-                                            ]
+                                    :format="{
+                                        type:{
+                                            orderName:'requests__type',
+                                            render:(elc,el)=>{
+                                                let returnString = '';
+                                                switch(el.requests_type){
+                                                    case 0:case '0': returnString = 'Schedule Application';break;
+                                                    case 1:case '1': returnString = 'Reschedule Request';break;
+                                                    case 2:case '2': returnString = 'Reassign Requests';break;
+                                                }
+                                                return returnString;
+                                            }
+                                        },
+                                        schedulesid:{
+                                            orderName:'requests__schedulesid',
+                                            render:(elc,el)=>el.requests_schedulesid
                                         },
                                         employee_lastname:{
-                                            render: (value,row)=>{
-                                                return value+', '+row.employee_firstname;
-                                            }
+                                            orderName:'employee__lastname',
+                                            render:(elc,el)=>elc+', '+el.employee_firstname
                                         },
-                                        requests_reason:{
-                                            render: (value)=>{
-                                                return value ?? `<em style='color:#777'>No reason provided...</em>`;
-                                            }
-                                        },
-                                        requests_status:{
-                                            replace:[
-                                                ['0','Pending'],
-                                                ['1','Approved'],
-                                                ['2','Denied'],
-                                            ]
-                                        },
+                                        created_at:{
+                                            orderName:'requests__created__at',
+                                            render:(elc,el)=>dateFormatV2('%sm %d, %y (%h:%i%a)',el.requests_created_at)
+                                        }
                                     }"
                                 >
-                                    <div class="action_btns">
-                                        <img draggable="false" title="View" @click="viewRequestCard(row.data)" class="actionIcons" src="../../assets/view-icon.svg">
-                                        <img draggable="false" title="Approve" v-if="row.data.requests_status == 0" @click="approveOrDeny(row.data.requests_id,1,row.data)" class="actionIcons approve" src="../../assets/approve-icon.svg">
-                                        <img draggable="false" title="Deny" v-if="row.data.requests_status == 0" @click="approveOrDeny(row.data.requests_id,2,row.data)" class="actionIcons deny" src="../../assets/deny-icon.svg">
-                                    </div>
-                                </DataTables>
+                                <div class="action_btns">
+                                    <img title="View" @click="this.viewRequest = row.data" class="actionIcons" src="../../assets/view-icon.svg">
+                                    <img v-if="row.data.requests_status == 0" title="Approve" @click="approveOrDeny(row.data.requests_id,1,row.data)" class="actionIcons approve" src="../../assets/approve-icon.svg">
+                                    <img v-if="row.data.requests_status == 0" title="Deny" @click="approveOrDeny(row.data.requests_id,2,row.data)" class="actionIcons deny" src="../../assets/deny-icon.svg">
+                                </div>
+                                </data-tables>
 
                                 
                             </div>
