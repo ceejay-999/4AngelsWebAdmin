@@ -103,14 +103,6 @@
                   <li class="nav-item mx-3 my-0 py-0">
                     <a class="nav-link active pb-3" id="home2-tab" data-toggle="tab" href="#home2" role="tab" aria-controls="home2" aria-selected="true">All (11)</a>
                   </li>
-
-                  <li class="nav-item mx-3 my-0 py-0">
-                    <a class="nav-link pb-3" id="profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="profile2" aria-selected="false">Msgs (6)</a>
-                  </li>
-
-                  <li class="nav-item mx-3 my-0 py-0">
-                    <a class="nav-link pb-3" id="contact2-tab" data-toggle="tab" href="#contact2" role="tab" aria-controls="contact2" aria-selected="false">Others (5)</a>
-                  </li>
                 </ul>
 
                 <div class="tab-content" id="myTabContent3">
@@ -536,17 +528,16 @@
                     <ul class="dropdown-menu dropdown-menu-right">
                       <!-- User image -->
                       <li class="dropdown-header">
-                        <div class="d-inline-block">
+                        <!-- <div class="d-inline-block"> -->
                           <span class="mdi mdi-account"></span>
                           {{infodata.users_username}}
-                        </div>
+                        <!-- </div> -->
                       </li>
-                      <li>
+                      <!-- <li>
                         <a href="#">
                           <i class="mdi mdi-email"></i> Message
                         </a>
-                      </li>
-
+                      </li> -->
                       <li class="dropdown-footer">
                         <a href="#" @click="logoutAccount"> <i class="mdi mdi-logout"></i> Log Out </a>
                       </li>
@@ -925,5 +916,11 @@ export default ({
   }
   .close:hover{
     color:blue;
+  }
+  .navbar .dropdown-menu li.dropdown-header{
+    border-bottom: none;
+  }
+  .tab-content{
+    display: block !important;
   }
 </style>

@@ -251,7 +251,6 @@ export default ({
             let filtered = this.designations.filter(el=>{
                 return el.facility_name.toLowerCase().includes(this.searchDesignations.toLowerCase()) && !this.queSched.designations.includes(el.facility_id);
             });
-            console.log(filtered);
             return filtered;
         }
     },
@@ -298,7 +297,6 @@ export default ({
                         {
                             obj = JSON.parse(JSON.stringify(element));
                             this.facilitiesm.push(obj);
-                            console.log(this.facilitiesm);
                         }
                     });
                 });
@@ -315,7 +313,6 @@ export default ({
             }
         },
         objFromArr(arr,id){
-            console.log(id);
             return this[arr].find(el=>el.facility_id == id);
         },
         selectDesignation(num){
@@ -428,8 +425,6 @@ export default ({
                 }).then(res =>{
                     if(res.data.success)
                     {
-                        console.log('aw');
-                        console.log(res.data.result.result.users_id);
                         newUsers.branch.forEach(element => {
                             axios.post('branches/createpermit',null,{permission_user_id: res.data.result.result.users_id, permission_facility_id: element}).catch(res=>{
 

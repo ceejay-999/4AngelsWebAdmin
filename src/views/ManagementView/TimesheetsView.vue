@@ -98,7 +98,6 @@ export default ({
                 return;
             }
             this.timesheets = res.data.result;
-            console.log("on timesheetpage:",this.timesheets);
             if(this.timesheets != null)
             {
                 let temp = []
@@ -125,7 +124,6 @@ export default ({
             if(currentDateString == null || currentDateString == "")
             {
                 this.callToaster("toast-top-right",2);
-                console.log('aw');
                 return;
             }
             if(weekDateString == null || weekDateString == "")
@@ -140,7 +138,6 @@ export default ({
                     return;
                 }
                 this.timesheets = res.data.result;
-                console.log("on timesheetpage:",this.timesheets);
                 if(this.timesheets != null)
                 {
                     let temp = []

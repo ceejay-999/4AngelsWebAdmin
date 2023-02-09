@@ -73,7 +73,6 @@ export default ({
     },
     methods:{
         genXLSXTable(){
-            console.log(this.loaded);
             if(this.loaded != null)
             {
                 const table = document.getElementById("DataTable_Element");
@@ -89,7 +88,6 @@ export default ({
                     return;
                 }
                 this.timesheets = res.data.result;
-                console.log("on timesheetpage:",this.timesheets);
                 if(this.timesheets != null)
                 {
                     let temp = []

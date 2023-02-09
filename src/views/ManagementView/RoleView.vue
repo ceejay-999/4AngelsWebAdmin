@@ -252,7 +252,7 @@ export default ({
                         document.querySelector('.feedback1').textContent = "Role name is required";
                         document.querySelector('.feedback1').style.display = "block";
                     }
-                    if(a == rolecolor)
+                    if(a == "rolecolor")
                     {
                         document.querySelector('.feedback2').textContent = "Role Color is required";
                         document.querySelector('.feedback2').style.display = "block";
@@ -358,7 +358,6 @@ export default ({
 
         }).then(res=>{
            this.role = res.data.result;
-           console.log(res);
         });
         
     },

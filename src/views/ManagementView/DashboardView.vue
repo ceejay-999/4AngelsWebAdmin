@@ -722,7 +722,6 @@ export default ({
                     if(flag == 1)
                     {
                         axios.post("timesheet/create?returnall=true",null,{timesheets_totalpaid: firstpast.assignschedules_totalwage,timesheets_totalhour: firstpast.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: firstpast.schedules_dates }).then(res=>{
-                            console.log('aw');
                             this.timesheets = res.data.info.result;
                             axios.post("assigned/update?id="+firstpast.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
 
@@ -748,24 +747,19 @@ export default ({
                     };
                         for(let i = 0; i < this.timesheets.length; i++)
                         {
-                            console.log(new Date(this.timesheets[i].timesheets_schedule),new Date(element.schedules_dates))
-                            console.log(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime());
+                            
                             if(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime())
                             {
-                                console.log('inner if sa loop',this.timesheets[i]);
                                 flag = 1;
                                 sheettime = this.timesheets[i];
                                 index = i;
-                                console.log('aw3');
                                 break;
                             }
-                            console.log('outer if sa loop',this.timesheets[i]);
                         }
                         if(flag == 1)
                         {
                             if(element.assignschedules_recorded == 0)
                             {
-                                console.log('aw1');
                                 let totwage = 0;
                                 let tothour = 0;
                                 let timecard = 0;
@@ -780,8 +774,6 @@ export default ({
                                 totwage = parseFloat(sheettime.timesheets_totalpaid) + parseFloat(element.assignschedules_totalwage);
                                 tothour = parseFloat(sheettime.timesheets_totalhour) + parseFloat(element.assignschedules_totalhours);
                                 timecard = parseInt(sheettime.timesheets_totaltimecard) + 1;
-                                console.log('index',index)
-                                console.log('timesheet',this.timesheets[index]);
                                 this.timesheets[index].timesheets_totalpaid = totwage;
                                 this.timesheets[index].timesheets_totalhour = tothour;
                                 this.timesheets[index].timesheets_totaltimecard = timecard;
@@ -799,7 +791,6 @@ export default ({
                         {
                             if(element.assignschedules_recorded == 0)
                             {
-                                console.log('aw2');
                                 if(element.assignschedules_totalhours == null)
                                 {
                                     element.assignschedules_totalhours = 0;
@@ -813,11 +804,6 @@ export default ({
                                 newtimesheet.timesheets_totaltimecard = 1;
                                 newtimesheet.timesheets_schedule = element.schedules_dates;
                                 this.timesheets.push(newtimesheet);
-                                console.log(element.assignschedules_totalwage);
-                                console.log(element.assignschedules_totalhours);
-                                console.log('newtimesheetpaid',newtimesheet.timesheets_totalpaid);
-                                console.log('newtimesheethour',newtimesheet.timesheets_totalhour);
-                                console.log('timecard on aw2',newtimesheet.timesheets_totaltimecard);
                                 axios.post("timesheet/create?returnall",null,{timesheets_totalpaid: element.assignschedules_totalwage,timesheets_totalhour: element.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: element.schedules_dates }).then(res=>{
                                     axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
 

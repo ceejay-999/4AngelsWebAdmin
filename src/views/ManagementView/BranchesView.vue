@@ -255,7 +255,6 @@ export default ({
             axios.post("branches/search?from=name&s="+this.searchkey+"&batch=true").then(res=>{
                 if(res.data.success){
                     this.branches = res.data.result;
-                    console.log(res.data.result);
                     document.querySelector(".textcenter").style.display = "none";
                 }
                 else{
@@ -329,7 +328,6 @@ export default ({
                 this.long = res.data.result.facility_location_long;
                 this.lat = res.data.result.facility_location_lat;
                 this.branchimg = res.data.result.facility_image;
-                console.log(res.data.result.facility_image)
             });
         },
         SaveBranch(data){
@@ -375,10 +373,7 @@ export default ({
                 {onUploadProgress:progressEvent =>{
                     this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
                 }}).catch(ress=>{
-                    console.log(ress.data);
-                    console.log('aw2');
                 }).then(ress=>{
-                    console.log(ress.data);
                     if(!ress.data.success){
                         alert('Error Uploading File!');
                         return;
@@ -447,9 +442,7 @@ export default ({
                 {onUploadProgress:progressEvent =>{
                     this.uploading[fname] = Math.floor((progressEvent.loaded/progressEvent.total) * 100);
                 }}).catch(ress=>{
-                    console.log(ress.data);
                 }).then(ress=>{
-                    console.log(ress.data);
                     if(!ress.data.success){
                         alert('Error Uploading File!');
                     }
@@ -458,7 +451,6 @@ export default ({
                         this.clearVariable();
                         this.callToaster("toast-top-right",2);
                     }).then(res=>{
-                        console.log(res.data);
                         if(res.data.success)
                         {
                             this.clearVariable();
@@ -582,6 +574,7 @@ export default ({
         }
     },
     mounted() {
+        
         //mapbox Start
         let permiss = lStore.get('users_info')
         this.permi = permiss.users_permission_status;
@@ -633,12 +626,10 @@ export default ({
                             {
                                 obj = JSON.parse(JSON.stringify(element));
                                 this.branches.push(obj);
-                                console.log(this.branches);
                             }
                         });
                     });
                 });
-                console.log(this.branches);
                 document.querySelector(".textcenter").style.display = "none";
             }
             else{
@@ -674,5 +665,9 @@ export default ({
 .modal-body .img-fluid{
     width: 100%;
     height: auto;
+}
+.mapboxgl-ctrl-geocoder .mapboxgl-ctrl
+{
+
 }
 </style>

@@ -269,15 +269,15 @@
                 </nav>
             </div>
         </div>
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger" role="alert" v-if="viewusers.employee_comment != null || viewusers.employee_comment != ''">
             Reason of Terminate: <br />
             {{viewusers.employee_comment}}
         </div>  
         <div class="invoice-wrapper rounded border bg-white py-5 px-3 px-md-4 px-lg-5">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img v-if="employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'" :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
-                    <img v-else src="../../assets/users.png" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-if="viewusers.employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'" :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-else :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
                     <div>
                         <h2 class="text-dark font-weight-medium">{{viewusers.employee_firstname}} {{viewusers.employee_lastname}}</h2>
                         <ul class="list-unstyled">
@@ -503,8 +503,6 @@ export default({
     }).then(res=>{
         if(res.data.success){
             this.designation = res.data.result;
-            console.log('aw');
-            console.log(this.designation);
         }
     });
     axios.post("branches?&_batch=true").catch(res=>{
@@ -512,7 +510,6 @@ export default({
     }).then(res=>{
             if(res.data.success){
                 this.branches = res.data.result;
-                console.log(this.branches);
             }
     });
     document.querySelector(".toast").id = "toaster";
@@ -522,7 +519,6 @@ export default({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
         });
-        console.log(geocoder3);
         const geocoder4 = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
@@ -537,16 +533,6 @@ export default({
                 geocoder4.addTo('#geocoder2');
             }
          });
-
-        // geocoder3.on('result', e => {
-        //     console.log(e);
-        //     this.address = e.result.place_name;
-        // });
-
-        // geocoder4.on('result', e => {
-        //     console.log(e);
-        //     this.address = e.result.place_name;
-        // });
         axios.post("designation?_batch=true").catch(res=>{
         }).then(res=>{
             if(res.data.success){
@@ -630,7 +616,6 @@ export default({
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        console.log(res.data.success);
                         this.callToaster("toast-top-right",1);
                         document.querySelector('#termModalForm').style.display = "none"
                         this.cleardata();
@@ -653,7 +638,6 @@ export default({
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        console.log("aw");
                         this.callToaster("toast-top-right",1);
                         this.cleardata();
                         setTimeout(() => {
@@ -693,7 +677,6 @@ export default({
             });
             if(valid.allValid)
             {
-                console.log(document.querySelector('#dess').value);
                 axios.post("userDesignations/update?employeeid="+lStore.get("userdetails")+"&id="+lStore.get("editrolebranchid"),null,{assigndesignation_roleid:newRole.roles,assigndesignation_wagerate: newRole.rate}).catch(res=>{
 
                 }).then(res=>{
@@ -752,7 +735,6 @@ export default({
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        console.log("aw");
                         this.callToaster("toast-top-right",1);
                         document.querySelector('#AddRoleModalForm').style.display = "none"
                         this.cleardata();
@@ -820,7 +802,6 @@ export default({
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        console.log("aw");
                         this.callToaster("toast-top-right",1);
                         document.querySelector('#personalModalForm').style.display = "none"
                         this.cleardata();
@@ -891,7 +872,6 @@ export default({
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        console.log("aw");
                         this.callToaster("toast-top-right",1);
                         document.querySelector('#contactModalForm').style.display = "none"
                         this.cleardata();
@@ -911,23 +891,6 @@ export default({
             }).then(res=>{
                 if(res.data.success == true)
                 {
-                    // arr = res.data.result;
-                    // arr.forEach(element => {
-                    //     if(element.branch_id == data)
-                    //     {
-                    //         this.editrole = {
-                    //             position: element.position,
-                    //             designation_id: element.designation_id,
-                    //             hourly_rate: element.hourly_rate,
-                    //         }
-                    //         lStore.set("editrolebranchid",data);
-                    //         var dessselected = document.getElementById('desss');
-                    //         dessselected.options[dessselected.selectedIndex].text = this.editrole.position;
-                    //         dessselected.options[dessselected.selectedIndex].value = this.editrole.designation_id;
-                    //         dessselected.options[dessselected.selectedIndex].disabled = true;
-                    //         this.rates = this.editrole.hourly_rate;
-                    //     }
-                    // });
                     lStore.set("editrolebranchid",data);
                     var dessselected = document.getElementById('desss');
                     this.editrole.position = res.data.result.role_name;

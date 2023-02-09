@@ -293,7 +293,6 @@ export default ({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
         });
-        console.log(geocoder1);
         const geocoder2 = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
@@ -346,15 +345,13 @@ export default ({
                     return;
                 }
                 this.users = res.data.result;
-                console.log(this.users);
                 this.searchkey = "";
             });
         },
-        ShowTerm(){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        ShowTerm(){                                                                                                                                        
             if(this.value == 0)
             {
                 this.value = 1;
-                console.log(this.value);
                 axios.post("employee?&_batch=true").catch(res=>{
                 }).then(res=>{
                   this.users = res.data.result;
@@ -363,7 +360,6 @@ export default ({
             else
             {
                 this.value = 0;
-                console.log(this.value);
                 axios.post("employee?status=0&_batch=true").catch(res=>{
                 }).then(res=>{
                     this.users = res.data.result;
@@ -403,10 +399,8 @@ export default ({
                     assigndesignation_wagerate: document.querySelector("#rates").value,
                 }
                 newArrRole.push(newRole);
-                console.log(newArrRole);
                 for(let i = 1; i <= this.rolenumberformindex; i++)
                 {
-                    console.log(i);
                     newRole = {
                         assigndesignation_roleid: document.querySelector("#des"+ i).value,
                         assigndesignation_facilityid: document.querySelector("#bran"+ i).value,
@@ -547,7 +541,6 @@ export default ({
                     }
                 }
             });
-            console.log(valid.allValid + " and " + check)
             if(valid.allValid && check == 0){
                 let roleArrusers = [];
                 let roleusers = {
@@ -568,15 +561,12 @@ export default ({
                         roleArrusers.push(roleusers);
                     }
                 }
-                console.log(roleArrusers);
                 delete newUser.confirmpassword;
                 roleArrusers.forEach((el,i)=>{
-                    console.log(el);
                     newUser['assigndesignation_'+i+'facilityid'] =  el.assigndesignation_facilityid;
                     newUser['assigndesignation_'+i+'roleid'] =  el.assigndesignation_roleid;
                     newUser['assigndesignation_'+i+'wagerate'] =  el.assigndesignation_wagerate;
                 });
-                console.log(newUser);
                 axios.post("employee/create",null,newUser).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{

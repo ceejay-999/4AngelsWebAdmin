@@ -63,7 +63,6 @@ export default ({
             try{
                 html2pdf(document.querySelector('#printMe'),opt).save()
             }catch(e){
-                console.log('printed');
             }
         },1000);
     }

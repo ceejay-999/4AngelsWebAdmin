@@ -350,7 +350,6 @@ export default({
             {
                 if(this.timerecordid != "")
                 {
-                    console.log(this.clockouttime)
                     axios.post("timerecord/update?id="+this.timerecordid,null,{time_out : this.datetoday + " " + this.clockouttime}).then(res=>{
                         if(res.data.success)
                         {
