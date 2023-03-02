@@ -1,6 +1,6 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
         </div>
         <div class="modal fade" id="exampleEditModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
@@ -114,29 +114,34 @@
         <!--Modal-->
         <div class="breadcrumb-wrapper">
             <h1>Role</h1>
-                <nav aria-label="breadcrumb">
-                <ol class="breadcrumb p-0">
-                    <li class="breadcrumb-item">
-                    <RouterLink to="/dashboard">
-                        <span class="mdi mdi-home"></span>                
-                    </RouterLink>
-                    </li>
-                    <li class="breadcrumb-item" aria-current="page">Role</li>
-                </ol>
-                </nav>
+            <nav aria-label="breadcrumb">
+            <ol class="breadcrumb p-0">
+                <li class="breadcrumb-item">
+                <RouterLink to="/dashboard">
+                    <span class="mdi mdi-home"></span>                
+                </RouterLink>
+                </li>
+                <li class="breadcrumb-item" aria-current="page">Role</li>
+            </ol>
+            </nav>
         </div>
         <div class="row">
             <div class="col-12">
                 <div class="card card-default">
                     <div class="card-header card-header-border-bottom d-flex justify-content-between card-design head">
                         <h2>Role Table</h2>
-
-                        <a @click="clearVariable" data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary btn-sm text-uppercase link">
-                            <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
-                        </a>
+                        <div class="d-flex">
+                            <div class="d-flex px-3">
+                                <input class="form-control mr-sm-2" v-model="keyword" placeholder="Search Role" aria-label="Search">
+                                <button class="btn btn-outline-success my-2 my-sm-0" @click="SearchRole">Search</button>
+                            </div>
+                            <a @click="clearVariable" data-toggle="modal" data-target="#exampleModalForm" target="_blank" class="btn btn-outline-primary text-uppercase link">
+                                <span class="mdi mdi-briefcase-plus"></span>&nbsp; Add Role
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body tableinside">
                         <table class="table card-table table-responsive table-responsive-large" style="width:100%">
                             <thead>
                                 <tr>
@@ -148,7 +153,7 @@
                             </thead>
                             <tbody>
                                 <tr v-if="role == null || role == ''">
-                                    <td colspan="3" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
+                                    <td colspan="4" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
                                 </tr>
                             <tr v-for="r in role">
                                 <td >{{ r.role_id }}</td>
@@ -177,9 +182,8 @@
 </template>
 <script type="script">
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
-import { axios , elementLoad} from '@/functions';
+import { axios,validateForm } from '@/functions';
 import toastr from 'toastr';
-import { validateForm } from '../../functions';
 
 export default ({
     name: "App",
@@ -192,9 +196,28 @@ export default ({
             roleid: "",
             rolecolor: "",
             role:[],
+            keyword: "",
         }
     },
+    mounted(){
+        axios.post('rolecontroller/displayallroles',null,{}).then(res=>{
+            if(res.data.success){
+                this.role = res.data.result;
+            }else{
+                this.callToaster("toast-top-right", res.data);
+            }
+        });
+    },
     methods:{
+        SearchRole(){
+            axios.post('rolecontroller/searchroles',null,{keyword: this.keyword}).then(res=>{
+                if(res.data.success){
+                    this.role = res.data.result;
+                }else{
+                    this.callToaster("toast-top-right", res.data);
+                }
+            });
+        },
         EditRole()
         {
             if(this.position == "")
@@ -204,36 +227,30 @@ export default ({
                 return;
             }
             else{
-                document.querySelector(".toast").id = "toaster";
-                axios.post("designation/update?id="+this.roleid,null,{role_name:this.position,role_color: this.rolecolor}).catch(res=>{
-                    this.clearVariable();
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
+                axios.post("rolecontroller/UpdateRoles",null,{roleid: this.roleid, rolename:this.position,rolecolor: this.rolecolor}).then(res=>{
                     if(res.data.success)
                     {
                         this.clearVariable();
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector('#exampleEditModalForm').style.display = "none"
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 3000);
+                        this.callToaster("toast-top-right", res.data);
+                        this.clearModal("exampleEditModalForm");
+                        this.role = res.data.result;
                     }
                     else
                     {
                         this.clearVariable();
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
+                        this.clearModal("exampleEditModalForm");
                     }
                 });
             }
         },
         ViewRole(data)
         {
-            this.clearVariable();
-            axios.post("designation?role_id="+data).catch(res=>{
-
-            }).then(res=>{
-                this.position = res.data.result.role_name;
-                this.rolecolor = res.data.result.role_color;
+            console.log(data);
+            axios.post("rolecontroller/displayarole",null,{roleid: data}).then(res=>{
+                console.log(res.data);
+                this.position = res.data.result[0].role_name;
+                this.rolecolor = res.data.result[0].role_color;
                 this.roleid = data;
             });
         },
@@ -247,39 +264,39 @@ export default ({
                 rolename: "required",
                 rolecolor: "required",
                 callback: (a)=>{
+                    console.log(a);
                     if(a == "rolename")
                     {
+                        console.log(a);
                         document.querySelector('.feedback1').textContent = "Role name is required";
                         document.querySelector('.feedback1').style.display = "block";
                     }
                     if(a == "rolecolor")
                     {
-                        document.querySelector('.feedback2').textContent = "Role Color is required";
+                        console.log(a);
+                        document.querySelector('.feedback2').textContent = "Role color is required";
                         document.querySelector('.feedback2').style.display = "block";
                     }
                 }
             })
+            
             if(valid.allValid)
             {
                 document.querySelector('.feedback1').style.display = "none";
                 document.querySelector('.feedback2').style.display = "none";
-                axios.post("designation/create",null,{role_name:this.position,role_color:this.rolecolor}).catch(res=>{
-                    this.clearVariable();
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
+                axios.post("rolecontroller/CreateRoles",null,{rolename:this.position,rolecolor:this.rolecolor}).then(res=>{
                     if(res.data.success)
                     {
                         this.clearVariable();
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector('#exampleModalForm').style.display = "none"
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
+                        this.callToaster("toast-top-right", res.data);
+                        this.clearModal("exampleModalForm");
+                        this.role = res.data.result;
                     }
                     else
                     {
                         this.clearVariable();
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
+                        this.clearModal("exampleModalForm");
                     }
                 });
             }
@@ -290,12 +307,10 @@ export default ({
             this.clearVariable();
             if(data == "")
             {
-                document.querySelector(".toast").id = "toaster";
                 this.callToaster("toast-top-right",2);
             }
             else
             {
-                document.querySelector(".toast").id = "toaster";
                 axios.post("designation/delete?id="+data).catch(res=>{
                     this.callToaster("toast-top-right",2);
                 }).then(res=>{
@@ -319,7 +334,7 @@ export default ({
                 toastr.options = {
                 closeButton: true,
                 debug: false,
-                newestOnTop: false,
+                newestOnTop: true,
                 progressBar: true,
                 positionClass: positionClass,
                 preventDuplicates: false,
@@ -333,33 +348,37 @@ export default ({
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut"
                 };
-                if(reserror == 1)
+                if(reserror.success == true)
                 {
-                    toastr.success("Data was save successfully", "Successfully Save!");
+                    toastr.success(""+reserror.msg, "Successfully!");
                 }
-                if(reserror == 2)
+                else
                 {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                if(reserror == 3)
-                {
-                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
+        },
+        clearModal(modalname){
+            const exampleModalForm = document.querySelector('#'+ modalname);
+                        exampleModalForm.removeAttribute('aria-modal');
+                        exampleModalForm.removeAttribute('role');
+                        exampleModalForm.setAttribute('aria-hidden', 'true');
+                        exampleModalForm.classList.remove('show');
+                        exampleModalForm.style.display = "none";
+                        exampleModalForm.style.paddingRight = "0";
+                        const bodyForm = document.querySelector('#body');
+                        bodyForm.classList.remove('modal-open');
+                        bodyForm.style.paddingRight = "0";
+                        const modalBackdrop = document.querySelector('.modal-backdrop');
+                        modalBackdrop.parentNode.removeChild(modalBackdrop);
         },
         clearVariable()
         {
             this.position = "";
             this.roleid = "";
+            this.rolecolor =  "";
+            this.keyword = "";
         },
-    },
-    mounted() {
-        axios.post("designation?_batch=true").catch({
-
-        }).then(res=>{
-           this.role = res.data.result;
-        });
-        
     },
 })
 </script>
@@ -374,5 +393,11 @@ export default ({
 .box{
     padding: 20px;
     width: 10%;
+}
+.card-table{
+    margin-top: 0;
+}
+.tableinside{
+    padding: 0;
 }
 </style>

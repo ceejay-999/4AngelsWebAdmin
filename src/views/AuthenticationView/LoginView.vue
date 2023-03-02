@@ -1,5 +1,5 @@
 <template>
-<div class="toast" >
+<div id="toaster" >
 
 </div>
     <div class="container d-flex align-items-center justify-content-center vh-100">
@@ -11,7 +11,7 @@
               <h4 class="text-dark mb-5" id="cent">Sign In Admin</h4>
                 <div class="row">
                   <div class="form-group col-md-12 mb-4">
-                    <input type="email" v-model="loginInput" class="form-control input-lg" id="email" aria-describedby="emailHelp" placeholder="Username">
+                    <input type="email" v-model="loginInput" class="form-control input-lg" id="email" aria-describedby="emailHelp" placeholder="Email">
                   </div>
                   <div class="form-group col-md-12 ">
                     <input type="password" class="form-control input-lg" v-model="password" id="password" placeholder="Password">
@@ -36,7 +36,7 @@
     </div>
 </template>
 <script>
-import { lStore, axios , validateForm } from '../../functions';
+import { lStore, axios } from '../../functions';
 import toastr from 'toastr';
 
 export default({
@@ -49,67 +49,16 @@ export default({
   },
   methods: {
     login(){
-      document.querySelector(".toast").id = "toaster";
-      let rules = {password:{isRequired:true}};
-      let input = {password:this.password};
-      rules.email = {isRequired:true};
-      input.email = this.loginInput;
-      rules.email.callback = ()=>{this.callToaster("toast-top-right",5)};
-      const valid = validateForm(input,rules);
-        if(!valid.allValid) return;
 
-        
-
-        axios.post('users/login',null,{
-            login: this.loginInput,
-            password: this.password
-        }).catch(err=>{
-            this.callToaster("toast-top-right",5);
-        }).then(res=>{
-            if(res.data.success == false && res.data.msg === 'user not found')
-            {
-              this.callToaster("toast-top-right",6);
-            }
-            else if(res.data.success == false && res.data.msg == 'wrong password'){
-              this.callToaster("toast-top-right",6);
-            }
-            else if(res.data.success == true){
-              if(res.data.result.users_permission_status == 1)
-              {
-                lStore.remove('selected_facility');
-                lStore.set('users_id',res.data.result.users_id);
-                lStore.set('users_token',res.data.token);
-                lStore.set('users_info', res.data.result);
-                console.log(res.data.result);
-                this.callToaster("toast-top-right",1);
-                this.$router.replace('/dashboard');
-              }
-              if(res.data.result.users_permission_status == 2)
-              {
-                lStore.remove('selected_facility');
-                lStore.set('users_id',res.data.result.users_id);
-                lStore.set('users_token',res.data.token);
-                lStore.set('users_info', res.data.result);
-                console.log(res.data.result);
-                this.callToaster("toast-top-right",1);
-                this.$router.replace('/dashboard');
-              }
-              if(res.data.result.users_permission_status == 3)
-              {
-                lStore.remove('selected_facility');
-                lStore.set('users_id',res.data.result.users_id);
-                lStore.set('users_token',res.data.token);
-                lStore.set('users_info', res.data.result);
-                console.log(res.data.result);
-                this.callToaster("toast-top-right",1);
-                this.$router.replace('/dashboard');
-              }
-            }
-            else
-            {
-              this.callToaster("toast-top-right",2);
-            }
-      });
+      axios.post('usercontroller/authuser',null,{email: this.loginInput, password:this.password}).then(res=>{
+        if(res.data.success){
+          this.callToaster("toast-top-right",res.data);
+          lStore.set('userdetails',res.data.result[0]);
+          this.$router.push('/dashboard');
+        }else{
+          this.callToaster("toast-top-right",res.data)
+        }
+      })
     },
     callToaster(positionClass, reserror) {
             if (document.getElementById("toaster")) {
@@ -130,29 +79,13 @@ export default({
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut"
                 };
-                if(reserror == 1)
+                if(reserror.success == true)
                 {
-                    toastr.success("Login successfully!", "Login Successfully!");
+                    toastr.success(""+reserror.msg, "Successfully!");
                 }
-                else if(reserror == 2)
+                else
                 {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                else if(reserror == 3)
-                {
-                    toastr.error("Password must be more than 8 characters!", "Error!");
-                }
-                else if(reserror == 4)
-                {
-                  toastr.error("Email must be in valid format!", "Error!");
-                }
-                else if(reserror == 5)
-                {
-                  toastr.error("All fields are required!", "Error!");
-                }
-                else if(reserror == 6)
-                {
-                  toastr.error("Username or password doesn`t match!","Error!");
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
         },

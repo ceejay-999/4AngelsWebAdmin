@@ -98,12 +98,12 @@
                 <h2>Notifications</h2>
               </div>
 
-              <div class="card-body px-0 py-3">
-                <ul class="nav nav-tabs nav-style-border p-0 justify-content-between" id="myTab" role="tablist">
+              <div class="card-body px-0 py-0">
+                <!-- <ul class="nav nav-tabs nav-style-border p-0 justify-content-between" id="myTab" role="tablist">
                   <li class="nav-item mx-3 my-0 py-0">
                     <a class="nav-link active pb-3" id="home2-tab" data-toggle="tab" href="#home2" role="tab" aria-controls="home2" aria-selected="true">All (11)</a>
                   </li>
-                </ul>
+                </ul> -->
 
                 <div class="tab-content" id="myTabContent3">
                   <div class="tab-pane fade show active" id="home2" role="tabpanel" aria-labelledby="home2-tab">
@@ -520,29 +520,31 @@
           </li>
           <!-- User Account -->
           <li class="dropdown user-menu">
-                    <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
-                      <span class="d-none d-lg-inline-block text-success text-uppercase" v-if="infodata.users_permission_status == 1"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Admin )</span>
-                      <span class="d-none d-lg-inline-block text-primary text-uppercase" v-if="infodata.users_permission_status == 2"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Supervisor )</span>
-                      <span class="d-none d-lg-inline-block text-info text-uppercase" v-if="infodata.users_permission_status == 3"><span class="mdi mdi-account"></span>{{infodata.users_username}} ( Manager )</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                      <!-- User image -->
-                      <li class="dropdown-header">
-                        <!-- <div class="d-inline-block"> -->
-                          <span class="mdi mdi-account"></span>
-                          {{infodata.users_username}}
-                        <!-- </div> -->
-                      </li>
-                      <!-- <li>
-                        <a href="#">
-                          <i class="mdi mdi-email"></i> Message
-                        </a>
-                      </li> -->
-                      <li class="dropdown-footer">
-                        <a href="#" @click="logoutAccount"> <i class="mdi mdi-logout"></i> Log Out </a>
-                      </li>
-                    </ul>
-                  </li>
+            <button href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">
+              <img v-if="infodata.user_photo == '' || infodata.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="user-image"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+infodata.user_photo" alt="Profile" class="user-image">
+              <span class="d-none d-lg-inline-block text-uppercase text-success">{{ infodata.user_firstname }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+              <!-- User image -->
+              <li class="dropdown-header">
+                <img v-if="infodata.user_photo == '' || infodata.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="user-image"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+infodata.user_photo" alt="Profile" class="user-image">
+                <div class="d-inline-block text-success">
+                  {{infodata.user_firstname}} {{ infodata.user_lastname }}<br/> 
+                  <small class="pt-1" v-if="infodata.user_access_level_id == 1">( Admin )</small>
+                  <small class="pt-1" v-if="infodata.user_access_level_id == 2">( Supervisor )</small>
+                  <small class="pt-1" v-if="infodata.user_access_level_id == 3">( Manager )</small>
+                </div>
+              </li>
+              <li>
+                <RouterLink to="/profile">
+                  <i class="mdi mdi-account"></i> My Profile
+                </RouterLink>
+              </li>
+              <li class="dropdown-footer">
+                <a href="#" @click="logoutAccount"> <i class="mdi mdi-logout"></i> Log Out </a>
+              </li>
+            </ul>
+          </li>
         </ul>
       </div>
     </nav>
@@ -556,7 +558,7 @@
   </div>
 </template>
 <script>
-import { axios , validateForm,lStore } from '@/functions.js';
+import { lStore } from '@/functions.js';
 
 export default ({
   name: "App",
@@ -572,7 +574,7 @@ export default ({
     }
   },
   mounted(){
-    this.infodata = lStore.get("users_info");
+    this.infodata = lStore.get("userdetails");
     $(document).ready(function () {
 
     setInterval(()=>{
@@ -886,6 +888,16 @@ export default ({
 @import '../../assets/scss/_sidebar.scss';
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
+.profile img {
+  max-height: 36px;
+}
+.navbar{
+  padding-right: 0;
+}
+.navbar .navbar-right .navbar-nav li > .dropdown-menu{
+  min-width: 284px;
+  width: 100%;
+}
 .app-brand{
     background-color: #f3feff !important;
   }
@@ -917,10 +929,16 @@ export default ({
   .close:hover{
     color:blue;
   }
-  .navbar .dropdown-menu li.dropdown-header{
-    border-bottom: none;
-  }
-  .tab-content{
+  .tab-content, #home2{
     display: block !important;
+  }
+  .navbar .dropdown-menu li.dropdown-footer{
+    margin-top: 0;
+  }
+  .navbar .dropdown-menu li.dropdown-header{
+    margin-bottom: 0;
+  }
+  .navbar .dropdown-menu > li a[data-v-543bc2ab], .notifications-list li a{
+    padding: .94rem 1.25rem;
   }
 </style>

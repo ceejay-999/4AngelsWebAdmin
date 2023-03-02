@@ -40,6 +40,7 @@
                         <th class="font-weight-bold">Time Card</th>
                         <th class="font-weight-bold">Total Hours</th>
                         <th class="font-weight-bold">Total Paid</th>
+                        <th class="font-weight-bold">Action</th>
                     </tr>
                 </thead>
                 
@@ -56,6 +57,7 @@
                         <td>{{ timeshet.timesheets_totaltimecard }} Total Time Cards</td>
                         <td class="font-weight-bold text-left">{{ timeshet.timesheets_totalhour }}</td>
                         <td class="font-weight-bold text-left">${{ timeshet.timesheets_totalpaid }}</td>
+                        <td></td>
                     </tr>
                     <tr :id="'accordion'+timeshet.timesheets_id" class="collapse" v-for="sched in pastschedules">
                         <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.employee_firstname+" "+ sched.employee_lastname }}</div></td>
@@ -64,6 +66,10 @@
                         <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div v-if="sched.assignschedules_timein != null && sched.assignschedules_timeout != null ">{{ sched.assignschedules_timein +" - "+ sched.assignschedules_timeout }}</div><div class="text-danger" v-else>No Clockin / No Clockout</div></td>
                         <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.assignschedules_totalhours }}</div></td>
                         <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>${{ sched.assignschedules_totalwage }}</div></td>
+                        <td><a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                        </div></td>
                     </tr>
                 </tbody>
             </table>
@@ -92,29 +98,33 @@ export default ({
         }
     },
     mounted(){
-        axios.post('timesheet?_batch=true').then(res=>{
-            if(res.data.result == null)
-            {
-                return;
-            }
-            this.timesheets = res.data.result;
-            if(this.timesheets != null)
-            {
-                let temp = []
-                axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
-                    temp = res.data.result;
-                    this.timesheets.forEach(element => {
-                        temp.forEach(e => {
-                            if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
-                            {
-
-                                this.pastschedules.push(e);
-                            }
-                        });
-                    });
-                });
-            } 
+        axios.post('timesheetcontroller/gettimesheet?facility='+this.branchselected).then(res=>{
+            console.log(res);
         });
+        // axios.post('timesheet?_batch=true').then(res=>{
+        //     if(res.data.result == null)
+        //     {
+        //         return;
+        //     }
+        //     this.timesheets = res.data.result;
+        //     if(this.timesheets != null)
+        //     {
+        //         let temp = []
+        //         axios.post("")
+        //         // axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
+        //         //     temp = res.data.result;
+        //         //     this.timesheets.forEach(element => {
+        //         //         temp.forEach(e => {
+        //         //             if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
+        //         //             {
+
+        //         //                 this.pastschedules.push(e);
+        //         //             }
+        //         //         });
+        //         //     });
+        //         // });
+        //     } 
+        // });
     },
     methods:{
         FilterDates(currentDateString,weekDateString){
@@ -191,6 +201,8 @@ export default ({
 <style scoped>
 @import '../../assets/scss/_card.scss';
 @import '../../assets/scss/_breadcrumb.scss';
+@import '../../assets/scss/_type.scss';
+@import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
 
 .card{

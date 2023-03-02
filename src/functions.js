@@ -60,49 +60,49 @@ function validateForm(obj,rules) {
                 validated[r] = true;
             else if (rules[r].isEmail ) {
                 validated[r] = 'invalid_email';
-                break;
+                continue;
             }
 
             if (rules[r].isInteger && obj[r].match(intregex))
                 validated[r] = true;
             else if (rules[r].isInteger) {
                 validated[r] = 'invalid_number';
-                break;
+                continue;
             }
 
             if (rules[r].isFloat && (obj[r].match(floatregex) || obj[r].match(intregex)))
                 validated[r] = true;
             else if (rules[r].isFloat) {
                 validated[r] = 'invalid_number';
-                break;
+                continue;
             }
 
             if (rules[r].regexMatch != null && obj[r].match(rules[r].regexMatch))
                 validated[r] = true;
             else if (rules[r].regexMatch != null) {
                 validated[r] = 'value_and_regex_not_match';
-                break;
+                continue;
             }
 
             if (rules[r].equalTo != null &&  obj[r] == rules[r].equalTo)
                 validated[r] = true;
             else if (rules[r].equalTo != null) {
                 validated[r] = 'values_not_match';
-                break;
+                continue;
             }
 
             if (typeof rules[r].maxChars == 'number' && rules[r].maxChars >= obj[r].length)
                 validated[r] = true;
             else if (typeof rules[r].maxChars == 'number') {
                 validated[r] = 'invalid_length_max';
-                break;
+                continue;
             }
 
             if (typeof rules[r].minChars == 'number' && rules[r].minChars <= obj[r].length)
                 validated[r] = true;
             else if (typeof rules[r].minChars == 'number') {
                 validated[r] = 'invalid_length_min';
-                break;
+                continue;
             }
         }
     }
@@ -113,9 +113,9 @@ function validateForm(obj,rules) {
         for (let v in validated) {
             if (validated[v] === 'empty') {
                 validated.allValid = false;
-                rules.callback();
+                rules.callback(v);
                 someEmpty = true;
-                break;
+                continue;
             }
         }
     }
@@ -126,7 +126,7 @@ function validateForm(obj,rules) {
                 validated.allValid = false;
                 if (rules[v].callback != null) {
                     rules[v].callback(validated[v],v);
-                    break;
+                    continue;
                 }
             }
         }
@@ -581,7 +581,8 @@ class AxiosR{
     }
 }
 
-const axios = new AxiosR('https://www.4angelshc.com/mobile/');
+const axios = new AxiosR('https://www.4angelshc.com/wangelmobile/');
+// const axios = new AxiosR('https://www.4angelshc.com/mobile/');
 
 export {
     validateForm,

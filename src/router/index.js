@@ -14,6 +14,7 @@ import EmployeePrintable from '../views/ManagementView/EmployeePrintable.vue'
 import EmployeeExportToExcel from '../views/ManagementView/EmployeeExportToExcel.vue'
 import UsersView from '../views/ManagementView/ManageUsers.vue'
 import TimeSheetExport from '../views/ManagementView/TimsheetExportView.vue'
+import ProfileView from '../views/ManagementView/ProfileView.vue'
 import { lStore } from '../functions'
 
 const router = createRouter({
@@ -28,7 +29,7 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
       beforeEnter: () => {
-        if (lStore.isset('users_token')) return '/dashboard';
+        if (lStore.isset('userdetails')) return '/dashboard';
       },
     },
     {
@@ -36,7 +37,7 @@ const router = createRouter({
       name: 'dashboard',
       component: DashboardView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
       
     },
@@ -45,7 +46,7 @@ const router = createRouter({
       name: 'timesheetexport',
       component: TimeSheetExport,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
       
     },
@@ -55,7 +56,15 @@ const router = createRouter({
       component: BranchesView,
       beforeEnter: () => {
         
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
+      },
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      beforeEnter: () => {
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -64,7 +73,7 @@ const router = createRouter({
       component: BranchesEmployView,
       beforeEnter: () => {
         
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -72,7 +81,7 @@ const router = createRouter({
       name: 'designation',
       component: DesignationView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -80,8 +89,8 @@ const router = createRouter({
       name: 'employeeprint',
       component: EmployeePrintable,
       beforeEnter: () => {
-        console.log(lStore.isset('users_token'));
-        if (!lStore.isset('users_token')) return '/login';
+        console.log(lStore.isset('userdetails'));
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -89,8 +98,8 @@ const router = createRouter({
       name: 'employeeexcel',
       component: EmployeeExportToExcel,
       beforeEnter: () => {
-        console.log(lStore.isset('users_token'));
-        if (!lStore.isset('users_token')) return '/login';
+        console.log(lStore.isset('userdetails'));
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -98,8 +107,8 @@ const router = createRouter({
       name: 'employee',
       component: EmployeeView,
       beforeEnter: () => {
-        console.log(lStore.isset('users_token'));
-        if (!lStore.isset('users_token')) return '/login';
+        console.log(lStore.isset('userdetails'));
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -107,8 +116,8 @@ const router = createRouter({
       name: 'employeeprofile',
       component: EmployeeProfileView,
       beforeEnter: () => {
-        console.log(lStore.isset('users_token'));
-        if (!lStore.isset('users_token')) return '/login';
+        console.log(lStore.isset('userdetails'));
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -116,7 +125,7 @@ const router = createRouter({
       name: 'jobschedule',
       component: JobScheduleView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -124,7 +133,7 @@ const router = createRouter({
       name: 'timeclock',
       component: TimeclockView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -132,7 +141,7 @@ const router = createRouter({
       name: 'timesheets',
       component: TimesheetsView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -140,7 +149,7 @@ const router = createRouter({
       name: 'request',
       component: RequestVIew,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
     },
     {
@@ -148,7 +157,7 @@ const router = createRouter({
       name: 'users',
       component: UsersView,
       beforeEnter: () => {
-        if (!lStore.isset('users_token')) return '/login';
+        if (!lStore.isset('userdetails')) return '/login';
       },
       
     },
