@@ -409,453 +409,453 @@ export default ({
             timesheets: [],
         }
     },
-    mounted(){
+    // mounted(){
         
-        this.datetoday = new Date().toLocaleString();
+    //     this.datetoday = new Date().toLocaleString();
 
-        axios.post("branches?_batch=true").catch(res=>{
-        }).then(res=>{
-            this.totalfacility = res.data.result.length;
-        });
-        axios.post("employee?_batch=true").catch(res=>{
-        }).then(res=>{
-            let obj = {};
-            res.data.result.forEach(element => {
-                if(element.users_permission_status == 2)
-                {
-                    obj = element;
-                    this.users.push(obj);
-                }
-            });
-            this.totalsupervisor = this.users.length;
-            this.users = [];
-            obj = {};
-            res.data.result.forEach(element => {
-                if(element.users_permission_status == 3)
-                {
-                    obj = element;
-                    this.users.push(obj);
-                }
-            });
-            this.totalmanagers = this.users.length;
-        });
+    //     axios.post("branches?_batch=true").catch(res=>{
+    //     }).then(res=>{
+    //         this.totalfacility = res.data.result.length;
+    //     });
+    //     axios.post("employee?_batch=true").catch(res=>{
+    //     }).then(res=>{
+    //         let obj = {};
+    //         res.data.result.forEach(element => {
+    //             if(element.users_permission_status == 2)
+    //             {
+    //                 obj = element;
+    //                 this.users.push(obj);
+    //             }
+    //         });
+    //         this.totalsupervisor = this.users.length;
+    //         this.users = [];
+    //         obj = {};
+    //         res.data.result.forEach(element => {
+    //             if(element.users_permission_status == 3)
+    //             {
+    //                 obj = element;
+    //                 this.users.push(obj);
+    //             }
+    //         });
+    //         this.totalmanagers = this.users.length;
+    //     });
         
-        axios.post("branches?facility_id="+lStore.get("selected_facilityId")).catch(res=>{
+    //     axios.post("branches?facility_id="+lStore.get("selected_facilityId")).catch(res=>{
 
-        }).then(res=>{
-            if(res.data.success)
-            {
-                this.branch = res.data.result;
-            }
-        });
-        this.gethourlydata();
-        this.GetTimesheetonpastschedules();
-        setInterval(() => {
-            this.gethourlydata();this.GetTimesheetonpastschedules();
+    //     }).then(res=>{
+    //         if(res.data.success)
+    //         {
+    //             this.branch = res.data.result;
+    //         }
+    //     });
+    //     this.gethourlydata();
+    //     this.GetTimesheetonpastschedules();
+    //     setInterval(() => {
+    //         this.gethourlydata();this.GetTimesheetonpastschedules();
             
-        }, 3000);
-    },
-    methods:{
-        startAndEnd(element){
-            let scheduleDate = element.schedules_dates;
-            let scheduleTimeStart = element.schedules_timestart;
-            let scheduleTimeEnd = element.schedules_timeend;
-            let clockTimeEnd = element.assignschedules_timeout;
-            let clockTimeStart = element.assignschedules_timein;
+    //     }, 3000);
+    // },
+    // methods:{
+    //     startAndEnd(element){
+    //         let scheduleDate = element.schedules_dates;
+    //         let scheduleTimeStart = element.schedules_timestart;
+    //         let scheduleTimeEnd = element.schedules_timeend;
+    //         let clockTimeEnd = element.assignschedules_timeout;
+    //         let clockTimeStart = element.assignschedules_timein;
 
-            let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-            let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-            let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-            let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-            let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-            scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
+    //         let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
+    //         let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
+    //         let clockStart = new Date(scheduleDate+' '+clockTimeStart);
+    //         let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
+    //         let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
+    //         scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
 
-            const dayHrs = 1000 * 60 * 60;
+    //         const dayHrs = 1000 * 60 * 60;
 
-            //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-            if(schedEnd.getTime() < schedStart.getTime()) {
-                //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-            if(clockStart.getTime() < clockEnd.getTime()){
-                clockStart.setDate(clockStart.getDate() + 1);
-            }
+    //         //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
+    //         if(schedEnd.getTime() < schedStart.getTime()) {
+    //             //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
+    //         if(clockStart.getTime() < clockEnd.getTime()){
+    //             clockStart.setDate(clockStart.getDate() + 1);
+    //         }
 
-            //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-            if(clockEnd.getTime() < schedStart.getTime()) {
-                clockEnd.setDate(clockEnd.getDate() + 1);
-            }
-                schedEnd.setDate(schedEnd.getDate() + 1);
-            }
+    //         //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
+    //         if(clockEnd.getTime() < schedStart.getTime()) {
+    //             clockEnd.setDate(clockEnd.getDate() + 1);
+    //         }
+    //             schedEnd.setDate(schedEnd.getDate() + 1);
+    //         }
             
-            return [schedStart,schedEnd,clockStart,clockEnd];
-        },
-        cleardata(){
-            this.assignschedid = "";
-            this.assignschedclockin = "";
-            this.assignschedclockout = "";
-        },
-        gethourlydata(){
-            axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid&_batch=true").catch(res=>{
+    //         return [schedStart,schedEnd,clockStart,clockEnd];
+    //     },
+    //     cleardata(){
+    //         this.assignschedid = "";
+    //         this.assignschedclockin = "";
+    //         this.assignschedclockout = "";
+    //     },
+    //     gethourlydata(){
+    //         axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid&_batch=true").catch(res=>{
 
-            }).then(res=>{
-                if(!res.data.success)
-                {
-                    return;
-                }
-                if(res.data.success)
-                {
-                    this.totalhoursb = 0;
-                    this.totalwageb = 0;
-                    this.assignschedules = [];
-                    let allarr = [];
-                    allarr = res.data.result;
-                    allarr.forEach(element => {
-                        //first checking if ang data is karon nga date
-                        if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString()|| new Date(element.schedules_dates).toLocaleDateString() > new Date().toLocaleDateString())
-                        {
-                            if(this.startAndEnd(element)[1].getTime() < new Date().getTime() && element.assignschedules_status != 5)
-                            {
-                                element.assignschedules_status = 5;
-                                let scheduleDate = element.schedules_dates;
-                                let scheduleTimeStart = element.schedules_timestart;
-                                let scheduleTimeEnd = element.schedules_timeend;
-                                let clockTimeEnd = element.assignschedules_timeout;
-                                let clockTimeStart = element.assignschedules_timein;
+    //         }).then(res=>{
+    //             if(!res.data.success)
+    //             {
+    //                 return;
+    //             }
+    //             if(res.data.success)
+    //             {
+    //                 this.totalhoursb = 0;
+    //                 this.totalwageb = 0;
+    //                 this.assignschedules = [];
+    //                 let allarr = [];
+    //                 allarr = res.data.result;
+    //                 allarr.forEach(element => {
+    //                     //first checking if ang data is karon nga date
+    //                     if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString()|| new Date(element.schedules_dates).toLocaleDateString() > new Date().toLocaleDateString())
+    //                     {
+    //                         if(this.startAndEnd(element)[1].getTime() < new Date().getTime() && element.assignschedules_status != 5)
+    //                         {
+    //                             element.assignschedules_status = 5;
+    //                             let scheduleDate = element.schedules_dates;
+    //                             let scheduleTimeStart = element.schedules_timestart;
+    //                             let scheduleTimeEnd = element.schedules_timeend;
+    //                             let clockTimeEnd = element.assignschedules_timeout;
+    //                             let clockTimeStart = element.assignschedules_timein;
 
-                                let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-                                let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-                                let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-                                let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-                                let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-                                scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
+    //                             let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
+    //                             let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
+    //                             let clockStart = new Date(scheduleDate+' '+clockTimeStart);
+    //                             let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
+    //                             let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
+    //                             scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
 
-                                const dayHrs = 1000 * 60 * 60;
+    //                             const dayHrs = 1000 * 60 * 60;
 
-                                //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-                                if(schedEnd.getTime() < schedStart.getTime()) {
-                                    //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-                                if(clockStart.getTime() < clockEnd.getTime()){
-                                    clockStart.setDate(clockStart.getDate() + 1);
-                                }
+    //                             //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
+    //                             if(schedEnd.getTime() < schedStart.getTime()) {
+    //                                 //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
+    //                             if(clockStart.getTime() < clockEnd.getTime()){
+    //                                 clockStart.setDate(clockStart.getDate() + 1);
+    //                             }
                                 
-                                //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-                                if(clockEnd.getTime() < schedStart.getTime()) {
-                                    clockEnd.setDate(clockEnd.getDate() + 1);
-                                }
+    //                             //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
+    //                             if(clockEnd.getTime() < schedStart.getTime()) {
+    //                                 clockEnd.setDate(clockEnd.getDate() + 1);
+    //                             }
 
-                                    schedEnd.setDate(schedEnd.getDate() + 1);
-                                }
-
-
-
-                                let lateHours = 0;
-                                let overHours = 0;
-                                let underHours = 0;
-                                let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
+    //                                 schedEnd.setDate(schedEnd.getDate() + 1);
+    //                             }
 
 
 
-                                if(clockStart.getTime() > schedStart.getTime()){
-                                    lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
-                                }
-
-                                if(clockEnd.getTime() > schedEnd.getTime()){
-                                    overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
-                                }
-
-                                if(schedEnd.getTime() > clockEnd.getTime()){
-                                    underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
-                                }
-
-                                regularHours = regularHours - (lateHours + underHours);
+    //                             let lateHours = 0;
+    //                             let overHours = 0;
+    //                             let underHours = 0;
+    //                             let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
 
 
-                                if(regularHours <= 0.5) regularHours = 0;
-                                if(clockTimeStart == null || clockTimeEnd == null)
-                                {
-                                    regularHours = 0;
-                                }
 
-                                
+    //                             if(clockStart.getTime() > schedStart.getTime()){
+    //                                 lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
+    //                             }
+
+    //                             if(clockEnd.getTime() > schedEnd.getTime()){
+    //                                 overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
+    //                             }
+
+    //                             if(schedEnd.getTime() > clockEnd.getTime()){
+    //                                 underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
+    //                             }
+
+    //                             regularHours = regularHours - (lateHours + underHours);
+
+
+    //                             if(regularHours <= 0.5) regularHours = 0;
+    //                             if(clockTimeStart == null || clockTimeEnd == null)
+    //                             {
+    //                                 regularHours = 0;
+    //                             }
 
                                 
-                                element.assignschedules_totalhours = regularHours;
-                                element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
-                                element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
-                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
-
-                                }).then(res=>{
-
-                                });
-                            }
-                            else if(this.startAndEnd(element)[1].getTime() < new Date().getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
-                            {
-                                element.assignschedules_status = 5;
-                                let scheduleDate = element.schedules_dates;
-                                let scheduleTimeStart = element.schedules_timestart;
-                                let scheduleTimeEnd = element.schedules_timeend;
-                                let clockTimeEnd = element.assignschedules_timeout;
-                                let clockTimeStart = element.assignschedules_timein;
-
-                                let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-                                let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-                                let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-                                let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-                                let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-                                scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
-
-                                const dayHrs = 1000 * 60 * 60;
-
-                                //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-                                if(schedEnd.getTime() < schedStart.getTime()) {
-                                    //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-                                if(clockStart.getTime() < clockEnd.getTime()){
-                                    clockStart.setDate(clockStart.getDate() + 1);
-                                }
-                                
-                                //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-                                if(clockEnd.getTime() < schedStart.getTime()) {
-                                    clockEnd.setDate(clockEnd.getDate() + 1);
-                                }
-
-                                    schedEnd.setDate(schedEnd.getDate() + 1);
-                                }
-
-
-
-                                let lateHours = 0;
-                                let overHours = 0;
-                                let underHours = 0;
-                                let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
-
-
-
-                                if(clockStart.getTime() > schedStart.getTime()){
-                                    lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
-                                }
-
-                                if(clockEnd.getTime() > schedEnd.getTime()){
-                                    overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
-                                }
-
-                                if(schedEnd.getTime() > clockEnd.getTime()){
-                                    underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
-                                }
-
-                                regularHours = regularHours - (lateHours + underHours);
-
-                                if(regularHours <= 0.01)regularHours = 0;
 
                                 
-                                element.assignschedules_totalhours = regularHours;
-                                element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
-                                element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
-                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
+    //                             element.assignschedules_totalhours = regularHours;
+    //                             element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
+    //                             element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
+    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
 
-                                }).then(res=>{
+    //                             }).then(res=>{
 
-                                });
-                            }
-                            if(element.assignschedules_timein == null && (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) < (new Date().getTime()) && element.assignschedules_status != '2' && element.assignschedules_status != '5')
-                            {
+    //                             });
+    //                         }
+    //                         else if(this.startAndEnd(element)[1].getTime() < new Date().getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
+    //                         {
+    //                             element.assignschedules_status = 5;
+    //                             let scheduleDate = element.schedules_dates;
+    //                             let scheduleTimeStart = element.schedules_timestart;
+    //                             let scheduleTimeEnd = element.schedules_timeend;
+    //                             let clockTimeEnd = element.assignschedules_timeout;
+    //                             let clockTimeStart = element.assignschedules_timein;
+
+    //                             let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
+    //                             let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
+    //                             let clockStart = new Date(scheduleDate+' '+clockTimeStart);
+    //                             let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
+    //                             let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
+    //                             scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
+
+    //                             const dayHrs = 1000 * 60 * 60;
+
+    //                             //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
+    //                             if(schedEnd.getTime() < schedStart.getTime()) {
+    //                                 //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
+    //                             if(clockStart.getTime() < clockEnd.getTime()){
+    //                                 clockStart.setDate(clockStart.getDate() + 1);
+    //                             }
                                 
-                                axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
+    //                             //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
+    //                             if(clockEnd.getTime() < schedStart.getTime()) {
+    //                                 clockEnd.setDate(clockEnd.getDate() + 1);
+    //                             }
 
-                                }).then(res=>{
-                                    return;
-                                });
-                            }
+    //                                 schedEnd.setDate(schedEnd.getDate() + 1);
+    //                             }
 
 
 
-                            if(element.assignschedules_totalhours == null || element.assignschedules_totalwage == null)
-                            {
-                                this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(0);
-                                this.totalwageb = parseFloat(this.totalwageb) + parseFloat(0);
-                            }
-                            else{
-                                this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(element.assignschedules_totalhours);
-                                this.totalwageb = parseFloat(this.totalwageb) + parseFloat(element.assignschedules_totalwage);
-                            }
-                            this.assignschedules.push(element);
-                        }
-                        else
-                        {
-                            this.pastschedule.push(element);
-                            axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 4}).catch(res=>{
+    //                             let lateHours = 0;
+    //                             let overHours = 0;
+    //                             let underHours = 0;
+    //                             let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
 
-                            }).then(res=>{
-                                return;
-                            });
-                        }
-                    });
-                    this.assignschedules.sort((a,b)=>{
-                        let timeA = new Date(a.schedules_dates+' '+a.schedules_timestart).getTime();
-                        let timeB = new Date(b.schedules_dates+' '+b.schedules_timestart).getTime();
-                        return timeA - timeB;
-                    });
-                }
-                else
-                {
-                    return;
-                }
-            });
-        },
-        GetTimesheetonpastschedules()
-        {
+
+
+    //                             if(clockStart.getTime() > schedStart.getTime()){
+    //                                 lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
+    //                             }
+
+    //                             if(clockEnd.getTime() > schedEnd.getTime()){
+    //                                 overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
+    //                             }
+
+    //                             if(schedEnd.getTime() > clockEnd.getTime()){
+    //                                 underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
+    //                             }
+
+    //                             regularHours = regularHours - (lateHours + underHours);
+
+    //                             if(regularHours <= 0.01)regularHours = 0;
+
+                                
+    //                             element.assignschedules_totalhours = regularHours;
+    //                             element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
+    //                             element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
+    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
+
+    //                             }).then(res=>{
+
+    //                             });
+    //                         }
+    //                         if(element.assignschedules_timein == null && (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) < (new Date().getTime()) && element.assignschedules_status != '2' && element.assignschedules_status != '5')
+    //                         {
+                                
+    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
+
+    //                             }).then(res=>{
+    //                                 return;
+    //                             });
+    //                         }
+
+
+
+    //                         if(element.assignschedules_totalhours == null || element.assignschedules_totalwage == null)
+    //                         {
+    //                             this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(0);
+    //                             this.totalwageb = parseFloat(this.totalwageb) + parseFloat(0);
+    //                         }
+    //                         else{
+    //                             this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(element.assignschedules_totalhours);
+    //                             this.totalwageb = parseFloat(this.totalwageb) + parseFloat(element.assignschedules_totalwage);
+    //                         }
+    //                         this.assignschedules.push(element);
+    //                     }
+    //                     else
+    //                     {
+    //                         this.pastschedule.push(element);
+    //                         axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 4}).catch(res=>{
+
+    //                         }).then(res=>{
+    //                             return;
+    //                         });
+    //                     }
+    //                 });
+    //                 this.assignschedules.sort((a,b)=>{
+    //                     let timeA = new Date(a.schedules_dates+' '+a.schedules_timestart).getTime();
+    //                     let timeB = new Date(b.schedules_dates+' '+b.schedules_timestart).getTime();
+    //                     return timeA - timeB;
+    //                 });
+    //             }
+    //             else
+    //             {
+    //                 return;
+    //             }
+    //         });
+    //     },
+    //     GetTimesheetonpastschedules()
+    //     {
             
-            axios.post("timesheet?_batch=true").catch(res=>{
-            }).then(res=>{
-                if(res.data.success != true)
-                {
-                    let flag = 0;
-                    let firstpast = {};
-                    for(let i = 0; i < this.pastschedule.length; i++)
-                    {
-                        if(this.pastschedule[i].assignschedules_recorded == 0)
-                        {
-                            this.pastschedule[i].assignschedules_recorded = 1;
-                            flag = 1;
-                            firstpast = this.pastschedule[i]
-                            break;
-                        }
-                    }
-                    if(flag == 1)
-                    {
-                        axios.post("timesheet/create?returnall=true",null,{timesheets_totalpaid: firstpast.assignschedules_totalwage,timesheets_totalhour: firstpast.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: firstpast.schedules_dates }).then(res=>{
-                            this.timesheets = res.data.info.result;
-                            axios.post("assigned/update?id="+firstpast.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+    //         axios.post("timesheet?_batch=true").catch(res=>{
+    //         }).then(res=>{
+    //             if(res.data.success != true)
+    //             {
+    //                 let flag = 0;
+    //                 let firstpast = {};
+    //                 for(let i = 0; i < this.pastschedule.length; i++)
+    //                 {
+    //                     if(this.pastschedule[i].assignschedules_recorded == 0)
+    //                     {
+    //                         this.pastschedule[i].assignschedules_recorded = 1;
+    //                         flag = 1;
+    //                         firstpast = this.pastschedule[i]
+    //                         break;
+    //                     }
+    //                 }
+    //                 if(flag == 1)
+    //                 {
+    //                     axios.post("timesheet/create?returnall=true",null,{timesheets_totalpaid: firstpast.assignschedules_totalwage,timesheets_totalhour: firstpast.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: firstpast.schedules_dates }).then(res=>{
+    //                         this.timesheets = res.data.info.result;
+    //                         axios.post("assigned/update?id="+firstpast.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
 
-                            }).then(res=>{
+    //                         }).then(res=>{
                                 
-                            });
-                        });
-                    }
-                }
-                else
-                {
-                    this.timesheets = res.data.result;
-                    //since masudlan nag usa kabuok dapat ma condition na nako
-                    this.pastschedule.forEach(element => {
-                    let flag = 0;
-                    let sheettime = {};
-                    let index = 0;
-                    let newtimesheet={
-                        timesheets_totalpaid: 0,
-                        timesheets_totalhour: 0,
-                        timesheets_totaltimecard: 0,
-                        timesheets_schedule:"",
-                    };
-                        for(let i = 0; i < this.timesheets.length; i++)
-                        {
+    //                         });
+    //                     });
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 this.timesheets = res.data.result;
+    //                 //since masudlan nag usa kabuok dapat ma condition na nako
+    //                 this.pastschedule.forEach(element => {
+    //                 let flag = 0;
+    //                 let sheettime = {};
+    //                 let index = 0;
+    //                 let newtimesheet={
+    //                     timesheets_totalpaid: 0,
+    //                     timesheets_totalhour: 0,
+    //                     timesheets_totaltimecard: 0,
+    //                     timesheets_schedule:"",
+    //                 };
+    //                     for(let i = 0; i < this.timesheets.length; i++)
+    //                     {
                             
-                            if(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime())
-                            {
-                                flag = 1;
-                                sheettime = this.timesheets[i];
-                                index = i;
-                                break;
-                            }
-                        }
-                        if(flag == 1)
-                        {
-                            if(element.assignschedules_recorded == 0)
-                            {
-                                let totwage = 0;
-                                let tothour = 0;
-                                let timecard = 0;
-                                if(element.assignschedules_totalhours == null)
-                                {
-                                    element.assignschedules_totalhours = 0;
-                                }
-                                if(element.assignschedules_totalwage == null)
-                                {
-                                    element.assignschedules_totalwage = 0;
-                                }
-                                totwage = parseFloat(sheettime.timesheets_totalpaid) + parseFloat(element.assignschedules_totalwage);
-                                tothour = parseFloat(sheettime.timesheets_totalhour) + parseFloat(element.assignschedules_totalhours);
-                                timecard = parseInt(sheettime.timesheets_totaltimecard) + 1;
-                                this.timesheets[index].timesheets_totalpaid = totwage;
-                                this.timesheets[index].timesheets_totalhour = tothour;
-                                this.timesheets[index].timesheets_totaltimecard = timecard;
-                                this.timesheets[index].timesheets_schedule = element.schedules_dates;
-                                axios.post("timesheet/update?returnall=true&schedule="+element.schedules_dates,null,{timesheets_totalpaid: totwage,timesheets_totalhour: tothour,timesheets_totaltimecard: timecard }).then(res=>{
-                                    axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+    //                         if(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime())
+    //                         {
+    //                             flag = 1;
+    //                             sheettime = this.timesheets[i];
+    //                             index = i;
+    //                             break;
+    //                         }
+    //                     }
+    //                     if(flag == 1)
+    //                     {
+    //                         if(element.assignschedules_recorded == 0)
+    //                         {
+    //                             let totwage = 0;
+    //                             let tothour = 0;
+    //                             let timecard = 0;
+    //                             if(element.assignschedules_totalhours == null)
+    //                             {
+    //                                 element.assignschedules_totalhours = 0;
+    //                             }
+    //                             if(element.assignschedules_totalwage == null)
+    //                             {
+    //                                 element.assignschedules_totalwage = 0;
+    //                             }
+    //                             totwage = parseFloat(sheettime.timesheets_totalpaid) + parseFloat(element.assignschedules_totalwage);
+    //                             tothour = parseFloat(sheettime.timesheets_totalhour) + parseFloat(element.assignschedules_totalhours);
+    //                             timecard = parseInt(sheettime.timesheets_totaltimecard) + 1;
+    //                             this.timesheets[index].timesheets_totalpaid = totwage;
+    //                             this.timesheets[index].timesheets_totalhour = tothour;
+    //                             this.timesheets[index].timesheets_totaltimecard = timecard;
+    //                             this.timesheets[index].timesheets_schedule = element.schedules_dates;
+    //                             axios.post("timesheet/update?returnall=true&schedule="+element.schedules_dates,null,{timesheets_totalpaid: totwage,timesheets_totalhour: tothour,timesheets_totaltimecard: timecard }).then(res=>{
+    //                                 axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
 
-                                    }).then(res=>{
+    //                                 }).then(res=>{
                                         
-                                    });
-                                });
-                            }
-                        }
-                        else
-                        {
-                            if(element.assignschedules_recorded == 0)
-                            {
-                                if(element.assignschedules_totalhours == null)
-                                {
-                                    element.assignschedules_totalhours = 0;
-                                }
-                                if(element.assignschedules_totalwage == null)
-                                {
-                                    element.assignschedules_totalwage = 0;
-                                }
-                                newtimesheet.timesheets_totalpaid = element.assignschedules_totalwage;
-                                newtimesheet.timesheets_totalhour = element.assignschedules_totalhours;
-                                newtimesheet.timesheets_totaltimecard = 1;
-                                newtimesheet.timesheets_schedule = element.schedules_dates;
-                                this.timesheets.push(newtimesheet);
-                                axios.post("timesheet/create?returnall",null,{timesheets_totalpaid: element.assignschedules_totalwage,timesheets_totalhour: element.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: element.schedules_dates }).then(res=>{
-                                    axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
+    //                                 });
+    //                             });
+    //                         }
+    //                     }
+    //                     else
+    //                     {
+    //                         if(element.assignschedules_recorded == 0)
+    //                         {
+    //                             if(element.assignschedules_totalhours == null)
+    //                             {
+    //                                 element.assignschedules_totalhours = 0;
+    //                             }
+    //                             if(element.assignschedules_totalwage == null)
+    //                             {
+    //                                 element.assignschedules_totalwage = 0;
+    //                             }
+    //                             newtimesheet.timesheets_totalpaid = element.assignschedules_totalwage;
+    //                             newtimesheet.timesheets_totalhour = element.assignschedules_totalhours;
+    //                             newtimesheet.timesheets_totaltimecard = 1;
+    //                             newtimesheet.timesheets_schedule = element.schedules_dates;
+    //                             this.timesheets.push(newtimesheet);
+    //                             axios.post("timesheet/create?returnall",null,{timesheets_totalpaid: element.assignschedules_totalwage,timesheets_totalhour: element.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: element.schedules_dates }).then(res=>{
+    //                                 axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
 
-                                    }).then(res=>{
-                                    });
-                                });
-                            }
-                        }
-                    });
+    //                                 }).then(res=>{
+    //                                 });
+    //                             });
+    //                         }
+    //                     }
+    //                 });
 
-                }
-            });
-        },
-        GetClockinorClockout(data){
-            axios.post('assignschedule?assignschedules_id='+data,null,{}).catch(res=>{
+    //             }
+    //         });
+    //     },
+    //     GetClockinorClockout(data){
+    //         axios.post('assignschedule?assignschedules_id='+data,null,{}).catch(res=>{
 
-            }).then(res=>{
-                if(res.data.success)
-                {
-                    this.assignschedid = res.data.result.assignschedules_id;
-                    this.assignschedclockin = res.data.result.assignschedules_timein;
-                    this.assignschedclockout = res.data.result.assignschedules_timeout;
-                }
-                else
-                {
-                    return;
-                }
-            })
-        },
-        EditClockin(data){
+    //         }).then(res=>{
+    //             if(res.data.success)
+    //             {
+    //                 this.assignschedid = res.data.result.assignschedules_id;
+    //                 this.assignschedclockin = res.data.result.assignschedules_timein;
+    //                 this.assignschedclockout = res.data.result.assignschedules_timeout;
+    //             }
+    //             else
+    //             {
+    //                 return;
+    //             }
+    //         })
+    //     },
+    //     EditClockin(data){
 
-            axios.post('assignschedule/update?id='+data,null,{assignschedules_timein: this.assignschedclockin, assignschedules_timeout: this.assignschedclockout}).catch(res=>{
+    //         axios.post('assignschedule/update?id='+data,null,{assignschedules_timein: this.assignschedclockin, assignschedules_timeout: this.assignschedclockout}).catch(res=>{
 
-            }).then(res=>{
-                if(res.data.success)
-                {
-                    this.assignschedid = "";
-                    this.assignschedclockin = "";
-                    this.assignschedclockout = "";
-                    document.querySelector('#addClockinModalForm').style.display = "none";
-                    setTimeout(() => {
-                        this.$router.go(0);
-                    }, 2000);
-                }
-                else
-                {
-                    return;
-                }
-            })
-        },
+    //         }).then(res=>{
+    //             if(res.data.success)
+    //             {
+    //                 this.assignschedid = "";
+    //                 this.assignschedclockin = "";
+    //                 this.assignschedclockout = "";
+    //                 document.querySelector('#addClockinModalForm').style.display = "none";
+    //                 setTimeout(() => {
+    //                     this.$router.go(0);
+    //                 }, 2000);
+    //             }
+    //             else
+    //             {
+    //                 return;
+    //             }
+    //         })
+    //     },
         
-    }
+    // }
 })
 </script>
 

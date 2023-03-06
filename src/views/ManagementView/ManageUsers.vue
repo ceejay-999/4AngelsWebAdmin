@@ -1,6 +1,6 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
         </div>
         <div class="modal fade" id="modal-add-users" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -17,6 +17,14 @@
                     <div class="modal-body px-4">
                         <div class="row mt-4">
                             <div class="col-sm-12">
+                                <div class="form-group row">
+                                        <label for="coverImage" class="col-sm-4 col-lg-3 col-form-label">User Image</label>
+                                        <div class="col-sm-8 col-lg-6">
+                                            <div class="form-group">
+                                                <input type="file" @change="onImageChange" class="form-control-file form-control height-auto" accept="image/x-png,image/gif,image/jpeg">
+                                            </div>
+                                        </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="fname">Email Address</label>
                                     <input type="email" v-model="emailadd" class="form-control" placeholder="example@gmail.com">
@@ -25,14 +33,22 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-sm-12">
                                 <div class="form-group">
-                                    <label for="lname">Username</label>
-                                    <input type="text" v-model="username" class="form-control" placeholder="example0">
-                                    <div class="invalid-feedback feedback2">
-                                    
-                                    </div>
+                                    <label for="lname">Firstname</label>
+                                    <input type="text" v-model="firstname" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="lname">Lastname</label>
+                                    <input type="text" v-model="lastname" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="lname">Hire Date</label>
+                                    <input type="date" v-model="hiredate" class="form-control">
                                 </div>
                             </div>
                             <div class="col-sm-12">
@@ -177,7 +193,8 @@
                         <thead>
                           <tr>
                             <th>User ID</th>
-                            <th>Username</th>
+                            <th>Image</th>
+                            <th>Fullname</th>
                             <th class="d-none d-lg-table-cell">Email</th>
                             <th>Status</th>
                             <th></th>
@@ -185,18 +202,19 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="4" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
+                                <td colspan="6" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
                             </tr>
                           <tr v-for="u in users">
-                            <td >{{ u.users_id }}</td>
+                            <td >{{ u.user_id }}</td>
+                            <td><img v-if="u.user_photo == '' || u.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="rounded float-start"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+u.user_photo" alt="Profile" class="rounded float-start"></td>
                             <td >
-                              {{u.users_username}}
+                              {{u.user_firstname}} {{ u.user_lastname }}
                             </td>
-                            <td class="d-none d-lg-table-cell">{{u.users_email_address}}</td>
+                            <td class="d-none d-lg-table-cell">{{u.user_email}}</td>
                             <td >
-                              <span class="badge badge-success" v-if="u.users_permission_status == 1">Admin</span>
-                              <span class="badge badge-primary" v-if="u.users_permission_status == 2">Supervisor</span>
-                              <span class="badge badge-info" v-if="u.users_permission_status == 3">Manager</span>
+                              <span class="badge badge-success" v-if="u.user_access_level_id == 1">Admin</span>
+                              <span class="badge badge-primary" v-if="u.user_access_level_id == 2">Supervisor</span>
+                              <span class="badge badge-info" v-if="u.user_access_level_id == 3">Manager</span>
                             </td>
                             <td class="text-right">
                               <div class="dropdown show d-inline-block widget-dropdown">
@@ -218,6 +236,7 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
+import axiosA from 'axios';
 import 'chosen-js/chosen.jquery.min.js'
 import toastr from 'toastr';
 import { lStore, axios , validateForm, elementLoad } from '../../functions';
@@ -236,7 +255,9 @@ export default ({
             users: [],
             cpassword: "",
             password: "",
-            username: "",
+            hiredate: "",
+            firstname: "",
+            lastname: "",
             emailadd: "",
             designations:[],
             searchDesignations: "",
@@ -244,6 +265,10 @@ export default ({
             lfacility: 0,
             facilitiesm: [],
             searchkey: "",
+            profile: [],
+            userid: "",
+            searchkey: "",
+            selectedImage: "",
         }
     },
     computed:{
@@ -255,17 +280,15 @@ export default ({
         }
     },
     mounted(){
-        axios.post("users?&_batch=true").catch(res=>{
+        this.profile = lStore.get('userdetails');
+        this.userid = this.profile.user_id;
 
-        }).then(res=>{
-            
+        axios.post("usercontroller/viewallusermanagers",null,{useraccess: this.profile.user_access_level_id}).then(res=>{
             if(res.data.success){
                 this.users = res.data.result;
             }
         });
-        axios.post("branches?&_batch=true").catch(res=>{
-
-        }).then(res=>{
+        axios.post("facilitycontroller/viewallfacility",null,{'userid': this.userid}).then(res=>{
             if(res.data.success){
                 this.designations = res.data.result;
             }
@@ -273,34 +296,9 @@ export default ({
     },
     methods: {
         SearchEmp(){
-            axios.post("users/search?concat=users__username&s="+this.searchkey+"&batch=true").then(res=>{
+            axios.post("usercontroller/viewsearchusermanagers",null,{ useraccess: this.profile.user_access_level_id, $key: this.searchkey   }).then(res=>{
                 this.users = res.data.result;
             });
-        },
-        ViewUsers(data)
-        {
-            this.facilitiesm = [];
-            axios.post("users?users_id="+data).catch(res=>{
-
-            }).then(res=>{
-                this.specificusers = res.data.result;
-            });
-            axios.post("branches/viewpermit?permission_user_id="+data+"?&_batch=true").catch(res=>{
-
-            }).then(res=>{
-                let obj = {};
-                this.lfacility = res.data.result.length;
-                let permif = res.data.result;
-                this.designations.forEach(element => {
-                    permif.forEach(el => {
-                        if(element.facility_id == el.permission_facility_id && el.permission_user_id == data)
-                        {
-                            obj = JSON.parse(JSON.stringify(element));
-                            this.facilitiesm.push(obj);
-                        }
-                    });
-                });
-            })
         },
         checkclicked(){
             if(this.$refs.facilitySelected.checked == true)
@@ -327,14 +325,12 @@ export default ({
         },
         SaveUsers(){
             document.querySelector('.feedback1').style.display = "none";
-            document.querySelector('.feedback2').style.display = "none";
             document.querySelector('.feedback3').style.display = "none";
             document.querySelector('.feedback4').style.display = "none";
             document.querySelector('.feedback5').style.display = "none";
             document.querySelector('.feedback6').style.display = "none";
             let checkvalid = 0;
             let newUsers = {
-                username : this.username,
                 password : this.password,
                 emailadd : this.emailadd,
                 cpassword: this.cpassword,
@@ -343,7 +339,6 @@ export default ({
                 branch: this.queSched.designations,
             }
             const valid = validateForm(newUsers,{
-                username: "required",
                 password: "required",
                 accesslevel: "required",
                 facility: "required",
@@ -384,12 +379,6 @@ export default ({
                     }
                 },
                 callback: (a)=>{
-                    if(a == "username")
-                    {
-                        document.querySelector('.feedback2').textContent = "username is required";
-                        document.querySelector('.feedback2').style.display = "block";
-                        checkvalid = 1;
-                    }
                     if(a == "password")
                     {
                         document.querySelector('.feedback5').textContent = "password is required";
@@ -416,33 +405,41 @@ export default ({
             if(checkvalid == 0)
             {
                 let email = newUsers.emailadd;
-                let username = newUsers.username;
                 let password = newUsers.password;
                 let accesslevel = newUsers.accesslevel;
-
-                axios.post('users/create',null,{users_username: username, users_email_address: email, users_password: password, users_permission_status: accesslevel}).catch(res =>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res =>{
+                let file = null;
+                if(this.selectedImage != null){
+                    file = this.selectedImage;
+                }
+                let form = new FormData();
+                form.append('email', this.emailadd);
+                form.append('status', accesslevel);
+                form.append('password', this.password);
+                form.append('firstname', this.firstname);
+                form.append('lastname', this.lastname);
+                form.append('datehired', this.datehired);
+                form.append('confirmpassword', this.cpassword);
+                form.append('file', file);
+                axiosA.post('https://www.4angelshc.com/wangelmobile/usercontroller/addusermangers',form).then(res =>{
                     if(res.data.success)
                     {
                         newUsers.branch.forEach(element => {
-                            axios.post('branches/createpermit',null,{permission_user_id: res.data.result.result.users_id, permission_facility_id: element}).catch(res=>{
-
-                            }).then(res=>{
+                            axios.post('facilitycontroller/createpermition',null,{userid: res.data.result, facilityid: element}).then(res=>{
                                 if(res.data.success)
                                 {
-                                    this.callToaster("toast-top-right",1);
-                                    document.querySelector("#modal-add-users").style.display = "none";
-                                    setTimeout(() => {
-                                    this.$router.go(0);
-                                    }, 2000);
+                                    
                                 }
                             });
                         });
-                    }
+                        this.callToaster("toast-top-right",res.data);
+                        this.clearModal('modal-add-users');
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                    } 
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right",res.data);
                         return;
                     }
                 })
@@ -452,13 +449,32 @@ export default ({
             
 
         },
-        callToaster(positionClass, reserror)
-        {
+        clearModal(modalname){
+            const exampleModalForm = document.querySelector('#'+ modalname);
+            exampleModalForm.removeAttribute('aria-modal');
+            exampleModalForm.removeAttribute('role');
+            exampleModalForm.setAttribute('aria-hidden', 'true');
+            exampleModalForm.classList.remove('show');
+            exampleModalForm.style.display = "none";
+            exampleModalForm.style.paddingRight = "0";
+            const bodyForm = document.querySelector('#body');
+            bodyForm.classList.remove('modal-open');
+            bodyForm.style.paddingRight = "0";
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            modalBackdrop.parentNode.removeChild(modalBackdrop);
+        },
+        onImageChange(e) {
+            const selectedFile = e.target.files[0];
+            this.photo = URL.createObjectURL(selectedFile);
+            this.selectedImage = e.target.files[0];
+            e.target.files[0] = null;
+        },
+        callToaster(positionClass, reserror) {
             if (document.getElementById("toaster")) {
                 toastr.options = {
                 closeButton: true,
                 debug: false,
-                newestOnTop: false,
+                newestOnTop: true,
                 progressBar: true,
                 positionClass: positionClass,
                 preventDuplicates: false,
@@ -472,20 +488,16 @@ export default ({
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut"
                 };
-                if(reserror == 1)
+                if(reserror.success == true)
                 {
-                    toastr.success("Data was save successfully", "Successfully Save!");
+                    toastr.success(""+reserror.msg, "Successfully!");
                 }
-                if(reserror == 2)
+                else
                 {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                if(reserror == 3)
-                {
-                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
-        }
+        },
     }
 })
 
@@ -561,5 +573,8 @@ export default ({
 }
 .modal-content{
     border-radius: 20px;
+}
+.rounded{
+    max-width: 50px;
 }
 </style>

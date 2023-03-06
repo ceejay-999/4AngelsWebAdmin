@@ -70,7 +70,7 @@
                     <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                         <div class="tab-pane-content mt-5">
                         <form>
-                            <div class="form-group row mb-6">
+                            <div class="form-group row mb-6 cimg">
                             <label for="coverImage" class="col-sm-4 col-lg-2 col-form-label">User Image</label>
                             <div class="col-sm-8 col-lg-10">
                                 <img v-if="profile.user_photo == '' && this.photo == '' || profile.user_photo == null && this.photo == null" src="../../assets/default-profile.png" class="rounded-circle" alt="user image" />
@@ -294,6 +294,13 @@ export default({
 .card-img img{
     object-fit: cover;
     width: 100%;
+    height: 100%;
+}
+.cimg img{
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    max-width: 255px;
 }
 #settings{
     display: block;

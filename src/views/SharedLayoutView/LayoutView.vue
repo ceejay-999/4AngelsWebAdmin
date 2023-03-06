@@ -65,7 +65,7 @@
             </RouterLink>
           </li>
           <li class="has-sub" data-url="/users"> <!--// Only For ADMINS-->
-            <RouterLink class="sidenav-item-link" to="/users" v-if="infodata.users_permission_status == 1">
+            <RouterLink class="sidenav-item-link" to="/users" v-if="infodata.user_access_level_id == 1">
               <i class="mdi mdi-account-box"></i>
               <span class="nav-text">Account</span>
             </RouterLink>
@@ -889,6 +889,7 @@ export default ({
 @import '../../assets/scss/_reboot.scss';
 @import '../../assets/sleek.min.css';
 .profile img {
+  height: 100%;
   max-height: 36px;
 }
 .navbar{
@@ -940,5 +941,10 @@ export default ({
   }
   .navbar .dropdown-menu > li a[data-v-543bc2ab], .notifications-list li a{
     padding: .94rem 1.25rem;
+  }
+  .user-image{
+    width: 100%;
+    height: 100%;
+    max-height: 250px;
   }
 </style>
