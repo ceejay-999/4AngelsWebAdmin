@@ -121,7 +121,7 @@
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="exampleModalFormTitle">User ID: <span class="text-white">{{ specificusers.users_id }}</span></h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">User ID: <span class="text-white">{{ specificusers.user_id }}</span></h5>
                         <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -129,18 +129,19 @@
                     <div class="modal-body">
                         <div class="d-flex justify-content-between">
                             <div class="d-flex justify-content-center">
-                                <img class="mr-3 img-fluid rounded" src="../../assets/users.png" />
+                                <img v-if="specificusers.user_photo == null && specificusers.user_photo == ''" class="mr-3 img-fluid rounded" src="../../assets/default-profile.png" />
+                                <img v-else class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/'+specificusers.user_photo" />
                                 <div class="info">
-                                    <h5 class="mt-0 mb-2 text-dark">{{ specificusers.users_username}}</h5>
-                                    <h5 class="mt-0 mb-2 text-dark">{{ specificusers.users_email_address}}</h5>
-                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.users_permission_status == 1">Admin</h5>
-                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.users_permission_status == 2">Supervisor</h5>
-                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.users_permission_status == 3">Manager</h5>
+                                    <h5 class="mt-0 mb-2 text-dark">{{ specificusers.user_firstname}} {{ specificusers.user_lastname }}</h5>
+                                    <h5 class="mt-0 mb-2 text-dark">{{ specificusers.user_email}}</h5>
+                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.user_access_level_id == 1">Admin</h5>
+                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.user_access_level_id == 2">Supervisor</h5>
+                                    <h5 class="mt-0 mb-2 text-dark" v-if="specificusers.user_access_level_id == 3">Manager</h5>
                                     <h5 class="mt-0 mb-4 text-dark">Manage {{ lfacility }} Facilities</h5>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end text-primary">
-                                <span class="mdi mdi-circle-edit-outline">Edit Info</span>
+                                <span class="mdi mdi-circle-edit-outline"></span>
                             </div>
                         </div>
                         <div class="mt-3">
@@ -185,52 +186,52 @@
         </div>
         </div>
         <div class="card card-table-border-none recent-orders" id="recent-orders">
-                    <div class="card-header justify-content-between">
-                      <h2>Users Table</h2>
-                    </div>
-                    <div class="card-body pt-0 pb-5">
-                      <table class="table card-table table-responsive table-responsive-large" style="width:100%">
-                        <thead>
-                          <tr>
-                            <th>User ID</th>
-                            <th>Image</th>
-                            <th>Fullname</th>
-                            <th class="d-none d-lg-table-cell">Email</th>
-                            <th>Status</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
-                            </tr>
-                          <tr v-for="u in users">
-                            <td >{{ u.user_id }}</td>
-                            <td><img v-if="u.user_photo == '' || u.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="rounded float-start"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+u.user_photo" alt="Profile" class="rounded float-start"></td>
-                            <td >
-                              {{u.user_firstname}} {{ u.user_lastname }}
-                            </td>
-                            <td class="d-none d-lg-table-cell">{{u.user_email}}</td>
-                            <td >
-                              <span class="badge badge-success" v-if="u.user_access_level_id == 1">Admin</span>
-                              <span class="badge badge-primary" v-if="u.user_access_level_id == 2">Supervisor</span>
-                              <span class="badge badge-info" v-if="u.user_access_level_id == 3">Manager</span>
-                            </td>
-                            <td class="text-right">
-                              <div class="dropdown show d-inline-block widget-dropdown">
-                                <a class="dropdown-toggle icon-burger-mini" href="" role="button" id="dropdown-recent-order1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
-                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order1">
-                                  <li class="dropdown-item">
-                                    <a href="#" @click="ViewUsers(u.users_id)" data-toggle="modal" data-target="#modal-view-users">View</a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+            <div class="card-header justify-content-between">
+                <h2>Users Table</h2>
+            </div>
+            <div class="card-body pt-0 pb-5">
+                <table class="table card-table table-responsive table-responsive-large" style="width:100%">
+                <thead>
+                    <tr>
+                    <th>User ID</th>
+                    <th>Image</th>
+                    <th>Fullname</th>
+                    <th class="d-none d-lg-table-cell">Email</th>
+                    <th>Status</th>
+                    <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" v-if="users == null"> <div class="text-center"><div> No Data Found </div></div></td>
+                    </tr>
+                    <tr v-for="u in users">
+                    <td >{{ u.user_id }}</td>
+                    <td><img v-if="u.user_photo == '' || u.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="rounded float-start"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+u.user_photo" alt="Profile" class="rounded float-start"></td>
+                    <td >
+                        {{u.user_firstname}} {{ u.user_lastname }}
+                    </td>
+                    <td class="d-none d-lg-table-cell">{{u.user_email}}</td>
+                    <td >
+                        <span class="badge badge-success" v-if="u.user_access_level_id == 1">Admin</span>
+                        <span class="badge badge-primary" v-if="u.user_access_level_id == 2">Supervisor</span>
+                        <span class="badge badge-info" v-if="u.user_access_level_id == 3">Manager</span>
+                    </td>
+                    <td class="text-right">
+                        <div class="dropdown show d-inline-block widget-dropdown">
+                        <a class="dropdown-toggle icon-burger-mini" href="" role="button" id="dropdown-recent-order1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static"></a>
+                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-recent-order1">
+                            <li class="dropdown-item">
+                                <a href="#" @click="ViewUsers(u.user_id)" data-toggle="modal" data-target="#modal-view-users">View</a>
+                            </li>
+                        </ul>
+                        </div>
+                    </td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
 
     </LayoutView>
 </template>
@@ -449,6 +450,18 @@ export default ({
             
 
         },
+        ViewUsers(id){
+            axios.post('usercontroller/viewindividualusermanager',null,{userid: id}).then(res=>{
+                this.specificusers = res.data.result.user[0];
+                this.facilitiesm = res.data.result.facility;
+                this.lfacility = res.data.result.totalfacility;
+            });
+        },
+        EditUsers(id){
+            // axios.post('usercontroller/editusermanager',null,{userid: id}).then(res=>{
+
+            // });
+        },
         clearModal(modalname){
             const exampleModalForm = document.querySelector('#'+ modalname);
             exampleModalForm.removeAttribute('aria-modal');
@@ -575,6 +588,7 @@ export default ({
     border-radius: 20px;
 }
 .rounded{
-    max-width: 50px;
+    max-width: 150px;
+    width: 100%;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
         </div>
         <div class="modal fade" id="modal-add-contact" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -62,20 +62,11 @@
                         </div>
                         <h4 class="mt-4">Contact Information</h4>
                         <div class="row mt-4">
-                            <div class="col-sm-6">
+                            <div class="col-sm-12">
                                 <div class="form-group">
                                     <label for="fname">Phone number</label>
                                     <input type="text" v-model="phonenumber" class="form-control" placeholder="">
                                     <div class="invalid-feedback feedback3">
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label for="fname">Username</label>
-                                    <input type="text" v-model="username" class="form-control" placeholder="">
-                                    <div class="invalid-feedback feedback9">
                                     
                                     </div>
                                 </div>
@@ -190,30 +181,30 @@
         <div class="row">
             <div class="textcenter"></div>
             <div class="d-flex justify-content-center" v-if="users.length == 0"><div> No Data Found </div></div>
-            <div class="col-lg-6 col-xl-4" v-else v-for="u in users" :key = "u.employee_id">
+            <div class="col-lg-6 col-xl-4" v-else v-for="u in users" :key = "u.user_id">
                 <div class="card card-default p-4">
-                <a href="#" class="media text-secondary" @click="ViewDetailsEmp(u.employee_id)">
-                    <img src="../../assets/users.png" class="mr-3 img-fluid rounded" alt="Avatar Image" v-if="u.employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'">
-                    <img v-else :src="u.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                <a href="#" class="media text-secondary" @click="ViewEmployee(u.user_id)">
+                    <img src="../../assets/default-profile.png" class="mr-3 img-fluid rounded" alt="Avatar Image" v-if="u.user_photo == null || u.user_photo == ''">
+                    <img v-else :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+ u.user_photo" class="mr-3 img-fluid rounded" alt="Avatar Image">
 
                     <div class="media-body">
-                    <h5 class="mt-0 mb-2 text-dark">{{u.employee_firstname}} {{u.employee_lastname}}</h5>
+                    <h5 class="mt-0 mb-2 text-dark">{{u.user_firstname}} {{u.user_lastname}}</h5>
 
                     <ul class="list-unstyled">
                         <li class="d-flex mb-1">
                         <i class="mdi mdi-email mr-1"></i>
-                        <span>{{u.employee_emailaddress}}</span>
+                        <span>{{u.user_email}}</span>
                         </li>
 
                         <li class="d-flex mb-1">
                         <i class="mdi mdi-phone mr-1"></i>
-                        <span>{{u.employee_phonenumber}}</span>
+                        <span>{{u.user_phone}}</span>
                         </li>
                         
                         <li class="d-flex mb-1">
-                        <i class="mdi mdi-account-check text-success" v-if="u.employee_status == 0"></i>
+                        <i class="mdi mdi-account-check text-success" v-if="u.user_status == 1"></i>
                         <i class="mdi mdi-account-alert text-danger" v-else></i>
-                        <span v-if="u.employee_status == 0" class="text-success"> Active</span>
+                        <span v-if="u.user_status == 1" class="text-success"> Active</span>
                         <span v-else class="text-danger"> Terminate</span>
                         </li>
                     </ul>
@@ -252,7 +243,6 @@ export default ({
             datehired: "",
             rate: "",
             birthdate: "",
-            username: "",
             email: "",
             password: "",
             confirmpassword: "",
@@ -268,382 +258,375 @@ export default ({
             searchkey: ""
         }
     }, 
-    // mounted() {
-    //     $("#add_role").click(()=>{
-    //         this.rolenumberformindex++;
-    //         $("#phone_number_form").after($("#phone_number_form").clone().attr("id","phone_number_form" + this.rolenumberformindex));
-    //         $("#phone_number_form" + this.rolenumberformindex).css("display","inline");
-    //         var a = this.rolenumberformindex;
-    //         $("#phone_number_form" + this.rolenumberformindex + " :input").each(function(){
-    //             $(this).attr("name",$(this).attr("name") + a);
-    //             $(this).attr("id",$(this).attr("id") + a);
-    //             });
+    mounted() {
+        $("#add_role").click(()=>{
+            this.rolenumberformindex++;
+            $("#phone_number_form").after($("#phone_number_form").clone().attr("id","phone_number_form" + this.rolenumberformindex));
+            $("#phone_number_form" + this.rolenumberformindex).css("display","inline");
+            var a = this.rolenumberformindex;
+            $("#phone_number_form" + this.rolenumberformindex + " :input").each(function(){
+                $(this).attr("name",$(this).attr("name") + a);
+                $(this).attr("id",$(this).attr("id") + a);
+                });
             
-    //         $("#remove_phone_number" + this.rolenumberformindex).click(()=>{
-    //             this.rolenumberformindex--;
-    //         })
-    //         $("#remove_phone_number" + this.rolenumberformindex).click(function(){
-    //             $("#phone_number_form"+ a).remove();
-    //         });
-    //     });
-    //     //End Adding multiple role
-    //     mapboxgl.accessToken = this.mapToken;
+            $("#remove_phone_number" + this.rolenumberformindex).click(()=>{
+                this.rolenumberformindex--;
+            })
+            $("#remove_phone_number" + this.rolenumberformindex).click(function(){
+                $("#phone_number_form"+ a).remove();
+            });
+        });
+        //End Adding multiple role
+        mapboxgl.accessToken = this.mapToken;
 
-    //     const geocoder1 = new MapboxGeocoder({
-    //         accessToken: mapboxgl.accessToken,
-    //         mapboxgl: mapboxgl
-    //     });
-    //     const geocoder2 = new MapboxGeocoder({
-    //         accessToken: mapboxgl.accessToken,
-    //         mapboxgl: mapboxgl
-    //     });
+        const geocoder1 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
+        const geocoder2 = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        });
 
-    //     elementLoad('#geocoder1').then(()=>{
-    //         geocoder2.addTo('#geocoder1');
-    //     });
-    //     elementLoad('#geocoder2').then(()=>{
-    //         if($('.mapboxgl-ctrl-geocoder').length == 1){
+        elementLoad('#geocoder1').then(()=>{
+            geocoder2.addTo('#geocoder1');
+        });
+        elementLoad('#geocoder2').then(()=>{
+            if($('.mapboxgl-ctrl-geocoder').length == 1){
                 
-    //             geocoder2.addTo('#geocoder2');
-    //         }
-    //      });
+                geocoder2.addTo('#geocoder2');
+            }
+         });
 
-    //     geocoder1.on('result', e => {
-    //         this.address = e.result.place_name;
-    //     });
+        geocoder1.on('result', e => {
+            this.address = e.result.place_name;
+        });
 
-    //     geocoder2.on('result', e => {
-    //         this.address = e.result.place_name;
-    //     });
-    //     document.querySelector(".toast").id = "toaster";
+        geocoder2.on('result', e => {
+            this.address = e.result.place_name;
+        });
 
-    //     axios.post("designation?_batch=true").catch(res=>{
+        axios.post("rolecontroller/DisplayAllRoles").then(res=>{
+            if(res.data.success){
+                this.designation = res.data.result;
+            }
+        });
+        axios.post("usercontroller/ReadEmployee",null,null).catch(res=>{
+        }).then(res=>{
+            console.log(res.data.success);
+            if(res.data.success)
+            {
+                this.users = res.data.result;
+            }
+            console.log(this.users);
+        });
+        axios.post("facilitycontroller/facilities").then(res=>{
+            this.branches = res.data.result;
+        })
+    },
+    methods : {
+        SearchEmp(){
+            this.users = [];
+            axios.post("employee/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
+                if(res.data.result == null)
+                {
+                    return;
+                }
+                this.users = res.data.result;
+                this.searchkey = "";
+            });
+        },
+        ShowTerm(){                                                                                                                                        
+            if(this.value == 0)
+            {
+                this.value = 1;
+                axios.post("usercontroller/ReadwithTermiEmployee").then(res=>{
+                  this.users = res.data.result;
+                })
+            }
+            else
+            {
+                this.value = 0;
+                axios.post("usercontroller/ReadEmployee").catch(res=>{
+                }).then(res=>{
+                    this.users = res.data.result;
+                });
+            }
+        },
+        SaveEmployee(){
+            document.querySelector('.feedback1').style.display = "none";
+            document.querySelector('.feedback2').style.display = "none";
+            document.querySelector('.feedback3').style.display = "none";
+            document.querySelector('.feedback6').style.display = "none";
+            document.querySelector('.feedback7').style.display = "none";
+            document.querySelector('.feedback10').style.display = "none";
+            document.querySelector('.feedback11').style.display = "none";
+            document.querySelector('.feedback12').style.display = "none";
+            document.querySelector('.feedback13').style.display = "none";
+            let newUser = {
+                employee_firstname: this.firstname,
+                employee_lastname:this.lastname,
+                employee_hiredate: this.datehired,
+                employee_phonenumber:this.phonenumber,
+                employee_birthday: this.birthdate,
+                employee_emailaddress:this.email,
+                employee_password:this.password,
+                confirmpassword:this.confirmpassword,
+                file: document.getElementById('uploadFile1').files[0]
+            };
+            let check = 0;
+            if(this.rolenumberformindex > 0)
+            {
+                let newArrRole = [];
+                let newRole = {
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
+                }
+                newArrRole.push(newRole);
+                for(let i = 1; i <= this.rolenumberformindex; i++)
+                {
+                    newRole = {
+                        assigndesignation_roleid: document.querySelector("#des"+ i).value,
+                        assigndesignation_facilityid: document.querySelector("#bran"+ i).value,
+                        assigndesignation_wagerate: document.querySelector("#rates"+ i).value,
+                    }
+                    newArrRole.push(newRole);
+                    (newArrRole).forEach(element => {
+                        let roleval = validateForm(element,{
+                            assigndesignation_roleid: "required",
+                            assigndesignation_facilityid: "required",
+                            assigndesignation_wagerate: "required",
+                            callback: (a)=>{
+                                if(a == "role")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
+                                if(a == "branch")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
+                                if(a == "rate")
+                                {
+                                    document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                    document.querySelector('.feedback13').style.display = "block";
+                                }
+                            }
+                        });
+                        if(!roleval.allValid)
+                        {
+                            check++;
+                        }
+                    });
+                }
+            }
+            else{
+                let newRole = {
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
+                    }
+                    let rolevalid = validateForm(newRole,{
+                        assigndesignation_roleid: "required",
+                        assigndesignation_facilityid: "required",
+                        assigndesignation_wagerate: "required",
+                        callback: (a)=>{
+                            if(a == "role")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "branch")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                            if(a == "rate")
+                            {
+                                document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
+                                document.querySelector('.feedback13').style.display = "block";
+                            }
+                        }
+                    });
+                    if(!rolevalid.allValid)
+                    {
+                        check++;
+                    }
+            }
+            const valid = validateForm(newUser,{
+                employee_firstname:"required",
+                employee_lastname:"required",
+                employee_phonenumber: "required",
+                employee_birthday: "required",
+                employee_hiredate: "required",
+                employee_emailaddress: {
+                    isEmail: true,
+                    isRequired:true,
+                    callback: res=>{
+                        if(res!='invalid_email') return;
+                        document.querySelector('.feedback10').textContent = "Email is not valid!";
+                        document.querySelector('.feedback10').style.display = "block";
+                    }
+                },
+                employee_password: "required",
+                confirmpassword: {
+                    equalTo: this.password,
+                    isRequired: true,
+                    callback: res=>{
+                        if(res == "values_not_match")
+                        {
+                            document.querySelector('.feedback11').textContent = "Password and Confirm Password doesn`t match";
+                            document.querySelector('.feedback11').style.display = "block";
+                        }
+                    }
+                },
+                callback: (a)=>{
+                    if(a == "employee_firstname")
+                    {
+                        document.querySelector('.feedback1').textContent = "Firstname is required";
+                        document.querySelector('.feedback1').style.display = "block";
+                    }
+                    if(a == "employee_lastname")
+                    {
+                        document.querySelector('.feedback2').textContent = "Lastname is required";
+                        document.querySelector('.feedback2').style.display = "block";
+                    }
+                    if(a == "employee_phonenumber")
+                    {
+                        document.querySelector('.feedback3').textContent = "Phone number is required";
+                        document.querySelector('.feedback3').style.display = "block";
+                    }
+                    if(a == "employee_birthday")
+                    {
+                        document.querySelector('.feedback3').textContent = "Birthday is required";
+                        document.querySelector('.feedback3').style.display = "block";
+                    }
+                    if(a == "employee_emailaddress")
+                    {
+                        document.querySelector('.feedback10').textContent = "Email is required";
+                        document.querySelector('.feedback10').style.display = "block";
+                    }
+                    if(a == "employee_password")
+                    {
+                        document.querySelector('.feedback11').textContent = "Password is required";
+                        document.querySelector('.feedback11').style.display = "block";
+                    }
+                    if(a == "confirmpassword")
+                    {
+                        document.querySelector('.feedback12').textContent = "Confirm Password is required";
+                        document.querySelector('.feedback12').style.display = "block";
+                    }
+                }
+            });
+            if(valid.allValid && check == 0){
+                let roleArrusers = [];
+                let roleusers = {
+                    assigndesignation_roleid: document.querySelector("#des").value,
+                    assigndesignation_wagerate: document.querySelector("#rates").value,
+                    assigndesignation_facilityid: document.querySelector("#bran").value,
+                };
+                roleArrusers.push(roleusers);
+                if(this.rolenumberformindex > 0)
+                {
+                    for(let i = 1; i <= this.rolenumberformindex; i++)
+                    {
+                        roleusers = {
+                            assigndesignation_roleid: document.querySelector("#des"+i).value,
+                            assigndesignation_wagerate: document.querySelector("#rates"+i).value,
+                            assigndesignation_facilityid: document.querySelector("#bran"+i).value,
+                        };
+                        roleArrusers.push(roleusers);
+                    }
+                }
+                delete newUser.confirmpassword;
+                axios.post("usercontroller/CreateEmployee",null,newUser).then(res=>{
+                     let user = res.data.result;
+                     roleArrusers.forEach((el,i)=>{
+                        let data = {
+                            'userid': user,
+                            'roleid': el.assigndesignation_roleid,
+                            'facilityid': el.assigndesignation_facilityid,
+                            'wage': el.assigndesignation_wagerate,
+                        };
+                        axios.post("rolecontroller/InsertProfession",null,data).then(ress=>{
+                            if(ress.data.success){
+                            }
+                        });
+                     });
+                     this.callToaster("toast-top-right",res.data);
+                     setTimeout(() => {
+                        this.$router.go();
+                     }, 2000);
+                });
+            }
 
-    //     }).then(res=>{
-    //         if(res.data.success){
-    //             this.designation = res.data.result;
-    //         }
-    //     });
-    //     axios.post("employee?employee_status=0&_batch=true").catch(res=>{
-    //     }).then(res=>{
-    //         if(res.data.result == null)
-    //         {
-    //             return
-    //         }
-    //         this.users = res.data.result;
-    //     });
-    //     axios.post("branches?&_batch=true").then(res=>{
-    //         this.branches = res.data.result;
-    //     })
-    // },
-    // methods : {
-    //     SearchEmp(){
-    //         this.users = [];
-    //         axios.post("employee/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
-    //             if(res.data.result == null)
-    //             {
-    //                 return;
-    //             }
-    //             this.users = res.data.result;
-    //             this.searchkey = "";
-    //         });
-    //     },
-    //     ShowTerm(){                                                                                                                                        
-    //         if(this.value == 0)
-    //         {
-    //             this.value = 1;
-    //             axios.post("employee?&_batch=true").catch(res=>{
-    //             }).then(res=>{
-    //               this.users = res.data.result;
-    //             })
-    //         }
-    //         else
-    //         {
-    //             this.value = 0;
-    //             axios.post("employee?status=0&_batch=true").catch(res=>{
-    //             }).then(res=>{
-    //                 this.users = res.data.result;
-    //             });
-    //         }
-    //     },
-    //     SaveEmployee(){
-    //         document.querySelector('.feedback1').style.display = "none";
-    //         document.querySelector('.feedback2').style.display = "none";
-    //         document.querySelector('.feedback3').style.display = "none";
-    //         document.querySelector('.feedback6').style.display = "none";
-    //         document.querySelector('.feedback7').style.display = "none";
-    //         document.querySelector('.feedback9').style.display = "none";
-    //         document.querySelector('.feedback10').style.display = "none";
-    //         document.querySelector('.feedback11').style.display = "none";
-    //         document.querySelector('.feedback12').style.display = "none";
-    //         document.querySelector('.feedback13').style.display = "none";
-    //         let newUser = {
-    //             employee_firstname: this.firstname,
-    //             employee_lastname:this.lastname,
-    //             employee_hiredate: this.datehired,
-    //             employee_phonenumber:this.phonenumber,
-    //             employee_birthday: this.birthdate,
-    //             employee_username:this.username,
-    //             employee_emailaddress:this.email,
-    //             employee_password:this.password,
-    //             confirmpassword:this.confirmpassword,
-    //             file: document.getElementById('uploadFile1').files[0]
-    //         };
-    //         let check = 0;
-    //         if(this.rolenumberformindex > 0)
-    //         {
-    //             let newArrRole = [];
-    //             let newRole = {
-    //                 assigndesignation_roleid: document.querySelector("#des").value,
-    //                 assigndesignation_facilityid: document.querySelector("#bran").value,
-    //                 assigndesignation_wagerate: document.querySelector("#rates").value,
-    //             }
-    //             newArrRole.push(newRole);
-    //             for(let i = 1; i <= this.rolenumberformindex; i++)
-    //             {
-    //                 newRole = {
-    //                     assigndesignation_roleid: document.querySelector("#des"+ i).value,
-    //                     assigndesignation_facilityid: document.querySelector("#bran"+ i).value,
-    //                     assigndesignation_wagerate: document.querySelector("#rates"+ i).value,
-    //                 }
-    //                 newArrRole.push(newRole);
-    //                 (newArrRole).forEach(element => {
-    //                     let roleval = validateForm(element,{
-    //                         assigndesignation_roleid: "required",
-    //                         assigndesignation_facilityid: "required",
-    //                         assigndesignation_wagerate: "required",
-    //                         callback: (a)=>{
-    //                             if(a == "role")
-    //                             {
-    //                                 document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                                 document.querySelector('.feedback13').style.display = "block";
-    //                             }
-    //                             if(a == "branch")
-    //                             {
-    //                                 document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                                 document.querySelector('.feedback13').style.display = "block";
-    //                             }
-    //                             if(a == "rate")
-    //                             {
-    //                                 document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                                 document.querySelector('.feedback13').style.display = "block";
-    //                             }
-    //                         }
-    //                     });
-    //                     if(!roleval.allValid)
-    //                     {
-    //                         check++;
-    //                     }
-    //                 });
-    //             }
-    //         }
-    //         else{
-    //             let newRole = {
-    //                 assigndesignation_roleid: document.querySelector("#des").value,
-    //                 assigndesignation_facilityid: document.querySelector("#bran").value,
-    //                 assigndesignation_wagerate: document.querySelector("#rates").value,
-    //                 }
-    //                 let rolevalid = validateForm(newRole,{
-    //                     assigndesignation_roleid: "required",
-    //                     assigndesignation_facilityid: "required",
-    //                     assigndesignation_wagerate: "required",
-    //                     callback: (a)=>{
-    //                         if(a == "role")
-    //                         {
-    //                             document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                             document.querySelector('.feedback13').style.display = "block";
-    //                         }
-    //                         if(a == "branch")
-    //                         {
-    //                             document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                             document.querySelector('.feedback13').style.display = "block";
-    //                         }
-    //                         if(a == "rate")
-    //                         {
-    //                             document.querySelector('.feedback13').textContent = "There is Field that is required but empty";
-    //                             document.querySelector('.feedback13').style.display = "block";
-    //                         }
-    //                     }
-    //                 });
-    //                 if(!rolevalid.allValid)
-    //                 {
-    //                     check++;
-    //                 }
-    //         }
-    //         const valid = validateForm(newUser,{
-    //             employee_firstname:"required",
-    //             employee_lastname:"required",
-    //             employee_phonenumber: "required",
-    //             employee_birthday: "required",
-    //             employee_username: "required",
-    //             employee_hiredate: "required",
-    //             employee_emailaddress: {
-    //                 isEmail: true,
-    //                 isRequired:true,
-    //                 callback: res=>{
-    //                     if(res!='invalid_email') return;
-    //                     document.querySelector('.feedback10').textContent = "Email is not valid!";
-    //                     document.querySelector('.feedback10').style.display = "block";
-    //                 }
-    //             },
-    //             employee_password: "required",
-    //             confirmpassword: {
-    //                 equalTo: this.password,
-    //                 isRequired: true,
-    //                 callback: res=>{
-    //                     if(res == "values_not_match")
-    //                     {
-    //                         document.querySelector('.feedback11').textContent = "Password and Confirm Password doesn`t match";
-    //                         document.querySelector('.feedback11').style.display = "block";
-    //                     }
-    //                 }
-    //             },
-    //             callback: (a)=>{
-    //                 if(a == "employee_firstname")
-    //                 {
-    //                     document.querySelector('.feedback1').textContent = "Firstname is required";
-    //                     document.querySelector('.feedback1').style.display = "block";
-    //                 }
-    //                 if(a == "employee_lastname")
-    //                 {
-    //                     document.querySelector('.feedback2').textContent = "Lastname is required";
-    //                     document.querySelector('.feedback2').style.display = "block";
-    //                 }
-    //                 if(a == "employee_phonenumber")
-    //                 {
-    //                     document.querySelector('.feedback3').textContent = "Phone number is required";
-    //                     document.querySelector('.feedback3').style.display = "block";
-    //                 }
-    //                 if(a == "employee_birthday")
-    //                 {
-    //                     document.querySelector('.feedback3').textContent = "Birthday is required";
-    //                     document.querySelector('.feedback3').style.display = "block";
-    //                 }
-    //                 if(a == "employee_emailaddress")
-    //                 {
-    //                     document.querySelector('.feedback10').textContent = "Email is required";
-    //                     document.querySelector('.feedback10').style.display = "block";
-    //                 }
-    //                 if(a == "employee_password")
-    //                 {
-    //                     document.querySelector('.feedback11').textContent = "Password is required";
-    //                     document.querySelector('.feedback11').style.display = "block";
-    //                 }
-    //                 if(a == "confirmpassword")
-    //                 {
-    //                     document.querySelector('.feedback12').textContent = "Confirm Password is required";
-    //                     document.querySelector('.feedback12').style.display = "block";
-    //                 }
-    //                 if(a == "username")
-    //                 {
-    //                     document.querySelector('.feedback9').textContent = "Username is required";
-    //                     document.querySelector('.feedback9').style.display = "block";
-    //                 }
-    //             }
-    //         });
-    //         if(valid.allValid && check == 0){
-    //             let roleArrusers = [];
-    //             let roleusers = {
-    //                 assigndesignation_roleid: document.querySelector("#des").value,
-    //                 assigndesignation_wagerate: document.querySelector("#rates").value,
-    //                 assigndesignation_facilityid: document.querySelector("#bran").value,
-    //             };
-    //             roleArrusers.push(roleusers);
-    //             if(this.rolenumberformindex > 0)
-    //             {
-    //                 for(let i = 1; i <= this.rolenumberformindex; i++)
-    //                 {
-    //                     roleusers = {
-    //                         assigndesignation_roleid: document.querySelector("#des").value,
-    //                         assigndesignation_wagerate: document.querySelector("#rates").value,
-    //                         assigndesignation_facilityid: document.querySelector("#bran").value,
-    //                     };
-    //                     roleArrusers.push(roleusers);
-    //                 }
-    //             }
-    //             delete newUser.confirmpassword;
-    //             roleArrusers.forEach((el,i)=>{
-    //                 newUser['assigndesignation_'+i+'facilityid'] =  el.assigndesignation_facilityid;
-    //                 newUser['assigndesignation_'+i+'roleid'] =  el.assigndesignation_roleid;
-    //                 newUser['assigndesignation_'+i+'wagerate'] =  el.assigndesignation_wagerate;
-    //             });
-    //             axios.post("employee/create",null,newUser).catch(res=>{
-    //                 this.callToaster("toast-top-right",2);
-    //             }).then(res=>{
-    //                 this.users = res.data.result;
-    //                 this.callToaster("toast-top-right",1);
-    //                 document.querySelector('#modal-add-contact').style.display = "none"
-    //                 this.$router.go(0);
-    //             });
-    //         }
-
-    //     },
-    //     ViewDetailsEmp(data){
-    //        lStore.set("userdetails", data)
-    //        this.$router.replace('/employee/profile');
-    //     },
-    //     cleardata(){
-    //         this.firstname = "";
-    //         this.lastname = "";
-    //         this.phonenumber = "";
-    //         this.gender = "";
-    //         this.datehired = "";
-    //         this.address = "";
-    //         this.username = "";
-    //         this.email = "";
-    //         this.password = "";
-    //         this.confirmpassword = "";
-    //         this.designations = "";
-    //         this.role = "";
-    //         this.userid = "";
-    //         this.search = "";
-    //         this.filesrc = "";
-    //         this.rate = "";
-    //         document.querySelector('.feedback1').style.display = "none";
-    //         document.querySelector('.feedback2').style.display = "none";
-    //         document.querySelector('.feedback3').style.display = "none";
-    //         document.querySelector('.feedback6').style.display = "none";
-    //         document.querySelector('.feedback7').style.display = "none";
-    //         document.querySelector('.feedback9').style.display = "none";
-    //         document.querySelector('.feedback10').style.display = "none";
-    //         document.querySelector('.feedback11').style.display = "none";
-    //         document.querySelector('.feedback12').style.display = "none";
-    //         document.querySelector('.feedback13').style.display = "none";
-    //     },
-    //     callToaster(positionClass, reserror) {
-    //         if (document.getElementById("toaster")) {
-    //             toastr.options = {
-    //             closeButton: true,
-    //             debug: false,
-    //             newestOnTop: false,
-    //             progressBar: true,
-    //             positionClass: positionClass,
-    //             preventDuplicates: false,
-    //             onclick: null,
-    //             showDuration: "300",
-    //             hideDuration: "1000",
-    //             timeOut: "2000",
-    //             extendedTimeOut: "1000",
-    //             showEasing: "swing",
-    //             hideEasing: "linear",
-    //             showMethod: "fadeIn",
-    //             hideMethod: "fadeOut"
-    //             };
-    //             if(reserror == 1)
-    //             {
-    //                 toastr.success("Data was save successfully", "Successfully Save!");
-    //             }
-    //             if(reserror == 2)
-    //             {
-    //                 toastr.error("Something went Wrong!", "Error!");
-    //             }
-    //             if(reserror == 3)
-    //             {
-    //                 toastr.success("Data was successfully deleted!", "Successfully Deleted!");
-    //             }
-    //         }
-    //     },
-    // },
+        },
+        ViewEmployee(data){
+           lStore.set('employeeid',data);
+           this.$router.replace('/employee/profile');
+        },
+        cleardata(){
+            this.firstname = "";
+            this.lastname = "";
+            this.phonenumber = "";
+            this.gender = "";
+            this.datehired = "";
+            this.address = "";
+            this.email = "";
+            this.password = "";
+            this.confirmpassword = "";
+            this.designations = "";
+            this.role = "";
+            this.userid = "";
+            this.search = "";
+            this.filesrc = "";
+            this.rate = "";
+            document.querySelector('.feedback1').style.display = "none";
+            document.querySelector('.feedback2').style.display = "none";
+            document.querySelector('.feedback3').style.display = "none";
+            document.querySelector('.feedback6').style.display = "none";
+            document.querySelector('.feedback7').style.display = "none";
+            document.querySelector('.feedback10').style.display = "none";
+            document.querySelector('.feedback11').style.display = "none";
+            document.querySelector('.feedback12').style.display = "none";
+            document.querySelector('.feedback13').style.display = "none";
+        },
+        callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: false,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror == 1)
+                {
+                    toastr.success("Data was save successfully", "Successfully Save!");
+                }
+                if(reserror == 2)
+                {
+                    toastr.error("Something went Wrong!", "Error!");
+                }
+                if(reserror == 3)
+                {
+                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                }
+            }
+        },
+    },
 })
 
 </script>

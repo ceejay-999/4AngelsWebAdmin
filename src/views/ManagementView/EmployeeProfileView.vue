@@ -269,28 +269,30 @@
                 </nav>
             </div>
         </div>
-        <div class="alert alert-danger" role="alert" v-if="viewusers.employee_comment != null || viewusers.employee_comment != ''">
+        <div class="alert alert-danger" role="alert" v-if="viewusers.user_comment == null && viewusers.status == 0 || viewusers.user_comment == '' && viewusers.status == 0">
             Reason of Terminate: <br />
-            {{viewusers.employee_comment}}
+            {{viewusers.user_comment}}
         </div>  
         <div class="invoice-wrapper rounded border bg-white py-5 px-3 px-md-4 px-lg-5">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <img v-if="viewusers.employee_profilepicture == 'https://www.4angelshc.com/mobile/filesystem/'" :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
-                    <img v-else :src="viewusers.employee_profilepicture" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-if="viewusers.user_photo == null || viewusers.user_photo == ''" src="../../assets/default-profile.png" class="mr-3 img-fluid rounded" alt="Avatar Image" />
+                    <img v-else :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+ viewusers.user_photo" class="mr-3 img-fluid rounded" alt="Avatar Image" />
                     <div>
-                        <h2 class="text-dark font-weight-medium">{{viewusers.employee_firstname}} {{viewusers.employee_lastname}}</h2>
+                        <h2 class="text-dark font-weight-medium">{{viewusers.user_firstname}} {{viewusers.user_lastname}}</h2>
                         <ul class="list-unstyled">
-                        <li class="d-flex mb-1">
-                        <i class="mdi mdi-map mr-1"></i>
-                        <span>Employee at {{count}} locations</span>
-                        </li>
+                            <li class="d-flex mb-1">
+                            <i class="mdi mdi-map mr-1"></i>
+                            <span>Employee at {{count}} locations</span>
+                            </li>
 
-                        <li class="d-flex mb-1">
-                        <i class="mdi mdi-phone mr-1"></i>
-                        <span>{{viewusers.employee_phonenumber}} | <i class="mdi mdi-email mr-1"></i> {{viewusers.employee_emailaddress}}</span>
-                        </li>
-                    </ul>
+                            <li class="d-flex mb-1">
+                            <i class="mdi mdi-phone mr-1"></i>
+                            <span>{{viewusers.user_phone}} | <i class="mdi mdi-email mr-1"></i> {{viewusers.user_email}}</span>
+                            </li>
+                        </ul>
+                        <h5 v-if="viewusers.user_status == 1" class="text-success">Active</h5>
+                        <h5 v-else class="text-danger">Terminate</h5>
                     </div>
                 </div>
                 <div class="btn-group d-flex">
@@ -335,7 +337,7 @@
 
                                 <div class="card-body">
                                     <div id="accordion3" class="accordion accordion-bordered">
-                                        <div class="card" v-for="r in usersroleb">
+                                        <div class="card" v-for="r in viewusers.facility">
                                             <div class="card-header d-flex justify-content-between border-bottom" id="heading1">
                                                 <div class="p-4">
                                                     {{r.facility_name}}
@@ -357,10 +359,10 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm text-uppercase">
-                                                        {{r.role_name}}
+                                                        {{r.role_name}} <div class="box" :style="'background:'+r.role_color"></div>
                                                         </div>
                                                         <div class="col-sm text-uppercase">
-                                                        ${{r.assigndesignation_wagerate}}
+                                                        ${{r.prof_wage}}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -386,7 +388,7 @@
                                             Preferred Name:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_firstname}} {{viewusers.employee_lastname}}
+                                            {{viewusers.user_firstname}} {{viewusers.user_lastname}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -394,7 +396,7 @@
                                             Personal Email:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_emailaddress}}
+                                            {{viewusers.user_email}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -402,34 +404,15 @@
                                             Phone Number:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_phonenumber}}
+                                            {{viewusers.user_phone}}
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="py-3"></div>
-                                <div class="card card-default">
-                                    <div class="card-header card-header-border-bottom d-flex justify-content-between">
-                                        Personal Information
-                                        <div>
-                                            <a href="" data-toggle="modal" data-target="#personalModalForm" @click="EditPersonalInfo"><span class="mdi mdi-pencil"></span></a>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm font-weight-bold">
                                             Birthday:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_birthday}}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm font-weight-bold">
-                                            Username:
-                                            </div>
-                                            <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_username}}
+                                            {{viewusers.user_birthday}}
                                             </div>
                                         </div>
                                         <div class="row">
@@ -437,7 +420,7 @@
                                             Date Hired:
                                             </div>
                                             <div class="col-12 col-md-9 text-uppercase">
-                                            {{viewusers.employee_hiredate}}
+                                            {{viewusers.user_datehired}}
                                             </div>
                                         </div>
                                     </div>
@@ -466,7 +449,6 @@ export default({
             comments:"",
             count: 0,
             branches: [],
-            usersroleb: [],
             value: 0,
             designation: [],
             firstname: "",
@@ -498,92 +480,45 @@ export default({
   },
   mounted() 
   {
-    axios.post("designation?_batch=true").catch(res=>{
+    this.userid = lStore.get("employeeid");
+    axios.post("rolecontroller/DisplayAllRoles").catch(res=>{
 
     }).then(res=>{
         if(res.data.success){
             this.designation = res.data.result;
         }
     });
-    axios.post("branches?&_batch=true").catch(res=>{
+    axios.post("facilitycontroller/facilities").catch(res=>{
 
     }).then(res=>{
             if(res.data.success){
                 this.branches = res.data.result;
             }
     });
-    document.querySelector(".toast").id = "toaster";
     mapboxgl.accessToken = this.mapToken;
 
-        const geocoder3 = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
-        });
-        const geocoder4 = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
-        });
+    const geocoder3 = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl
+    });
+    const geocoder4 = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl
+    });
 
-        elementLoad('#geocoder3').then(()=>{
-            geocoder3.addTo('#geocoder3');
-        });
-        elementLoad('#geocoder4').then(()=>{
-            if($('.mapboxgl-ctrl-geocoder').length == 1){
-                
-                geocoder4.addTo('#geocoder2');
-            }
-         });
-        axios.post("designation?_batch=true").catch(res=>{
-        }).then(res=>{
-            if(res.data.success){
-                this.designation = res.data.result;
-            }
-        });
-    this.viewusers = ""
-    axios.post("employee?employee_id="+lStore.get("userdetails"),null,{}).catch(res=>{
-            this.callToaster("toast-top-right",2);
-        }).then(res=>{
-                this.viewusers = res.data.result;
-                if(this.viewusers.employee_status == 0)
-                {
-                    this.value = 0;
-                }
-                else
-                {
-                    this.value = 1;
-                }
-                if(this.viewusers.employee_comment == null && this.viewusers.employee_status == 1 || this.viewusers.employee_comment == "" && this.viewusers.employee_status == 1)
-                {
-                  elementLoad('.alert').then(()=>{
-                    document.querySelector(".alert").style.display = "block";
-                    document.querySelector(".alert").textContent = "No reason added for the termination of this employee";
-                  });
-                }
-                else if(this.viewusers.employee_comment == null && this.viewusers.employee_status == 0 || this.viewusers.employee_comment == "" && this.viewusers.employee_status == 0)
-                {
-                  elementLoad('.alert').then(()=>{
-                    document.querySelector(".alert").style.display = "none";
-                  });
-                }
-                else{
-                  elementLoad('.alert').then(()=>{
-                    document.querySelector(".alert").style.display = "block";
-                  });
-                }
-                return;
-        });
-    axios.post("userDesignations?assigndesignation_employeeid="+lStore.get("userdetails")+"&_joins=facility,role&_on=assigndesignation_facilityid=facility_id,assigndesignation_roleid=role_id&_batch=true",null,{}).catch(res=>{
-        this.callToaster("toast-top-right",2);
-    }).then(res=>{
-        if(res.data.success == true)
-        {
-            this.usersroleb = res.data.result;
-            this.count = this.usersroleb.length;
+    elementLoad('#geocoder3').then(()=>{
+        geocoder3.addTo('#geocoder3');
+    });
+    elementLoad('#geocoder4').then(()=>{
+        if($('.mapboxgl-ctrl-geocoder').length == 1){
+            
+            geocoder4.addTo('#geocoder4');
         }
-        else
-        {
-            return;
-        }
+    });
+    
+    axios.post("usercontroller/ReadSpecificEmployee",null,{userid: this.userid}).then(res=>{
+            this.viewusers = res.data.result[0];
+            this.count = this.viewusers.facility.length;
     });
 
   },
@@ -1064,5 +999,9 @@ right: 0;
 }
 .accordion .card-header .btn::after{
     display: none;
+}
+.box{
+    padding: 10px;
+    width: 5%;
 }
 </style>

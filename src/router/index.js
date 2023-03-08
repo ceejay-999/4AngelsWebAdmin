@@ -116,8 +116,8 @@ const router = createRouter({
       name: 'employeeprofile',
       component: EmployeeProfileView,
       beforeEnter: () => {
-        console.log(lStore.isset('userdetails'));
         if (!lStore.isset('userdetails')) return '/login';
+        else if (!lStore.isset('employeeid')) return '/employee';
       },
     },
     {

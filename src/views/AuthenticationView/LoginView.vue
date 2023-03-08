@@ -103,7 +103,7 @@ export default({
 #cent{
   margin: 0 auto;
   display: flex;
-  justify-content: center;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+  justify-content: center;                 
   padding-bottom: 15px;
 }
 </style>                                                                                                                                                                                  

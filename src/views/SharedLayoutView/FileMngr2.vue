@@ -3,7 +3,7 @@
         <div class="filemng_top_ctrl">
                 <button class="bulkSelect" :class="{buttonActive: bulkSelect}" @click="bulkSelect = !bulkSelect;chosenFile=[]">Bulk Select {{bulkSelect ? 'On': 'Off'}}</button>
                 <button class="delete" @click="deleteSelected">Delete</button>
-                <button class="view" v-if="!bulkSelect && chosenFile.length > 0" @click="openFile" >Open in New Tab</button>
+                <button class="view" v-if="!bulkSelect && chosenFile.length > 0" @click="openFile" >Download</button>
                 <button class="choose" @click="chooseFile" v-if="chosenFile.length > 0">Choose {{chosenFile.length}} File(s)</button>
                 <button class="keepName" :class="{keepNameActive: keepName}" @click="keepName = !keepName;">{{!keepName ? 'Don\'t': ''}} Keep Name on Upload </button>
             </div>
@@ -46,7 +46,7 @@ import {axios,lStore} from '../../functions.js'
 //import {axiosReq}
 //import axios from 'axios'
 //
-const cifile = 'https://www.4angelshc.com/mobile/filesystem/';
+const cifile = 'https://www.4angelshc.com/wangelmobile/filesystem/';
 
 export default({
     props:["user_id"],
@@ -63,10 +63,10 @@ export default({
         }
     },
     mounted(){
-        this.path = cifile+lStore.get('userdetails');
-        this.relativePath = lStore.get('userdetails');
-        axios.post('files?path='+this.relativePath).then(res=>{
-            this.files = res.data;
+        this.path = cifile+lStore.get('employeeid');
+        this.relativePath = lStore.get('employeeid');
+        axios.post('files/index?path='+this.relativePath).then(res=>{
+            this.files = res.data.result;
         });
     },
     methods:{
@@ -123,7 +123,14 @@ export default({
             });
         },
         openFile(){
-            window.open(this.path+'/'+this.chosenFile[0])
+            const fileUrl = this.path+'/'+this.chosenFile[0];
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.setAttribute('download', '');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
         },
         chooseFile(){
             this.$emit('chosenFiles',[...this.chosenFile]);

@@ -14,14 +14,14 @@
             </thead>
             <tbody>
                 <tr v-for="u in location">
-                <td scope="col">{{u.employee_id}}</td>
-                <td scope="col">{{u.employee_firstname}}</td>
-                <td scope="col">{{u.employee_lastname}}</td>
-                <td scope="col">{{u.employee_emailaddress}}</td>
-                <td scope="col">{{u.employee_phonenumber}}</td>
-                <td scope="col"><div v-for="uu in u.assigndesignation">Employee at {{uu.facility_name}}</div> <br /></td>
-                <td scope="col" v-if="(u.employee_status == 1)">Terminate</td>
-                <td scope="col" v-if="(u.employee_status == 0)">Active</td>
+                <td scope="col">{{u.user_id}}</td>
+                <td scope="col">{{u.user_firstname}}</td>
+                <td scope="col">{{u.user_lastname}}</td>
+                <td scope="col">{{u.user_email}}</td>
+                <td scope="col">{{u.user_phone}}</td>
+                <td scope="col"><div v-for="uu in u.facility">Employee at {{uu.facility_name}}<br /></div> </td>
+                <td scope="col" v-if="(u.user_status == 0)">Terminate</td>
+                <td scope="col" v-if="(u.user_status == 1)">Active</td>
                 </tr>
             </tbody>
         </table>
@@ -40,16 +40,16 @@ export default ({
         }
     },
     mounted(){
-        axios.post("common/users").catch(res=>{
+        axios.post("usercontroller/printEmployee").catch(res=>{
         }).then(res=>{
             this.location = res.data.result;
-        });
 
-        setTimeout(()=>{
-            const table = document.getElementById("printMe");
-            const wb = utils.table_to_book(table);
-            writeFileXLSX(wb,"4AngelsEmployee.xlsx");
-        },700)
+            setTimeout(()=>{
+                const table = document.getElementById("printMe");
+                const wb = utils.table_to_book(table);
+                writeFileXLSX(wb,"4AngelsEmployee.xlsx");
+            },700)
+        });
     }
 });
 </script>

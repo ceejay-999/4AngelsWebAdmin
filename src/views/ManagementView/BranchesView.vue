@@ -3,32 +3,11 @@
         <div id="toaster" >
 
         </div>
-        <!-- <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                        <button type="button" @click="clearVariable" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body">
-                        Are you sure you want to delete this? {{branchid}}
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" @click="clearVariable" class="btn btn-light btn-pill" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger btn-pill" @click="DeleteBranch(branchid)" data-dismiss="modal">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
-                        <img v-if="branchimg != 'https://www.4angelshc.com/wangelmobile/'" :src = "'https://www.4angelshc.com/wangelmobile/' +branchimg" class="img-fluid" alt="Avatar Image">
+                        <img v-if="branchimg != ''" :src = "'https://www.4angelshc.com/wangelmobile/filesystem/' +branchimg" class="img-fluid" alt="Avatar Image">
                         <img v-else src="../../assets/building.jpg" class="img-fluid" alt="Avatar Image">
                         <div class="mt-3">
                             Facility Name:<h5 class="text-primary"> {{ branchname }}</h5>
@@ -197,7 +176,7 @@
                         </div>
                     </div>
                     <a href="#" class="media text-secondary" @click="SelectedBranch(a.facility_name,a.facility_id)" >
-                        <img v-if="a.facility_photo != null && a.facility_photo != ''" :src = "'https://www.4angelshc.com/wangelmobile/'+a.facility_photo" class="mr-3 img-fluid rounded" alt="Avatar Image">
+                        <img v-if="a.facility_photo != null && a.facility_photo != ''" :src = "'https://www.4angelshc.com/wangelmobile/filesystem/'+a.facility_photo" class="mr-3 img-fluid rounded" alt="Avatar Image">
                         <img v-else src="../../assets/building.jpg" class="mr-3 img-fluid rounded" alt="Avatar Image">
                         <div class="media-body">
                         <h5 class="mt-0 mb-2 text-dark">{{a.facility_name}}</h5>
