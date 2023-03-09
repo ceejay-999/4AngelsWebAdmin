@@ -1,6 +1,6 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
         </div>
         <!--Termination Modal-->
@@ -18,7 +18,7 @@
                         <form>
                             <div class="form-group">
                                 <label>Reason</label>
-                                <textarea id="comments" class="form-control"></textarea>
+                                <textarea v-model="comments" class="form-control"></textarea>
                                 <div class="invalid-feedback feedback">
                                     
                                 </div>
@@ -74,6 +74,34 @@
                             <div class="form-group">
                                 <label>Number</label>
                                 <input type="text" class="form-control" v-model="phonenumber" placeholder="Enter Number">
+                                <div class="invalid-feedback feedback4">
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Birthday</label>
+                                <input type="text" class="form-control" v-model="birthdate" placeholder="Enter Number">
+                                <div class="invalid-feedback feedback4">
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Date Hired</label>
+                                <input type="date" class="form-control" v-model="datehired" placeholder="Enter Number">
+                                <div class="invalid-feedback feedback4">
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-control" v-model="password" placeholder="Enter Number">
+                                <div class="invalid-feedback feedback4">
+                                    
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <input type="password" class="form-control" v-model="confirmpassword" placeholder="Enter Number">
                                 <div class="invalid-feedback feedback4">
                                     
                                 </div>
@@ -159,6 +187,10 @@
                     <div class="modal-body">
                         <form>
                             <div class="form-group">
+                                <label>Facility</label>
+                                <input type="text" class="form-control" v-model="efacility" placeholder="Enter Rate Per Hour" disabled>
+                            </div>
+                            <div class="form-group">
                                 <label>Role</label>
                                 <select class="form-control" id="desss">
                                     <option value="">Please Select Role</option>
@@ -210,19 +242,6 @@
                                     
                                 </div>
                             </div>
-<!-- 
-                            <div class="form-group">
-                                <label>Access Level</label>
-                                <select class="form-control" id="role">
-                                    <option value="">Please select Access Level</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="Supervisor">Supervisor</option>
-                                    <option value="Employee">Employee</option>
-                                </select>
-                                <div class="invalid-feedback feedback10">
-                                    
-                                </div>
-                            </div> -->
 
                             <div class="form-group">
                                 <label>Role</label>
@@ -269,7 +288,7 @@
                 </nav>
             </div>
         </div>
-        <div class="alert alert-danger" role="alert" v-if="viewusers.user_comment == null && viewusers.status == 0 || viewusers.user_comment == '' && viewusers.status == 0">
+        <div class="alert alert-danger" role="alert" v-if="viewusers.user_status == 0">
             Reason of Terminate: <br />
             {{viewusers.user_comment}}
         </div>  
@@ -296,7 +315,7 @@
                     </div>
                 </div>
                 <div class="btn-group d-flex">
-                    <button class="btn btn-sm btn-danger" v-if="value == 0" data-toggle="modal" data-target="#termModalForm">
+                    <button class="btn btn-sm btn-danger" v-if="value == 1" data-toggle="modal" data-target="#termModalForm">
                         <i class="mdi mdi-account-alert"></i> Terminate
                     </button>
                     
@@ -343,7 +362,7 @@
                                                     {{r.facility_name}}
                                                 </div>
                                                 <div>
-                                                    <a href="" data-toggle="modal" data-target="#EditRoleModalForm" @click="EditRoleInfo(r.assigndesignation_id)"><span class="mdi mdi-pencil"></span></a>
+                                                    <a href="" data-toggle="modal" data-target="#EditRoleModalForm" @click="EditRoleInfo(r.prof_id)"><span class="mdi mdi-pencil"></span></a>
                                                 </div>
                                             </div>
 
@@ -446,6 +465,8 @@ export default({
   name: 'LoginPage',
   data() {
       return{
+            efacility:"",
+            branchid:"",
             comments:"",
             count: 0,
             branches: [],
@@ -518,6 +539,7 @@ export default({
     
     axios.post("usercontroller/ReadSpecificEmployee",null,{userid: this.userid}).then(res=>{
             this.viewusers = res.data.result[0];
+            this.value = this.viewusers.user_status;
             this.count = this.viewusers.facility.length;
     });
 
@@ -542,46 +564,41 @@ export default({
             this.rate = "";
         },
         TermiEmp(){
-            if(this.value == 1) //Meaning kay rehired
+            if(this.value == 0) //Meaning kay rehired
             {
                 this.comments = "";
-                this.value = 0;
-                axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_status: 0, employee_comment: this.comments}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
+                this.value = this.viewusers.user_status;
+                axios.post("usercontroller/TermiEmployee",null,{userid: lStore.get('employeeid'), comment: this.comments, value: 1}).then(res=>{
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",1);
-                        document.querySelector('#termModalForm').style.display = "none"
+                        this.callToaster("toast-top-right", res.data);
                         this.cleardata();
                         setTimeout(() => {
-                            this.$router.go(0);
+                            this.$router.go();
                         }, 2000);
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
             else
             {
-                this.comments = document.querySelector("#comments").value;
-                this.value = 1;
-                axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_status: 1, employee_comment: this.comments}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
+                this.value = this.viewusers.user_status;
+                axios.post("usercontroller/TermiEmployee",null,{userid: lStore.get('employeeid'), comment: this.comments, value: 0}).then(res=>{
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",1);
+                        this.callToaster("toast-top-right", res.data);
+                        this.clearModal("termModalForm");
                         this.cleardata();
                         setTimeout(() => {
-                            this.$router.go(0);
+                            this.$router.go();
                         }, 2000);
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
@@ -612,12 +629,10 @@ export default({
             });
             if(valid.allValid)
             {
-                axios.post("userDesignations/update?employeeid="+lStore.get("userdetails")+"&id="+lStore.get("editrolebranchid"),null,{assigndesignation_roleid:newRole.roles,assigndesignation_wagerate: newRole.rate}).catch(res=>{
-
-                }).then(res=>{
+                axios.post("rolecontroller/EditProfession",null,{profid: this.branchid,userid: lStore.get("employeeid"),roleid:newRole.roles,wage: newRole.rate}).then(res=>{
                     if(res.data.success)
                     {   
-                        this.callToaster("toast-top-right",1);
+                        this.callToaster("toast-top-right", res.data);
                         document.querySelector('#EditRoleModalForm').style.display = "none";
                         this.cleardata();
                         setTimeout(() => {
@@ -626,7 +641,7 @@ export default({
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
@@ -665,12 +680,12 @@ export default({
             });
             if(valid.allValid == true)
             {
-                axios.post("userDesignations/create",null,{assigndesignation_facilityid: newRole.facility,assigndesignation_roleid: newRole.roles,assigndesignation_wagerate: newRole.rate,assigndesignation_employeeid: lStore.get("userdetails")}).catch(res=>{
+                axios.post("rolecontroller/InsertProfession",null,{facilityid: newRole.facility,roleid: newRole.roles,wage: newRole.rate,userid: lStore.get("employeeid")}).catch(res=>{
 
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",1);
+                        this.callToaster("toast-top-right", res.data);
                         document.querySelector('#AddRoleModalForm').style.display = "none"
                         this.cleardata();
                         setTimeout(() => {
@@ -679,7 +694,7 @@ export default({
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
@@ -733,11 +748,11 @@ export default({
             if(valid.allValid == true)
             {
                 axios.post("employee/update?id="+lStore.get("userdetails"),null,newUser).catch(res=>{
-                    this.callToaster("toast-top-right",2);
+                    this.callToaster("toast-top-right", res.data);
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",1);
+                        this.callToaster("toast-top-right", res.data);
                         document.querySelector('#personalModalForm').style.display = "none"
                         this.cleardata();
                         setTimeout(() => {
@@ -746,7 +761,7 @@ export default({
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
@@ -803,11 +818,11 @@ export default({
             if(valid.allValid == true)
             {
                 axios.post("employee/update?id="+lStore.get("userdetails"),null,{employee_firstname: this.firstname,employee_lastname: this.lastname,employee_emailaddress: this.email, employee_phonenumber: this.phonenumber}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
+                    this.callToaster("toast-top-right", res.data);
                 }).then(res=>{
                     if(res.data.success)
                     {
-                        this.callToaster("toast-top-right",1);
+                        this.callToaster("toast-top-right", res.data);
                         document.querySelector('#contactModalForm').style.display = "none"
                         this.cleardata();
                         setTimeout(() => {
@@ -816,75 +831,64 @@ export default({
                     }
                     else
                     {
-                        this.callToaster("toast-top-right",2);
+                        this.callToaster("toast-top-right", res.data);
                     }
                 });
             }
         },
         EditRoleInfo(data){
-            axios.post("userDesignations?assigndesignation_id="+data+"&_joins=facility,role&_on=assigndesignation_facilityid=facility_id,assigndesignation_roleid=role_id",null,{}).catch(res=>{
-            }).then(res=>{
+            axios.post("rolecontroller/ViewProfession",null,{profid:data}).then(res=>{
                 if(res.data.success == true)
                 {
-                    lStore.set("editrolebranchid",data);
+                    this.branchid = data;
                     var dessselected = document.getElementById('desss');
-                    this.editrole.position = res.data.result.role_name;
-                    dessselected.options[dessselected.selectedIndex].text = this.editrole.position;
-                    dessselected.options[dessselected.selectedIndex].value = this.editrole.designation_id;
+                    this.editrole = res.data.result[0];
+                    this.efacility = this.editrole.facility_name;
+                    dessselected.options[dessselected.selectedIndex].text = this.editrole.role_name;
+                    dessselected.options[dessselected.selectedIndex].value = this.editrole.prof_role_id;
                     dessselected.options[dessselected.selectedIndex].disabled = true;
-                    this.editrole.hourly_rate = res.data.result.assigndesignation_wagerate;
-                    this.rates = this.editrole.hourly_rate
-                }
-                else
-                {
-                    return;
+                    this.rates = this.editrole.prof_wage;
                 }
             });
 
         },
         EditPersonalInfo(){
             this.cleardata();
-            // var genderselected = document.getElementById('gender');
-            // genderselected.options[genderselected.selectedIndex].text = this.viewusers.gender;
-            // genderselected.options[genderselected.selectedIndex].value = this.viewusers.gender;
-            // genderselected.options[genderselected.selectedIndex].disabled = true;
             this.username = this.viewusers.employee_username;
             this.birthdate = this.viewusers.employee_birthday;
             this.datehired = this.viewusers.employee_hiredate;
         },
         EditcontactInfo(){
             this.cleardata();
-            this.firstname =  this.viewusers.employee_firstname;
-            this.lastname = this.viewusers.employee_lastname;
-            this.phonenumber = this.viewusers.employee_phonenumber;
-            this.email = this.viewusers.employee_emailaddress;
+            this.firstname = this.viewusers.user_firstname;
+            this.lastname = this.viewusers.user_lastname;
+            this.phonenumber = this.viewusers.user_phone;
+            this.datehired = this.viewusers.user_datehired;
+            this.birthdate = this.viewusers.user_birthday;
+            this.email = this.viewusers.user_email;
             
         },
     EditEmployee(){
         this.cleardata();
         this.role = this.viewusers.role;
-        this.firstname = this.viewusers.firstname;
-        this.lastname = this.viewusers.lastname;
-        this.phonenumber = this.viewusers.phonenumber;
-        this.gender = this.viewusers.gender;
-        this.datehired = this.viewusers.date_hired;
-        this.birthdate = this.viewusers.employee_birthday;
-        this.username = this.viewusers.username;
-        this.email = this.viewusers.email_address;
+        this.firstname = this.viewusers.user_firstname;
+        this.lastname = this.viewusers.user_lastname;
+        this.phonenumber = this.viewusers.user_phone;
+        this.datehired = this.viewusers.user_datehired;
+        this.birthdate = this.viewusers.user_birthday;
+        this.email = this.viewusers.user_email;
         this.userid = this.viewusers.user_id;
-        this.rate = this.viewusers.hourly_rate;
-        document.querySelector('#edes').value = this.viewusers.designation_id;
-        document.querySelector('#egender').value = this.viewusers.gender;
-        document.querySelector('#erole').value = this.viewusers.role;
-        document.querySelector('#egender').value = this.viewusers.gender;
-        document.querySelector('#edate').value = this.viewusers.date_hired;
+        this.rate = this.viewusers.prof_wage;
+        document.querySelector('#edes').value = this.viewusers.role_id;
+        document.querySelector('#erole').value = this.viewusers.role_name;
+        document.querySelector('#edate').value = this.viewusers.user_datehired;
     },
     callToaster(positionClass, reserror) {
             if (document.getElementById("toaster")) {
                 toastr.options = {
                 closeButton: true,
                 debug: false,
-                newestOnTop: false,
+                newestOnTop: true,
                 progressBar: true,
                 positionClass: positionClass,
                 preventDuplicates: false,
@@ -898,57 +902,29 @@ export default({
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut"
                 };
-                if(reserror == 1)
+                if(reserror.success == true)
                 {
-                    toastr.success("Data was save successfully", "Successfully Save!");
+                    toastr.success(""+reserror.msg, "Successfully!");
                 }
-                if(reserror == 2)
+                else
                 {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                if(reserror == 3)
-                {
-                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
         },
-        TermEmployee(){
-          this.status = 1
-          axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",1);
-                        this.cleardata();
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
-        },
-        RehireEmployee(){
-          this.status = 0;
-          axios.post("users/update?id="+lStore.get("userdetails"),null,{comments: this.comment,status: this.status}).catch(res=>{
-                    this.callToaster("toast-top-right",2);
-                }).then(res=>{
-                    if(res.data.success)
-                    {
-                        this.callToaster("toast-top-right",1);
-                        this.cleardata();
-                        setTimeout(() => {
-                            this.$router.go(0);
-                        }, 2000);
-                    }
-                    else
-                    {
-                        this.callToaster("toast-top-right",2);
-                    }
-                });
+        clearModal(modalname){
+            const exampleModalForm = document.querySelector('#'+ modalname);
+            exampleModalForm.removeAttribute('aria-modal');
+            exampleModalForm.removeAttribute('role');
+            exampleModalForm.setAttribute('aria-hidden', 'true');
+            exampleModalForm.classList.remove('show');
+            exampleModalForm.style.display = "none";
+            exampleModalForm.style.paddingRight = "0";
+            const bodyForm = document.querySelector('#body');
+            bodyForm.classList.remove('modal-open');
+            bodyForm.style.paddingRight = "0";
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            modalBackdrop.parentNode.removeChild(modalBackdrop);
         },
   }
 });
@@ -988,10 +964,6 @@ margin-right: 20px;
 position: absolute;
 top: 0;
 right: 0;
-}
-.alert{
-  display:none;
-  margin-top: 20px;
 }
 .tab-content > .active
 {

@@ -325,17 +325,17 @@ export default ({
         })
     },
     methods : {
-        SearchEmp(){
-            this.users = [];
-            axios.post("employee/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
-                if(res.data.result == null)
-                {
-                    return;
-                }
-                this.users = res.data.result;
-                this.searchkey = "";
-            });
-        },
+        // SearchEmp(){
+        //     this.users = [];
+        //     axios.post("employee/search?concat=firstname:+:lastname&s="+this.searchkey+"&batch=true").then(res=>{
+        //         if(res.data.result == null)
+        //         {
+        //             return;
+        //         }
+        //         this.users = res.data.result;
+        //         this.searchkey = "";
+        //     });
+        // },
         ShowTerm(){                                                                                                                                        
             if(this.value == 0)
             {

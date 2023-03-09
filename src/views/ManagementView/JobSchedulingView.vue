@@ -4,7 +4,7 @@
             <div class="col-12">
                 <div class="card card-default">
                     <div class="card-body">
-                        <AppointView :facilityId=facilitychoosen></AppointView>
+                        <SchedulerParent></SchedulerParent>
                     </div>
                 </div>
             </div>
@@ -14,12 +14,13 @@
 <script>
 import { lStore } from "../../functions";
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-import AppointView from "../../views/SharedLayoutView/Scheduler.vue"
+import SchedulerParent from '../../components/SchedulerComps/SchedulerParent.vue';
 
 export default ({
     name: "App",
     components: {
-    LayoutView
+    LayoutView,
+    SchedulerParent
     },
     data(){
         return{
