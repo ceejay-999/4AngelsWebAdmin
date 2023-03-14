@@ -182,7 +182,7 @@
 </template>
 <script type="script">
 import LayoutView from '../SharedLayoutView/LayoutView.vue';
-import { axios,validateForm } from '@/functions';
+import { axios,validateForm,lStore } from '@/functions';
 import toastr from 'toastr';
 
 export default ({
@@ -200,7 +200,7 @@ export default ({
         }
     },
     mounted(){
-        axios.post('rolecontroller/displayallroles',null,{}).then(res=>{
+        axios.post('rolecontroller/displayallroles',{pwauth: lStore.get('usertoken')},{}).then(res=>{
             if(res.data.success){
                 this.role = res.data.result;
             }else{
@@ -210,7 +210,7 @@ export default ({
     },
     methods:{
         SearchRole(){
-            axios.post('rolecontroller/searchroles',null,{keyword: this.keyword}).then(res=>{
+            axios.post('rolecontroller/searchroles',{pwauth: lStore.get('usertoken')},{keyword: this.keyword}).then(res=>{
                 if(res.data.success){
                     this.role = res.data.result;
                 }else{
@@ -227,7 +227,7 @@ export default ({
                 return;
             }
             else{
-                axios.post("rolecontroller/UpdateRoles",null,{roleid: this.roleid, rolename:this.position,rolecolor: this.rolecolor}).then(res=>{
+                axios.post("rolecontroller/UpdateRoles",{pwauth: lStore.get('usertoken')},{roleid: this.roleid, rolename:this.position,rolecolor: this.rolecolor}).then(res=>{
                     if(res.data.success)
                     {
                         this.clearVariable();
@@ -247,7 +247,7 @@ export default ({
         ViewRole(data)
         {
             console.log(data);
-            axios.post("rolecontroller/displayarole",null,{roleid: data}).then(res=>{
+            axios.post("rolecontroller/displayarole",{pwauth: lStore.get('usertoken')},{roleid: data}).then(res=>{
                 console.log(res.data);
                 this.position = res.data.result[0].role_name;
                 this.rolecolor = res.data.result[0].role_color;
@@ -284,7 +284,7 @@ export default ({
             {
                 document.querySelector('.feedback1').style.display = "none";
                 document.querySelector('.feedback2').style.display = "none";
-                axios.post("rolecontroller/CreateRoles",null,{rolename:this.position,rolecolor:this.rolecolor}).then(res=>{
+                axios.post("rolecontroller/CreateRoles",{pwauth: lStore.get('usertoken')},{rolename:this.position,rolecolor:this.rolecolor}).then(res=>{
                     if(res.data.success)
                     {
                         this.clearVariable();

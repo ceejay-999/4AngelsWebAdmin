@@ -7,7 +7,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle">Clockin / Clockout</h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockin</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -22,6 +22,28 @@
                                     
                                 </div>
                             </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal"> Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addClockoutModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockout</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
                             <div class="form-group">
                                 <label>Clockout Time</label>
                                 <input type="time" class="form-control" v-model="assignschedclockout">
@@ -34,7 +56,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin(assignschedid)" data-dismiss="modal"> Save Changes</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal"> Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -75,7 +97,7 @@
                 </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-sm-3">
+            <div v-if="accesslevel.user_access_level_id == 1" class="col-xl-3 col-sm-3">
                 <div class="card card-mini mb-4">
                 <div class="card-body">
                     <h2 class="mb-1">0</h2>
@@ -89,6 +111,7 @@
             <div class="card-body d-flex justify-content-between">
                 <div class="text-uppercase text-secondary">
                     <h4>{{ new Date().toLocaleString('en-US',{
+                        timeZone: "America/New_York",
                         weekday: "long",
                         year: "numeric",
                         month: "long",
@@ -117,7 +140,7 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="NowUpComming" role="tabpanel" aria-labelledby="settings-tab">
                             <div class="tab-pane-content">
-                                <div v-if="assignschedules.length == 0">
+                                <div v-if="assignschedules === null">
                                     <div class="d-flex justify-content-center">
                                     <div class="text-center mt-5">
                                         <h3 class="mb-2">Keep track of your Employees.</h3>
@@ -127,27 +150,17 @@
                                     </div>
                                 </div>
                                 <div v-else>
-                                    <div v-for="arr in assignschedules">
-                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status == 6">
+                                    <div v-for="arr in assignschedules.green">
+                                        <div class="bd-callout mt-4 bd-callout-success">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
-                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
-
-                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small> <!--If On Time-->
-
-                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
-
-                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small>
-
-                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
-                                                    <small v-else>Clockout: </small>
-                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
-                                                    <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
+                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
+                                                    <small>Clockout: </small>
+                                                    <small><span class="text-info"> Ongoing</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
@@ -163,73 +176,26 @@
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockin Selfie</a>
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockin Location</a>
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockout Selfie</a>
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm">View Clockout Location</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div><!--IF NO PROBLEM SA CLOCKIN-->
-                                        <div class="bd-callout mt-4 bd-callout-warning" v-if="arr.assignschedules_status == 7">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
-                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
-
-                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small> <!--If On Time-->
-
-                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
-
-                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timein).toLocaleTimeString() }}</small><!--if not yet Clocked In-->
-                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
-                                                    <small v-else>Clockout: </small>
-                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
-                                                    <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    Total Hours
-                                                    <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    Wages
-                                                    <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
-                                                <div>
-                                                    <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status == 8">
+                                    </div>
+                                    <div v-for="arr in assignschedules.yellow">
+                                        <div class="bd-callout mt-4 bd-callout-warning">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
 
-                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
-
-                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
-
-                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
-                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
-                                                    <small v-else>Clockout: </small>
-                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
-                                                    <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
+                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger">Missing Clockin</span> </small> <!--If On Time-->
+                                                    <small v-else>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }} <span class="text-danger">Clockin Late</span></small>
+                                                    <small>Clockout: </small>
+                                                    <small><span class="text-info"> Ongoing</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
@@ -245,31 +211,26 @@
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div><!--Missing Clock In-->
-                                        <div class="bd-callout mt-4 bd-callout-primary" v-if="(arr.assignschedules_status < 5)">
+                                        </div>
+                                    </div>
+                                    <div v-for="arr in assignschedules.red">
+                                        <div class="bd-callout mt-4 bd-callout-danger">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
-                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}} <small>rate: {{ arr.assigndesignation_wagerate }} </small>
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
+                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
 
-                                                    <small v-if="arr.assignschedules_status == 6" >Clockin: {{ arr.assignschedules_timein }}</small> <!--If On Time-->
-
-                                                    <small v-if="arr.assignschedules_status == 7" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Clocked in Late</span></small><!--if Late-->
-
-                                                    <small v-if="arr.assignschedules_status == 8" >Clockin: {{ arr.assignschedules_timein }} <span class="text-danger">Missing Clock In</span></small><!--if not yet Clocked In-->
-
-                                                    <small v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " >Clockin: {{ arr.assignschedules_timein }}</small><!--if not yet Clocked In-->
-
-                                                    <small v-if=" arr.assignschedules_status == 5 && arr.assignschedules_timeout != null">Clockout: {{ new Date(arr.schedules_dates+' '+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-if="arr.assignschedules_status == 5">Clockout: <span class="text-danger">Missing ClockOut</span></small>
-                                                    <small v-else>Clockout: </small>
-                                                    <small>{{ new Date(arr.schedules_dates).toLocaleDateString()}}<span class="text-primary"  v-if="arr.assignschedules_status == 0 || arr.assignschedules_status == null " > Upcoming</span><span class="text-info"  v-else > Ongoing</span> </small>
-                                                    <small>{{ new Date(arr.schedules_dates+' '+arr.schedules_timestart).toLocaleTimeString() }} - {{new Date(arr.schedules_dates+' '+arr.schedules_timeend).toLocaleTimeString()}}</small>
+                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger">Missing Clockin</span> </small> <!--If On Time-->
+                                                    <small v-else>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
+                                                    <small>Clockout: </small>
+                                                    <small><span class="text-info"> Ongoing</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
@@ -285,11 +246,45 @@
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div><!--wala pay time in-->
+                                        </div>
+                                    </div>
+                                    <div v-for="arr in assignschedules.gray">
+                                        <div class="bd-callout mt-4 bd-callout-default">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
+                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <small>Clockin: </small>
+                                                    <small>Clockout: </small>
+                                                    <small><span class="text-info"> Upcomming</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Wages
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
+                                                </div>
+                                                <div>
+                                                    <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -306,83 +301,83 @@
                                     </div>
                                 </div>
                                 <div v-else>
-                                    <div v-for="arr in assignschedules">
-                                        <div class="bd-callout mt-4 bd-callout-danger" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout == '' ||arr.assignschedules_status == 5 && arr.assignschedules_timein == '' || arr.assignschedules_status == 5 && arr.assignschedules_timeout == null ||arr.assignschedules_status == 5 && arr.assignschedules_timein == null ">
+                                    <div v-for="arr in assignschedules.complete">
+                                        <div v-if="arr.clock_event_isclockin == 1 && arr.clock_event_isclockout == 1" class="bd-callout mt-4 bd-callout-success">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
-                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}}<small>rate: {{ arr.assignschedules_lastrecordrate }} </small>
-                                                    <small v-if="arr.assignschedules_timein != null" >Clockin: {{ new Date(arr.schedules_dates+" "+arr.assignschedules_timein).toLocaleTimeString() }}</small>
-                                                    <small v-else>Clockin:<span class="text-danger"> No Clockin </span></small>
-                                                    <small v-if="arr.assignschedules_timeout != null">Clockout: {{  new Date(arr.schedules_dates+" "+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-else>Clockout: <span class="text-danger"> No Clockout </span></small>
-                                                    <small>{{ new Date(arr.schedules_dates+" "+arr.schedules_timestart).toLocaleTimeString() }} - {{ new Date(arr.schedules_dates+" "+arr.schedules_timeend).toLocaleTimeString() }} </small>
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
+                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
+                                                    <small>Clockout: {{ new Date(arr.clock_event_outtime).toLocaleTimeString() }}</small>
+                                                    <small><span class="text-success"> Completed</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Total Hours
-                                                    <p class="d-flex justify-content-center" v-if="arr.assignschedules_totalhours != null || arr.assignschedules_totalhours != ''"> {{ parseFloat(arr.assignschedules_totalhours).toFixed(2) }} </p>
-                                                    <p class="d-flex justify-content-center" v-else>0</p>
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
-                                                    <p class="d-flex justify-content-center" v-if="arr.assignschedules_totalwage != null || arr.assignschedules_totalwage != ''">${{ parseFloat(arr.assignschedules_totalwage).toFixed(2) }}</p>
-                                                    <p class="d-flex justify-content-center" v-else>0</p>
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
                                                 </div>
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="bd-callout mt-4 bd-callout-success" v-if="arr.assignschedules_status == 5 && arr.assignschedules_timeout != null && arr.assignschedules_timein != null">
+                                        <div v-else class="bd-callout mt-4 bd-callout-danger">
                                             <div class="d-flex justify-content-between">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <img v-if="arr.employee_profilepicture != 'https://www.4angelshc.com/mobile/filesystem/'" class="mr-3 img-fluid rounded" :src="arr.employee_profilepicture"/>
-                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.employee_firstname }} {{arr.employee_lastname}}<small>rate: {{ arr.assignschedules_lastrecordrate }} </small>
-                                                    <small v-if="arr.assignschedules_timein != null" >Clockin: {{ new Date(arr.schedules_dates+" "+arr.assignschedules_timein).toLocaleTimeString() }}</small>
-                                                    <small v-else>Clockin:<span class="text-danger"> No Clockin </span></small>
-                                                    <small v-if="arr.assignschedules_timeout != null">Clockout: {{  new Date(arr.schedules_dates+" "+arr.assignschedules_timeout).toLocaleTimeString() }}</small> 
-                                                    <small v-else>Clockout: <span class="text-danger"> No Clockout </span></small>
-                                                    <small>{{ new Date(arr.schedules_dates+" "+arr.schedules_timestart).toLocaleTimeString() }} - {{ new Date(arr.schedules_dates+" "+arr.schedules_timeend).toLocaleTimeString() }} </small>
+                                                    <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
+                                                    <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
+                                                    <small>Clockout: {{ new Date(arr.clock_event_outtime).toLocaleTimeString() }}</small>
+                                                    <small><span class="text-success"> Completed</span> </small>
+                                                    <small>{{ new Date(arr.schedule_detail_date+' '+arr.schedule_detail_start_time).toLocaleTimeString() }} - {{new Date(arr.schedule_detail_date+' '+arr.schedule_detail_end_time).toLocaleTimeString()}}</small>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Total Hours
-                                                    <p class="d-flex justify-content-center" v-if="arr.assignschedules_totalhours != null || arr.assignschedules_totalhours != ''"> {{ parseFloat(arr.assignschedules_totalhours).toFixed(2) }} </p>
-                                                    <p class="d-flex justify-content-center" v-else>0</p>
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
-                                                    <p class="d-flex justify-content-center" v-if="arr.assignschedules_totalwage != null || arr.assignschedules_totalwage != ''">${{ parseFloat(arr.assignschedules_totalwage).toFixed(2) }}</p>
-                                                    <p class="d-flex justify-content-center" v-else>0</p>
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">0</p>
                                                 </div>
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
-                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
+        </div>
+    </div>
     </LayoutView>
 </template>
 
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-import { axios , validateForm,lStore } from '@/functions.js';
+import { axios , validateForm,lStore,dateFormat } from '@/functions.js';
 
 export default ({
     name: "App",
@@ -407,455 +402,67 @@ export default ({
             assignschedclockout: "",
             pastschedule:[],
             timesheets: [],
+            facilityid: "",
+            accesslevel: lStore.get('userdetails'),
+            clockid: "",
         }
     },
-    // mounted(){
-        
-    //     this.datetoday = new Date().toLocaleString();
-
-    //     axios.post("branches?_batch=true").catch(res=>{
-    //     }).then(res=>{
-    //         this.totalfacility = res.data.result.length;
-    //     });
-    //     axios.post("employee?_batch=true").catch(res=>{
-    //     }).then(res=>{
-    //         let obj = {};
-    //         res.data.result.forEach(element => {
-    //             if(element.users_permission_status == 2)
-    //             {
-    //                 obj = element;
-    //                 this.users.push(obj);
-    //             }
-    //         });
-    //         this.totalsupervisor = this.users.length;
-    //         this.users = [];
-    //         obj = {};
-    //         res.data.result.forEach(element => {
-    //             if(element.users_permission_status == 3)
-    //             {
-    //                 obj = element;
-    //                 this.users.push(obj);
-    //             }
-    //         });
-    //         this.totalmanagers = this.users.length;
-    //     });
-        
-    //     axios.post("branches?facility_id="+lStore.get("selected_facilityId")).catch(res=>{
-
-    //     }).then(res=>{
-    //         if(res.data.success)
-    //         {
-    //             this.branch = res.data.result;
-    //         }
-    //     });
-    //     this.gethourlydata();
-    //     this.GetTimesheetonpastschedules();
-    //     setInterval(() => {
-    //         this.gethourlydata();this.GetTimesheetonpastschedules();
+    mounted(){
+        this.datetoday = new Date();
+        axios.post('dashboardcontroller/DashboardTotalReport',{pwauth: lStore.get('usertoken')}).then(res=>{
+            this.totalfacility = res.data.result.facilities;
+            this.totalsupervisor = res.data.result.supervisor;
+            this.totalmanagers = res.data.result.manager;
+        });
+        this.gethourlydata();
+        setInterval(() => {
+            this.gethourlydata();
             
-    //     }, 3000);
-    // },
-    // methods:{
-    //     startAndEnd(element){
-    //         let scheduleDate = element.schedules_dates;
-    //         let scheduleTimeStart = element.schedules_timestart;
-    //         let scheduleTimeEnd = element.schedules_timeend;
-    //         let clockTimeEnd = element.assignschedules_timeout;
-    //         let clockTimeStart = element.assignschedules_timein;
+        }, 3000);
 
-    //         let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-    //         let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-    //         let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-    //         let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-    //         let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-    //         scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
-
-    //         const dayHrs = 1000 * 60 * 60;
-
-    //         //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-    //         if(schedEnd.getTime() < schedStart.getTime()) {
-    //             //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-    //         if(clockStart.getTime() < clockEnd.getTime()){
-    //             clockStart.setDate(clockStart.getDate() + 1);
-    //         }
-
-    //         //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-    //         if(clockEnd.getTime() < schedStart.getTime()) {
-    //             clockEnd.setDate(clockEnd.getDate() + 1);
-    //         }
-    //             schedEnd.setDate(schedEnd.getDate() + 1);
-    //         }
-            
-    //         return [schedStart,schedEnd,clockStart,clockEnd];
-    //     },
-    //     cleardata(){
-    //         this.assignschedid = "";
-    //         this.assignschedclockin = "";
-    //         this.assignschedclockout = "";
-    //     },
-    //     gethourlydata(){
-    //         axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid&_batch=true").catch(res=>{
-
-    //         }).then(res=>{
-    //             if(!res.data.success)
-    //             {
-    //                 return;
-    //             }
-    //             if(res.data.success)
-    //             {
-    //                 this.totalhoursb = 0;
-    //                 this.totalwageb = 0;
-    //                 this.assignschedules = [];
-    //                 let allarr = [];
-    //                 allarr = res.data.result;
-    //                 allarr.forEach(element => {
-    //                     //first checking if ang data is karon nga date
-    //                     if(new Date(element.schedules_dates).toLocaleDateString() == new Date().toLocaleDateString()|| new Date(element.schedules_dates).toLocaleDateString() > new Date().toLocaleDateString())
-    //                     {
-    //                         if(this.startAndEnd(element)[1].getTime() < new Date().getTime() && element.assignschedules_status != 5)
-    //                         {
-    //                             element.assignschedules_status = 5;
-    //                             let scheduleDate = element.schedules_dates;
-    //                             let scheduleTimeStart = element.schedules_timestart;
-    //                             let scheduleTimeEnd = element.schedules_timeend;
-    //                             let clockTimeEnd = element.assignschedules_timeout;
-    //                             let clockTimeStart = element.assignschedules_timein;
-
-    //                             let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-    //                             let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-    //                             let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-    //                             let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-    //                             let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-    //                             scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
-
-    //                             const dayHrs = 1000 * 60 * 60;
-
-    //                             //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-    //                             if(schedEnd.getTime() < schedStart.getTime()) {
-    //                                 //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-    //                             if(clockStart.getTime() < clockEnd.getTime()){
-    //                                 clockStart.setDate(clockStart.getDate() + 1);
-    //                             }
-                                
-    //                             //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-    //                             if(clockEnd.getTime() < schedStart.getTime()) {
-    //                                 clockEnd.setDate(clockEnd.getDate() + 1);
-    //                             }
-
-    //                                 schedEnd.setDate(schedEnd.getDate() + 1);
-    //                             }
-
-
-
-    //                             let lateHours = 0;
-    //                             let overHours = 0;
-    //                             let underHours = 0;
-    //                             let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
-
-
-
-    //                             if(clockStart.getTime() > schedStart.getTime()){
-    //                                 lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
-    //                             }
-
-    //                             if(clockEnd.getTime() > schedEnd.getTime()){
-    //                                 overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
-    //                             }
-
-    //                             if(schedEnd.getTime() > clockEnd.getTime()){
-    //                                 underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
-    //                             }
-
-    //                             regularHours = regularHours - (lateHours + underHours);
-
-
-    //                             if(regularHours <= 0.5) regularHours = 0;
-    //                             if(clockTimeStart == null || clockTimeEnd == null)
-    //                             {
-    //                                 regularHours = 0;
-    //                             }
-
-                                
-
-                                
-    //                             element.assignschedules_totalhours = regularHours;
-    //                             element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
-    //                             element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
-    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
-
-    //                             }).then(res=>{
-
-    //                             });
-    //                         }
-    //                         else if(this.startAndEnd(element)[1].getTime() < new Date().getTime() >= new Date().getTime() && element.assignschedules_status != 5 && element.assignschedules_timeout != null)
-    //                         {
-    //                             element.assignschedules_status = 5;
-    //                             let scheduleDate = element.schedules_dates;
-    //                             let scheduleTimeStart = element.schedules_timestart;
-    //                             let scheduleTimeEnd = element.schedules_timeend;
-    //                             let clockTimeEnd = element.assignschedules_timeout;
-    //                             let clockTimeStart = element.assignschedules_timein;
-
-    //                             let schedStart = new Date(scheduleDate+' '+scheduleTimeStart);
-    //                             let schedEnd = new Date(scheduleDate+' '+scheduleTimeEnd);
-    //                             let clockStart = new Date(scheduleDate+' '+clockTimeStart);
-    //                             let clockEnd = new Date(scheduleDate+' '+clockTimeEnd);
-    //                             let scheduleTomorrowDateObj = new Date(scheduleDate+' '+scheduleTimeStart);
-    //                             scheduleTomorrowDateObj.setDate(scheduleTomorrowDateObj.getDate() + 1);
-
-    //                             const dayHrs = 1000 * 60 * 60;
-
-    //                             //checks if schedule end time is smaller than schedule start time. if yes, adds 1 day to schedule end datetime
-    //                             if(schedEnd.getTime() < schedStart.getTime()) {
-    //                                 //if clock in time is smaller than clock out time, this checks if the clockin time is smaller than clock out time, if yes, adds 1 day to clock in (meaning the user clocked in in date after the scheduled date)
-    //                             if(clockStart.getTime() < clockEnd.getTime()){
-    //                                 clockStart.setDate(clockStart.getDate() + 1);
-    //                             }
-                                
-    //                             //if clock out time is smaller than schedule start time, adds 1 day to clock out datetime
-    //                             if(clockEnd.getTime() < schedStart.getTime()) {
-    //                                 clockEnd.setDate(clockEnd.getDate() + 1);
-    //                             }
-
-    //                                 schedEnd.setDate(schedEnd.getDate() + 1);
-    //                             }
-
-
-
-    //                             let lateHours = 0;
-    //                             let overHours = 0;
-    //                             let underHours = 0;
-    //                             let regularHours = (schedEnd.getTime() - schedStart.getTime()) / dayHrs;
-
-
-
-    //                             if(clockStart.getTime() > schedStart.getTime()){
-    //                                 lateHours = (clockStart.getTime() - schedStart.getTime()) / dayHrs;
-    //                             }
-
-    //                             if(clockEnd.getTime() > schedEnd.getTime()){
-    //                                 overHours = (clockEnd.getTime() - schedEnd.getTime()) / dayHrs;
-    //                             }
-
-    //                             if(schedEnd.getTime() > clockEnd.getTime()){
-    //                                 underHours = (schedEnd.getTime() - clockEnd.getTime()) / dayHrs;
-    //                             }
-
-    //                             regularHours = regularHours - (lateHours + underHours);
-
-    //                             if(regularHours <= 0.01)regularHours = 0;
-
-                                
-    //                             element.assignschedules_totalhours = regularHours;
-    //                             element.assignschedules_totalwage = regularHours * element.assigndesignation_wagerate;
-    //                             element.assignschedules_lastrecordrate = element.assigndesignation_wagerate;
-    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 5,assignschedules_totalhours: element.assignschedules_totalhours, assignschedules_totalwage: element.assignschedules_totalwage,assignschedules_lastrecordrate: element.assigndesignation_wagerate}).catch(res=>{
-
-    //                             }).then(res=>{
-
-    //                             });
-    //                         }
-    //                         if(element.assignschedules_timein == null && (new Date(element.schedules_dates+' '+element.schedules_timestart).getTime()+1*60000) < (new Date().getTime()) && element.assignschedules_status != '2' && element.assignschedules_status != '5')
-    //                         {
-                                
-    //                             axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 8}).catch(res=>{
-
-    //                             }).then(res=>{
-    //                                 return;
-    //                             });
-    //                         }
-
-
-
-    //                         if(element.assignschedules_totalhours == null || element.assignschedules_totalwage == null)
-    //                         {
-    //                             this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(0);
-    //                             this.totalwageb = parseFloat(this.totalwageb) + parseFloat(0);
-    //                         }
-    //                         else{
-    //                             this.totalhoursb = parseFloat(this.totalhoursb) + parseFloat(element.assignschedules_totalhours);
-    //                             this.totalwageb = parseFloat(this.totalwageb) + parseFloat(element.assignschedules_totalwage);
-    //                         }
-    //                         this.assignschedules.push(element);
-    //                     }
-    //                     else
-    //                     {
-    //                         this.pastschedule.push(element);
-    //                         axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_status: 4}).catch(res=>{
-
-    //                         }).then(res=>{
-    //                             return;
-    //                         });
-    //                     }
-    //                 });
-    //                 this.assignschedules.sort((a,b)=>{
-    //                     let timeA = new Date(a.schedules_dates+' '+a.schedules_timestart).getTime();
-    //                     let timeB = new Date(b.schedules_dates+' '+b.schedules_timestart).getTime();
-    //                     return timeA - timeB;
-    //                 });
-    //             }
-    //             else
-    //             {
-    //                 return;
-    //             }
-    //         });
-    //     },
-    //     GetTimesheetonpastschedules()
-    //     {
-            
-    //         axios.post("timesheet?_batch=true").catch(res=>{
-    //         }).then(res=>{
-    //             if(res.data.success != true)
-    //             {
-    //                 let flag = 0;
-    //                 let firstpast = {};
-    //                 for(let i = 0; i < this.pastschedule.length; i++)
-    //                 {
-    //                     if(this.pastschedule[i].assignschedules_recorded == 0)
-    //                     {
-    //                         this.pastschedule[i].assignschedules_recorded = 1;
-    //                         flag = 1;
-    //                         firstpast = this.pastschedule[i]
-    //                         break;
-    //                     }
-    //                 }
-    //                 if(flag == 1)
-    //                 {
-    //                     axios.post("timesheet/create?returnall=true",null,{timesheets_totalpaid: firstpast.assignschedules_totalwage,timesheets_totalhour: firstpast.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: firstpast.schedules_dates }).then(res=>{
-    //                         this.timesheets = res.data.info.result;
-    //                         axios.post("assigned/update?id="+firstpast.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
-
-    //                         }).then(res=>{
-                                
-    //                         });
-    //                     });
-    //                 }
-    //             }
-    //             else
-    //             {
-    //                 this.timesheets = res.data.result;
-    //                 //since masudlan nag usa kabuok dapat ma condition na nako
-    //                 this.pastschedule.forEach(element => {
-    //                 let flag = 0;
-    //                 let sheettime = {};
-    //                 let index = 0;
-    //                 let newtimesheet={
-    //                     timesheets_totalpaid: 0,
-    //                     timesheets_totalhour: 0,
-    //                     timesheets_totaltimecard: 0,
-    //                     timesheets_schedule:"",
-    //                 };
-    //                     for(let i = 0; i < this.timesheets.length; i++)
-    //                     {
-                            
-    //                         if(new Date(element.schedules_dates).getTime() == new Date(this.timesheets[i].timesheets_schedule).getTime())
-    //                         {
-    //                             flag = 1;
-    //                             sheettime = this.timesheets[i];
-    //                             index = i;
-    //                             break;
-    //                         }
-    //                     }
-    //                     if(flag == 1)
-    //                     {
-    //                         if(element.assignschedules_recorded == 0)
-    //                         {
-    //                             let totwage = 0;
-    //                             let tothour = 0;
-    //                             let timecard = 0;
-    //                             if(element.assignschedules_totalhours == null)
-    //                             {
-    //                                 element.assignschedules_totalhours = 0;
-    //                             }
-    //                             if(element.assignschedules_totalwage == null)
-    //                             {
-    //                                 element.assignschedules_totalwage = 0;
-    //                             }
-    //                             totwage = parseFloat(sheettime.timesheets_totalpaid) + parseFloat(element.assignschedules_totalwage);
-    //                             tothour = parseFloat(sheettime.timesheets_totalhour) + parseFloat(element.assignschedules_totalhours);
-    //                             timecard = parseInt(sheettime.timesheets_totaltimecard) + 1;
-    //                             this.timesheets[index].timesheets_totalpaid = totwage;
-    //                             this.timesheets[index].timesheets_totalhour = tothour;
-    //                             this.timesheets[index].timesheets_totaltimecard = timecard;
-    //                             this.timesheets[index].timesheets_schedule = element.schedules_dates;
-    //                             axios.post("timesheet/update?returnall=true&schedule="+element.schedules_dates,null,{timesheets_totalpaid: totwage,timesheets_totalhour: tothour,timesheets_totaltimecard: timecard }).then(res=>{
-    //                                 axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
-
-    //                                 }).then(res=>{
-                                        
-    //                                 });
-    //                             });
-    //                         }
-    //                     }
-    //                     else
-    //                     {
-    //                         if(element.assignschedules_recorded == 0)
-    //                         {
-    //                             if(element.assignschedules_totalhours == null)
-    //                             {
-    //                                 element.assignschedules_totalhours = 0;
-    //                             }
-    //                             if(element.assignschedules_totalwage == null)
-    //                             {
-    //                                 element.assignschedules_totalwage = 0;
-    //                             }
-    //                             newtimesheet.timesheets_totalpaid = element.assignschedules_totalwage;
-    //                             newtimesheet.timesheets_totalhour = element.assignschedules_totalhours;
-    //                             newtimesheet.timesheets_totaltimecard = 1;
-    //                             newtimesheet.timesheets_schedule = element.schedules_dates;
-    //                             this.timesheets.push(newtimesheet);
-    //                             axios.post("timesheet/create?returnall",null,{timesheets_totalpaid: element.assignschedules_totalwage,timesheets_totalhour: element.assignschedules_totalhours,timesheets_totaltimecard: 1,timesheets_schedule: element.schedules_dates }).then(res=>{
-    //                                 axios.post("assigned/update?id="+element.assignschedules_id,null,{assignschedules_recorded: 1}).catch(res=>{
-
-    //                                 }).then(res=>{
-    //                                 });
-    //                             });
-    //                         }
-    //                     }
-    //                 });
-
-    //             }
-    //         });
-    //     },
-    //     GetClockinorClockout(data){
-    //         axios.post('assignschedule?assignschedules_id='+data,null,{}).catch(res=>{
-
-    //         }).then(res=>{
-    //             if(res.data.success)
-    //             {
-    //                 this.assignschedid = res.data.result.assignschedules_id;
-    //                 this.assignschedclockin = res.data.result.assignschedules_timein;
-    //                 this.assignschedclockout = res.data.result.assignschedules_timeout;
-    //             }
-    //             else
-    //             {
-    //                 return;
-    //             }
-    //         })
-    //     },
-    //     EditClockin(data){
-
-    //         axios.post('assignschedule/update?id='+data,null,{assignschedules_timein: this.assignschedclockin, assignschedules_timeout: this.assignschedclockout}).catch(res=>{
-
-    //         }).then(res=>{
-    //             if(res.data.success)
-    //             {
-    //                 this.assignschedid = "";
-    //                 this.assignschedclockin = "";
-    //                 this.assignschedclockout = "";
-    //                 document.querySelector('#addClockinModalForm').style.display = "none";
-    //                 setTimeout(() => {
-    //                     this.$router.go(0);
-    //                 }, 2000);
-    //             }
-    //             else
-    //             {
-    //                 return;
-    //             }
-    //         })
-    //     },
-        
-    // }
+    },
+    methods: {
+        gethourlydata(){
+            this.facilityid = lStore.get('selected_facilityid');
+            axios.post('dashboardcontroller/DashboardTodaySched',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{
+                if(res.data.success){
+                    console.log(res.data.result);
+                    this.assignschedules = res.data.result;
+                }
+            });
+        },
+        GetClockinorClockout(data){
+            axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
+                if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
+                {
+                    this.clockid = data;
+                    return;
+                }
+                if(res.data.success){
+                    this.clockid = data;
+                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString();
+                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString();
+                }
+            });
+        },
+        EditClockin(){
+            let indate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            let outdate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            if(this.assignschedclockin == "00:00"){
+                indate = "0000-00-00";
+            }
+            if(this.assignschedclockout == "00:00"){
+                outdate = "0000-00-00";
+            }
+            console.log(dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'));
+            console.log(outdate+' '+this.assignschedclockout+':00');
+            axios.post('dashboardcontroller/UpdateClockevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'),clockout: dateFormat('%y-%m-%D %H:%I:%S',outdate+' '+this.assignschedclockout+':00')}).then(res=>{
+                if(res.data.success){
+                    // this.$router.go(0);
+                }
+            });
+        }
+    }
 })
 </script>
 

@@ -10,7 +10,7 @@
                     <div class="card text-center widget-profile px-0 border-0">
                     <div class="card-img mx-auto">
                         <img v-if="profile.user_photo == '' || profile.user_photo == null" src="../../assets/default-profile.png" class="rounded-circle" alt="user image" />
-                        <img v-if="profile.user_photo != '' || profile.user_photo != null" :src="'https://www.4angelshc.com/wangelmobile/'+profile.user_photo" class="rounded-circle" alt="user image" />
+                        <img v-if="profile.user_photo != '' || profile.user_photo != null" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+profile.user_photo" class="rounded-circle" alt="user image" />
                     </div>
 
                     <div class="card-body">
@@ -74,7 +74,7 @@
                             <label for="coverImage" class="col-sm-4 col-lg-2 col-form-label">User Image</label>
                             <div class="col-sm-8 col-lg-10">
                                 <img v-if="profile.user_photo == '' && this.photo == '' || profile.user_photo == null && this.photo == null" src="../../assets/default-profile.png" class="rounded-circle" alt="user image" />
-                                <img v-else-if="profile.user_photo !== '' && this.photo === '' || profile.user_photo !== null && this.photo === null" :src="'https://www.4angelshc.com/wangelmobile/'+profile.user_photo" class="rounded-circle" alt="user image" />
+                                <img v-else-if="profile.user_photo !== '' && this.photo === '' || profile.user_photo !== null && this.photo === null" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+profile.user_photo" class="rounded-circle" alt="user image" />
                                 <img v-else :src="this.photo" class="rounded-circle" alt="user image" />
                                 <div class="custom-file mb-1">
                                 <input type="file" class="form-control" @change="onImageChange">
@@ -183,7 +183,7 @@ export default({
   methods: {
     UpdateProfile(){
         if(this.photo == null || this.photo == ""){
-            axios.post('usercontroller/editprofile',null,{
+            axios.post('usercontroller/editprofile',{pwauth: lStore.get('usertoken')},{
                 userid: this.userid,
                 firstname: this.firstname,
                 lastname: this.lastname,
@@ -210,8 +210,8 @@ export default({
             let formData = new FormData();
             formData.append('file', file);
             formData.append('userid', this.userid);
-            axiosA.post('https://www.4angelshc.com/wangelmobile/usercontroller/uploadfile',formData).then(() => {
-                    axios.post('usercontroller/editprofile',null,{
+            axiosA.post('https://www.4angelshc.com/wangelmobile/usercontroller/uploadfile',formData,{headers:{pwauth: lStore.get('usertoken')}}).then(() => {
+                    axios.post('usercontroller/editprofile',{pwauth: lStore.get('usertoken')},{
                     userid: this.userid,
                     firstname: this.firstname,
                     lastname: this.lastname,

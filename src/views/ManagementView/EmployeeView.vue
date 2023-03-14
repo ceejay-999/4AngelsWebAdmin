@@ -311,7 +311,7 @@ export default ({
                 this.designation = res.data.result;
             }
         });
-        axios.post("usercontroller/ReadEmployee",null,null).catch(res=>{
+        axios.post("usercontroller/ReadEmployee",{pwauth: lStore.get('usertoken')},null).catch(res=>{
         }).then(res=>{
             console.log(res.data.success);
             if(res.data.success)
@@ -340,14 +340,14 @@ export default ({
             if(this.value == 0)
             {
                 this.value = 1;
-                axios.post("usercontroller/ReadwithTermiEmployee").then(res=>{
+                axios.post("usercontroller/ReadwithTermiEmployee",{pwauth: lStore.get('usertoken')}).then(res=>{
                   this.users = res.data.result;
                 })
             }
             else
             {
                 this.value = 0;
-                axios.post("usercontroller/ReadEmployee").catch(res=>{
+                axios.post("usercontroller/ReadEmployee",{pwauth: lStore.get('usertoken')}).catch(res=>{
                 }).then(res=>{
                     this.users = res.data.result;
                 });
@@ -541,7 +541,7 @@ export default ({
                     }
                 }
                 delete newUser.confirmpassword;
-                axios.post("usercontroller/CreateEmployee",null,newUser).then(res=>{
+                axios.post("usercontroller/CreateEmployee",{pwauth: lStore.get('usertoken')},newUser).then(res=>{
                      let user = res.data.result;
                      roleArrusers.forEach((el,i)=>{
                         let data = {

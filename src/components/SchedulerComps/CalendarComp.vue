@@ -168,7 +168,7 @@ export default{
                 duration:2000,
                 show:false
             },
-            viewMode:0,
+            viewMode:1,
             queSchedule:{
                 id:'',
                 shift_date: '',

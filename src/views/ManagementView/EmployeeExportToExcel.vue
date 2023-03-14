@@ -40,7 +40,7 @@ export default ({
         }
     },
     mounted(){
-        axios.post("usercontroller/printEmployee").catch(res=>{
+        axios.post("usercontroller/printEmployee",{pwauth: lStore.get('usertoken')}).catch(res=>{
         }).then(res=>{
             this.location = res.data.result;
 

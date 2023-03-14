@@ -130,7 +130,7 @@
                         <div class="d-flex justify-content-between">
                             <div class="d-flex justify-content-center">
                                 <img v-if="specificusers.user_photo == null && specificusers.user_photo == ''" class="mr-3 img-fluid rounded" src="../../assets/default-profile.png" />
-                                <img v-else class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/'+specificusers.user_photo" />
+                                <img v-else class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+specificusers.user_photo" />
                                 <div class="info">
                                     <h5 class="mt-0 mb-2 text-dark">{{ specificusers.user_firstname}} {{ specificusers.user_lastname }}</h5>
                                     <h5 class="mt-0 mb-2 text-dark">{{ specificusers.user_email}}</h5>
@@ -207,7 +207,7 @@
                     </tr>
                     <tr v-for="u in users">
                     <td >{{ u.user_id }}</td>
-                    <td><img v-if="u.user_photo == '' || u.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="rounded float-start"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/'+u.user_photo" alt="Profile" class="rounded float-start"></td>
+                    <td><img v-if="u.user_photo == '' || u.user_photo == null" src="../../assets/default-profile.png" alt="Profile" class="rounded float-start"> <img v-else :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+u.user_photo" alt="Profile" class="rounded float-start"></td>
                     <td >
                         {{u.user_firstname}} {{ u.user_lastname }}
                     </td>
@@ -284,7 +284,7 @@ export default ({
         this.profile = lStore.get('userdetails');
         this.userid = this.profile.user_id;
 
-        axios.post("usercontroller/viewallusermanagers",null,{useraccess: this.profile.user_access_level_id}).then(res=>{
+        axios.post("usercontroller/viewallusermanagers",{pwauth: lStore.get('usertoken')},{useraccess: this.profile.user_access_level_id}).then(res=>{
             if(res.data.success){
                 this.users = res.data.result;
             }
@@ -297,7 +297,7 @@ export default ({
     },
     methods: {
         SearchEmp(){
-            axios.post("usercontroller/viewsearchusermanagers",null,{ useraccess: this.profile.user_access_level_id, $key: this.searchkey   }).then(res=>{
+            axios.post("usercontroller/viewsearchusermanagers",{pwauth: lStore.get('usertoken')},{ useraccess: this.profile.user_access_level_id, $key: this.searchkey   }).then(res=>{
                 this.users = res.data.result;
             });
         },
@@ -421,15 +421,12 @@ export default ({
                 form.append('datehired', this.datehired);
                 form.append('confirmpassword', this.cpassword);
                 form.append('file', file);
-                axiosA.post('https://www.4angelshc.com/wangelmobile/usercontroller/addusermangers',form).then(res =>{
+                axiosA.post('https://www.4angelshc.com/wangelmobile/usercontroller/addusermangers',form,{headers:{pwauth: lStore.get('usertoken')}}).then(res =>{
                     if(res.data.success)
                     {
                         newUsers.branch.forEach(element => {
                             axios.post('facilitycontroller/createpermition',null,{userid: res.data.result, facilityid: element}).then(res=>{
-                                if(res.data.success)
-                                {
-                                    
-                                }
+                                
                             });
                         });
                         this.callToaster("toast-top-right",res.data);
@@ -451,7 +448,7 @@ export default ({
 
         },
         ViewUsers(id){
-            axios.post('usercontroller/viewindividualusermanager',null,{userid: id}).then(res=>{
+            axios.post('usercontroller/viewindividualusermanager',{pwauth: lStore.get('usertoken')},{userid: id}).then(res=>{
                 this.specificusers = res.data.result.user[0];
                 this.facilitiesm = res.data.result.facility;
                 this.lfacility = res.data.result.totalfacility;

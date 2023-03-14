@@ -5,7 +5,6 @@ import BranchesView from '../views/ManagementView/BranchesView.vue'
 import DesignationView from '../views/ManagementView/RoleView.vue'
 import EmployeeView from '../views/ManagementView/EmployeeView.vue'
 import JobScheduleView from '../views/ManagementView/JobSchedulingView.vue'
-import TimeclockView from '../views/ManagementView/TimeclockView.vue'
 import TimesheetsView from '../views/ManagementView/TimesheetsView.vue'
 import EmployeeProfileView from '../views/ManagementView/EmployeeProfileView.vue'
 import BranchesEmployView from '../views/ManagementView/BranchesEmployView.vue'
@@ -124,14 +123,6 @@ const router = createRouter({
       path: '/jobschedule',
       name: 'jobschedule',
       component: JobScheduleView,
-      beforeEnter: () => {
-        if (!lStore.isset('userdetails')) return '/login';
-      },
-    },
-    {
-      path: '/timeclock',
-      name: 'timeclock',
-      component: TimeclockView,
       beforeEnter: () => {
         if (!lStore.isset('userdetails')) return '/login';
       },

@@ -202,8 +202,9 @@ function formatDateString(dateString) {
 }
 
 function dateFormat(format='',dateString='') {
-    if(dateString != '' && dateString.match(/[0-9]+-[0-9]+-[0-9]+/g) == null) dateString = '2000-01-01 '+dateString;
+    if(dateString != '' && dateString.match(/[0-9]+-[0-9]+-[0-9]+|[0-9]+\/[0-9]+\/[0-9]+/g) == null) dateString = '2000-01-01 '+dateString;
     let date = (dateString != '') ? new Date(dateString) : new Date();
+    
     if(format=='') {
         console.error('%cFunction.js[dateformat()]:%c format parameter is empty','font-weight:700','font-weight:400');
         return;

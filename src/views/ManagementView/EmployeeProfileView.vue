@@ -537,7 +537,7 @@ export default({
         }
     });
     
-    axios.post("usercontroller/ReadSpecificEmployee",null,{userid: this.userid}).then(res=>{
+    axios.post("usercontroller/ReadSpecificEmployee",{pwauth: lStore.get('usertoken')},{userid: this.userid}).then(res=>{
             this.viewusers = res.data.result[0];
             this.value = this.viewusers.user_status;
             this.count = this.viewusers.facility.length;
@@ -568,7 +568,7 @@ export default({
             {
                 this.comments = "";
                 this.value = this.viewusers.user_status;
-                axios.post("usercontroller/TermiEmployee",null,{userid: lStore.get('employeeid'), comment: this.comments, value: 1}).then(res=>{
+                axios.post("usercontroller/TermiEmployee",{pwauth: lStore.get('usertoken')},{userid: lStore.get('employeeid'), comment: this.comments, value: 1}).then(res=>{
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right", res.data);
@@ -586,7 +586,7 @@ export default({
             else
             {
                 this.value = this.viewusers.user_status;
-                axios.post("usercontroller/TermiEmployee",null,{userid: lStore.get('employeeid'), comment: this.comments, value: 0}).then(res=>{
+                axios.post("usercontroller/TermiEmployee",{pwauth: lStore.get('usertoken')},{userid: lStore.get('employeeid'), comment: this.comments, value: 0}).then(res=>{
                     if(res.data.success)
                     {
                         this.callToaster("toast-top-right", res.data);

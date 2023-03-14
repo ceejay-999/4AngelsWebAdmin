@@ -54,6 +54,7 @@ export default({
         if(res.data.success){
           this.callToaster("toast-top-right",res.data);
           lStore.set('userdetails',res.data.result[0]);
+          lStore.set('usertoken',res.data.result['token']);
           this.$router.push('/dashboard');
         }else{
           this.callToaster("toast-top-right",res.data)
