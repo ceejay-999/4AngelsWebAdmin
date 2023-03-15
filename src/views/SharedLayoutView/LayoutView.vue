@@ -764,6 +764,7 @@ export default ({
       axios.post('notificationcontroller/ShowMyNotif',{pwauth: lStore.get('usertoken')},{userid: this.user.user_id}).then(res=>{
         if(res.data.success){
           this.notify = res.data.result
+          console.log(this.notify);
         }
       });
     },

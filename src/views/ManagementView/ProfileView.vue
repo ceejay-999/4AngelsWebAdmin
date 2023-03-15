@@ -21,24 +21,7 @@
                         <p class="py-2" v-if="profile.user_access_level_id == 3">( Manager )</p>
                     </div>
                     </div>
-
-                    <!-- <div class="d-flex justify-content-between ">
-                    <div class="text-center pb-4">
-                        <h6 class="text-dark pb-2">1503</h6>
-                        <p>Friends</p>
-                    </div>
-
-                    <div class="text-center pb-4">
-                        <h6 class="text-dark pb-2">2905</h6>
-                        <p>Followers</p>
-                    </div>
-
-                    <div class="text-center pb-4">
-                        <h6 class="text-dark pb-2">1200</h6>
-                        <p>Following</p>
-                    </div>
-                    </div> -->
-
+                    
                     <hr class="w-100">
 
                     <div class="contact-info pt-4">
@@ -301,6 +284,7 @@ export default({
     width: 100%;
     height: 100%;
     max-width: 255px;
+    max-height: 255px;
 }
 #settings{
     display: block;

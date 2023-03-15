@@ -1,7 +1,36 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
+        </div>
+        <div class="modal fade" id="ViewClockModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Clockin Time</label>
+                                <input type="time" class="form-control" v-model="assignschedclockin">
+                                <div class="invalid-feedback feedback1">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal">Edit</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal fade" id="addClockinModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -55,8 +84,8 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal"> Save Changes</button>
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockout()" data-dismiss="modal"> Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -130,11 +159,11 @@
             <div class="card-body">
                 <ul class="nav nav-tabs px-3 px-xl-5 nav-style-border" id="myTab" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#NowUpComming" role="tab" aria-controls="settings" aria-selected="false">Now & Upcoming</a>
+                        <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#NowUpComming" role="tab" aria-controls="settings" aria-selected="false">Now & Upcoming ({{ nowup }})</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#Complete" role="tab" aria-controls="timeline" aria-selected="true">Completed</a>
+                        <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#Complete" role="tab" aria-controls="timeline" aria-selected="true">Completed ({{ complte }})</a>
                     </li>
                 </ul>
                     <div class="tab-content" id="myTabContent">
@@ -178,6 +207,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -213,6 +243,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -248,6 +279,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -281,6 +313,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -329,6 +362,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -360,6 +394,7 @@
                                                     <div class="dropdown-menu">
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockin</a>
                                                         <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(arr.clock_event_id)">Edit Clockout</a>
+                                                        <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(arr.clock_event_id)">View Details</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -378,6 +413,7 @@
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
 import { axios , validateForm,lStore,dateFormat } from '@/functions.js';
+import toastr from 'toastr';
 
 export default ({
     name: "App",
@@ -405,6 +441,8 @@ export default ({
             facilityid: "",
             accesslevel: lStore.get('userdetails'),
             clockid: "",
+            nowup: "",
+            complte: "",
         }
     },
     mounted(){
@@ -426,8 +464,10 @@ export default ({
             this.facilityid = lStore.get('selected_facilityid');
             axios.post('dashboardcontroller/DashboardTodaySched',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{
                 if(res.data.success){
-                    console.log(res.data.result);
                     this.assignschedules = res.data.result;
+                    this.nowup = this.assignschedules.red.length + this.assignschedules.green.length + this.assignschedules.gray.length + this.assignschedules.yellow.length;
+                    this.complte = this.assignschedules.complete.length;
+                    
                 }
             });
         },
@@ -436,12 +476,28 @@ export default ({
                 if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
                 {
                     this.clockid = data;
+                    console.log(this.assignschedclockin);
                     return;
                 }
                 if(res.data.success){
                     this.clockid = data;
-                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString();
-                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString();
+                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                }
+            });
+        },
+        GetEmployeeScheduleDetails(data){
+            axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
+                if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
+                {
+                    this.clockid = data;
+                    console.log(this.assignschedclockin);
+                    return;
+                }
+                if(res.data.success){
+                    this.clockid = data;
+                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
                 }
             });
         },
@@ -451,17 +507,77 @@ export default ({
             if(this.assignschedclockin == "00:00"){
                 indate = "0000-00-00";
             }
+            axios.post('dashboardcontroller/UpdateClockinevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00')}).then(res=>{
+                if(res.data.success){
+                    this.callToaster("toast-top-right",res.data);
+                    this.cleardata();
+                }else{
+                    this.callToaster("toast-top-right",res.data);
+                    this.cleardata();
+                }
+            });
+        },
+        EditClockout(){
+            let indate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            let outdate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
             if(this.assignschedclockout == "00:00"){
                 outdate = "0000-00-00";
             }
-            console.log(dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'));
-            console.log(outdate+' '+this.assignschedclockout+':00');
-            axios.post('dashboardcontroller/UpdateClockevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'),clockout: dateFormat('%y-%m-%D %H:%I:%S',outdate+' '+this.assignschedclockout+':00')}).then(res=>{
+            axios.post('dashboardcontroller/UpdateClockoutevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockout:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockout+':00')}).then(res=>{
                 if(res.data.success){
-                    // this.$router.go(0);
+                    this.callToaster("toast-top-right",res.data);
+                }else{
+                    this.callToaster("toast-top-right",res.data);
                 }
             });
-        }
+        },
+        cleardata(){
+            this.assignschedclockout = "";
+            this.assignschedclockin = "";
+        },
+        clearModal(modalname){
+            const exampleModalForm = document.querySelector('#'+ modalname);
+            exampleModalForm.removeAttribute('aria-modal');
+            exampleModalForm.removeAttribute('role');
+            exampleModalForm.setAttribute('aria-hidden', 'true');
+            exampleModalForm.classList.remove('show');
+            exampleModalForm.style.display = "none";
+            exampleModalForm.style.paddingRight = "0";
+            const bodyForm = document.querySelector('#body');
+            bodyForm.classList.remove('modal-open');
+            bodyForm.style.paddingRight = "0";
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            modalBackdrop.parentNode.removeChild(modalBackdrop);
+        },
+        callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: true,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror.success == true)
+                {
+                    toastr.success(""+reserror.msg, "Successfully!");
+                }
+                else
+                {
+                    toastr.error(""+reserror.msg, "Error!");
+                }
+            }
+    },
     }
 })
 </script>
