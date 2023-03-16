@@ -101,9 +101,26 @@
               <div class="card-body px-0 py-0">
                 <div class="tab-content" id="myTabContent3">
                   <div class="tab-pane fade show active" id="home2" role="tabpanel" aria-labelledby="home2-tab">
-                    <ul class="list-unstyled" data-simplebar style="height: 360px;" v-for="n in notify.notifications">
-                      <li v-if="n.notification_isRead == 1">
-                        <RouterLink :to="n.notification_link" class="media media-message media-notification event-active" @click="ReadNotif(n.notification_id)">
+                    <ul class="list-unstyled" data-simplebar style="height: 360px;">
+                      <li v-for="n in notify.notifications">
+                        <RouterLink :to="n.notification_link" class="media media-message media-notification event-active" @click="ReadNotif(n.notification_id)" v-if="n.notification_isRead == 1">
+
+                          <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-info text-white">
+                            <i class="mdi mdi-calendar-check font-size-20"></i>
+                          </div>
+
+                          <div class="media-body d-flex justify-content-between">
+                            <div class="message-contents">
+                              <h4 class="title">{{ n.notification_title }}</h4>
+                              <p class="last-msg font-size-14">{{ n.notification_description }}</p>
+
+                              <span class="font-size-12 font-weight-medium text-secondary">
+                                <i class="mdi mdi-clock-outline">{{ n.notification_created_at }}</i>
+                              </span>
+                            </div>
+                          </div>
+                        </RouterLink>
+                        <RouterLink :to="n.notification_link" class="media media-message media-notification event" v-else>
 
                           <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-info text-white">
                             <i class="mdi mdi-calendar-check font-size-20"></i>
@@ -121,26 +138,6 @@
                           </div>
                         </RouterLink>
                       </li>
-                      <li v-else>
-                        <RouterLink :to="n.notification_link" class="media media-message media-notification event">
-
-                          <div class="d-flex rounded-circle align-items-center justify-content-center mr-3 media-icon iconbox-45 bg-info text-white">
-                            <i class="mdi mdi-calendar-check font-size-20"></i>
-                          </div>
-
-                          <div class="media-body d-flex justify-content-between">
-                            <div class="message-contents">
-                              <h4 class="title">{{ n.notification_title }}</h4>
-                              <p class="last-msg font-size-14">{{ n.notification_description }}</p>
-
-                              <span class="font-size-12 font-weight-medium text-secondary">
-                                <i class="mdi mdi-clock-outline">{{ n.notification_created_at }}</i>
-                              </span>
-                            </div>
-                          </div>
-                        </RouterLink>
-                      </li>
-
                     </ul>
                   </div>
 

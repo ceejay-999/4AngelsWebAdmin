@@ -502,14 +502,14 @@ export default({
   mounted() 
   {
     this.userid = lStore.get("employeeid");
-    axios.post("rolecontroller/DisplayAllRoles").catch(res=>{
+    axios.post("rolecontroller/DisplayAllRoles",{pwauth: lStore.get('usertoken')}).catch(res=>{
 
     }).then(res=>{
         if(res.data.success){
             this.designation = res.data.result;
         }
     });
-    axios.post("facilitycontroller/facilities").catch(res=>{
+    axios.post("facilitycontroller/facilities",{pwauth: lStore.get('usertoken')}).catch(res=>{
 
     }).then(res=>{
             if(res.data.success){
@@ -629,7 +629,7 @@ export default({
             });
             if(valid.allValid)
             {
-                axios.post("rolecontroller/EditProfession",null,{profid: this.branchid,userid: lStore.get("employeeid"),roleid:newRole.roles,wage: newRole.rate}).then(res=>{
+                axios.post("rolecontroller/EditProfession",{pwauth: lStore.get('usertoken')},{profid: this.branchid,userid: lStore.get("employeeid"),roleid:newRole.roles,wage: newRole.rate}).then(res=>{
                     if(res.data.success)
                     {   
                         this.callToaster("toast-top-right", res.data);
@@ -680,7 +680,7 @@ export default({
             });
             if(valid.allValid == true)
             {
-                axios.post("rolecontroller/InsertProfession",null,{facilityid: newRole.facility,roleid: newRole.roles,wage: newRole.rate,userid: lStore.get("employeeid")}).catch(res=>{
+                axios.post("rolecontroller/InsertProfession",{pwauth: lStore.get('usertoken')},{facilityid: newRole.facility,roleid: newRole.roles,wage: newRole.rate,userid: lStore.get("employeeid")}).catch(res=>{
 
                 }).then(res=>{
                     if(res.data.success)
@@ -747,7 +747,7 @@ export default({
             });
             if(valid.allValid == true)
             {
-                axios.post("employee/update?id="+lStore.get("userdetails"),null,newUser).catch(res=>{
+                axios.post("employee/update?id="+lStore.get("userdetails"),{pwauth: lStore.get('usertoken')},newUser).catch(res=>{
                     this.callToaster("toast-top-right", res.data);
                 }).then(res=>{
                     if(res.data.success)

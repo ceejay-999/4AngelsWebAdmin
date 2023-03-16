@@ -306,7 +306,7 @@ export default ({
             this.address = e.result.place_name;
         });
 
-        axios.post("rolecontroller/DisplayAllRoles").then(res=>{
+        axios.post("rolecontroller/DisplayAllRoles",{pwauth: lStore.get('usertoken')}).then(res=>{
             if(res.data.success){
                 this.designation = res.data.result;
             }

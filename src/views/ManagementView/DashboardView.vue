@@ -14,20 +14,12 @@
                     </div>
 
                     <div class="modal-body">
-                        <form>
-                            <div class="form-group">
-                                <label>Clockin Time</label>
-                                <input type="time" class="form-control" v-model="assignschedclockin">
-                                <div class="invalid-feedback feedback1">
-                                    
-                                </div>
-                            </div>
-                        </form>
+                        
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal">Edit</button>
+                        <!-- <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal">Edit</button> -->
                     </div>
                 </div>
             </div>
@@ -147,9 +139,11 @@
                         day: "numeric",
                     }) }}</h4>
                 </div>
-                <div class="mr-4 text-secondary" v-if="totalhoursb != null"><h5>Total Hours</h5><h4 class="d-flex justify-content-center">{{totalhoursb.toFixed(2)}}</h4></div>
-                <div class="mr-4 text-secondary" v-if="totalwageb != null"><h5>Total Wages Today</h5> <h4 class="d-flex justify-content-center">${{totalwageb.toFixed(2)}}</h4></div>
-                <!-- <div class="date-range-report text-secondary d-flex align-items-center">
+                <div class="mr-4 text-secondary" v-if="totalShoursb != null"><h5>Total Scheduled Hours</h5><h4 class="d-flex justify-content-center">{{totalShoursb.toFixed(2)}}</h4></div>
+                <div class="mr-4 text-secondary" v-if="totalAhoursb != null"><h5>Total Actual Hours</h5><h4 class="d-flex justify-content-center">{{totalAhoursb.toFixed(2)}}</h4></div>
+                <div class="mr-4 text-secondary" v-if="totalRhoursb != null"><h5>Total Paid Hours</h5><h4 class="d-flex justify-content-center">{{totalRhoursb.toFixed(2)}}</h4></div>
+                <div class="mr-4 text-secondary" v-if="totalwageb != null"><h5>Total Wages Today</h5> <h4 class="d-flex ju{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}stify-content-center">${{totalwageb.toFixed(2)}}</h4></div>
+                <!-- <div class="date-range-report text-secondary d-flex align-items-cent{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}er">
                     <input type="date" class="form-control datepick" v-model="datetoday">
                     <button class="btn btn-success" @click="SearchRecordData"><p class="mdi mdi-calendar-search"></p></button>
                 </div> -->
@@ -169,7 +163,7 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="NowUpComming" role="tabpanel" aria-labelledby="settings-tab">
                             <div class="tab-pane-content">
-                                <div v-if="assignschedules === null">
+                                <div v-if="nowup === 0">
                                     <div class="d-flex justify-content-center">
                                     <div class="text-center mt-5">
                                         <h3 class="mb-2">Keep track of your Employees.</h3>
@@ -185,7 +179,7 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small>  
                                                     <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
                                                     <small>Clockout: </small>
                                                     <small><span class="text-info"> Ongoing</span> </small>
@@ -193,15 +187,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -219,9 +223,9 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/users.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small> 
 
-                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger">Missing Clockin</span> </small> <!--If On Time-->
+                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger"> Missing Clockin</span> </small> <!--If On Time-->
                                                     <small v-else>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }} <span class="text-danger">Clockin Late</span></small>
                                                     <small>Clockout: </small>
                                                     <small><span class="text-info"> Ongoing</span> </small>
@@ -229,15 +233,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -255,9 +269,9 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small> 
 
-                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger">Missing Clockin</span> </small> <!--If On Time-->
+                                                    <small v-if="arr.clock_event_isclockin == 0" >Clockin:<span class="text-danger"> Missing Clockin</span> </small> <!--If On Time-->
                                                     <small v-else>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
                                                     <small>Clockout: </small>
                                                     <small><span class="text-info"> Ongoing</span> </small>
@@ -265,15 +279,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -291,7 +315,7 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small> 
                                                     <small>Clockin: </small>
                                                     <small>Clockout: </small>
                                                     <small><span class="text-info"> Upcomming</span> </small>
@@ -299,15 +323,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -324,7 +358,7 @@
                         </div>
                         <div class="tab-pane fade show" id="Complete" role="tabpanel" aria-labelledby="settings-tab">
                             <div class="tab-pane-content">
-                                <div v-if="assignschedules.length == 0">
+                                <div v-if="nowup == 0">
                                     <div class="d-flex justify-content-center">
                                     <div class="text-center mt-5">
                                         <h3 class="mb-2">Keep track of your Employees.</h3>
@@ -340,7 +374,7 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small> 
                                                     <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
                                                     <small>Clockout: {{ new Date(arr.clock_event_outtime).toLocaleTimeString() }}</small>
                                                     <small><span class="text-success"> Completed</span> </small>
@@ -348,15 +382,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -372,7 +416,7 @@
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img v-if="arr.user_photo != ''" class="mr-3 img-fluid rounded" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+arr.user_photo"/>
                                                     <img v-else class="mr-3 img-fluid rounded" src="../../assets/default-profile.png"/>
-                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}}
+                                                    <div class="d-flex flex-column font-weight-bold">{{ arr.user_firstname }} {{arr.user_lastname}} <small>{{ arr.role_name }}</small> 
                                                     <small>Clockin: {{ new Date(arr.clock_event_intime).toLocaleTimeString() }}</small>
                                                     <small>Clockout: {{ new Date(arr.clock_event_outtime).toLocaleTimeString() }}</small>
                                                     <small><span class="text-success"> Completed</span> </small>
@@ -380,15 +424,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    Total Hours
+                                                    Total Scheduled Hours
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.schedule_detail_hours).toFixed(2)}}</p>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    Total Actual Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalacthour).toFixed(2)}}</p>
+                                                </div>
+                                                <!-- <div class="d-flex flex-column">
+                                                    Total Paid Hours
+                                                    <p class="d-flex justify-content-center"></p>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalreghour).toFixed(2)}}</p>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     Wages
                                                     <p class="d-flex justify-content-center"></p>
-                                                    <p class="d-flex justify-content-center">0</p>
-                                                </div>
+                                                    <p class="d-flex justify-content-center">{{parseFloat(arr.clock_event_totalwage).toFixed(2)}}</p>
+                                                </div> -->
                                                 <div>
                                                     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                                                     <div class="dropdown-menu">
@@ -428,7 +482,7 @@ export default ({
             totalmanagers: 0,
             users: [],
             branch: [],
-            totalhoursb: 0,
+            totalAhoursb: 0,
             totalwageb: 0,
             assignschedules:[],
             timetoday: 0,
@@ -442,7 +496,10 @@ export default ({
             accesslevel: lStore.get('userdetails'),
             clockid: "",
             nowup: "",
+            totalShoursb: 0,
             complte: "",
+            schedassignid: "",
+            totalRhoursb: 0,
         }
     },
     mounted(){
@@ -463,11 +520,15 @@ export default ({
         gethourlydata(){
             this.facilityid = lStore.get('selected_facilityid');
             axios.post('dashboardcontroller/DashboardTodaySched',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{
+                console.log(res.data.result);
                 if(res.data.success){
                     this.assignschedules = res.data.result;
                     this.nowup = this.assignschedules.red.length + this.assignschedules.green.length + this.assignschedules.gray.length + this.assignschedules.yellow.length;
                     this.complte = this.assignschedules.complete.length;
-                    
+                    this.totalShoursb = this.assignschedules.totalschedhours;
+                    this.totalAhoursb = this.assignschedules.totalacthours;
+                    this.totalRhoursb = this.assignschedules.totalreghours;
+                    this.totalwageb = this.assignschedules.totalwage;
                 }
             });
         },
@@ -483,6 +544,8 @@ export default ({
                     this.clockid = data;
                     this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
                     this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    this.schedassignid = res.data.result[0].schedule_assigns_id
+                    console.log(this.schedassignid)
                 }
             });
         },
@@ -491,13 +554,13 @@ export default ({
                 if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
                 {
                     this.clockid = data;
-                    console.log(this.assignschedclockin);
                     return;
                 }
                 if(res.data.success){
                     this.clockid = data;
                     this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
                     this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    
                 }
             });
         },
@@ -507,7 +570,7 @@ export default ({
             if(this.assignschedclockin == "00:00"){
                 indate = "0000-00-00";
             }
-            axios.post('dashboardcontroller/UpdateClockinevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00')}).then(res=>{
+            axios.post('dashboardcontroller/UpdateClockinevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'),assignschedid: this.schedassignid}).then(res=>{
                 if(res.data.success){
                     this.callToaster("toast-top-right",res.data);
                     this.cleardata();
@@ -523,7 +586,7 @@ export default ({
             if(this.assignschedclockout == "00:00"){
                 outdate = "0000-00-00";
             }
-            axios.post('dashboardcontroller/UpdateClockoutevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockout:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockout+':00')}).then(res=>{
+            axios.post('dashboardcontroller/UpdateClockoutevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockout:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockout+':00'),assignschedid: this.schedassignid}).then(res=>{
                 if(res.data.success){
                     this.callToaster("toast-top-right",res.data);
                 }else{
@@ -534,6 +597,7 @@ export default ({
         cleardata(){
             this.assignschedclockout = "";
             this.assignschedclockin = "";
+            this.schedassignid = "";
         },
         clearModal(modalname){
             const exampleModalForm = document.querySelector('#'+ modalname);
