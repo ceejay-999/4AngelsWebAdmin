@@ -1,5 +1,5 @@
 <template>
-    <div class="styled-alert-modal" :class="{show:show}" @click="dismissEarly">
+    <div class="styled-alert-modal" :class="{show:show}" @click="getProperFunc">
         <div class="styled-alert-parent" :class="{
             danger:type=='danger',
             warning:type=='warning',
@@ -8,9 +8,12 @@
             
             }">
             <h5>{{this.header}}</h5>
-            <p>{{ this.body }}</p>
-            <div class="styled-alert-timer-cont">
+            <p v-html="body"></p>
+            <div class="styled-alert-timer-cont" v-if="buttons == null || buttons.length == 0" >
                 <div class="styled-alert-timer-juice" :style="{'animation-duration':duration+'ms'}" v-if="!resetAnimation"></div>
+            </div>
+            <div class="styled-alert-buttons">
+                <button @click="$emit('onResult',b.data);dismissEarly()" v-for="b,i in buttons" :key="i">{{b.label}}</button>
             </div>
         </div>
 
@@ -37,9 +40,19 @@ export default{
     },
     methods:{
         dismissEarly(){
-            clearInterval(this.dismissTimer)
+            if(this.dismissTimer != null) clearInterval(this.dismissTimer)
             this.$emit('dismiss',this.show)
-        }   
+        },
+        dismissIf(e){
+            if(e.target.classList.contains('styled-alert-modal')) {
+                this.$emit('onResult',false);
+                this.dismissEarly();
+            }
+        },
+        getProperFunc(e){
+            if(this.buttons != null && this.buttons.length > 0) this.dismissIf(e);
+            else this.dismissEarly();
+        }
     },
     watch:{
         show(c){
@@ -50,6 +63,8 @@ export default{
                 this.resetAnimation = false;
             },5);
 
+            
+            if(this.buttons != null && this.buttons.length > 0) return;
             this.dismissTimer = setTimeout(()=>{
                 this.$emit('dismiss',this.show)
             },this.duration)
@@ -98,6 +113,15 @@ export default{
 }
 
 .dismisstooltip{color:#fff;background: rgba(0,0,0,0.7);padding: 10px;border-radius: 5px;}
+
+.styled-alert-buttons{margin: 10px 0 0;display: flex;justify-content: flex-end;}
+
+button{all:unset;padding: 10px;background:transparent;color:#1b567a;font-weight:600;border-radius: 5px;transition: 0.2s;font-size: 14px;line-height: 14px;}
+.styled-alert-parent.danger button{color:#822b2b}
+.styled-alert-parent.success button{color:#161e16}
+.styled-alert-parent.warning button{color:#4f370d}
+button:hover{scale:1.05}
+button:active{scale:0.95}
 
 
 @keyframes beforeDismiss {

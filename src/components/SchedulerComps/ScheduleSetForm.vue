@@ -1,6 +1,18 @@
 <template>
 <div class="scheduler-form-modal" :class="{closed:modalClose}">
+    <StyledAlert
+        :header="styledAlert.header"
+        :body="styledAlert.body"
+        :buttons="styledAlert.buttons"
+        :type="styledAlert.type"
+        :duration="styledAlert.duration"
+        :show="styledAlert.show"
+        @dismiss="styledAlert.show=false;"
+        @onResult="e=>alertResult=e"
+    />
+
     <div class="scheduler-form-parent">
+        
         <div class="scheduler-form-header">
             <h4>{{(queSchedule.id == '') ? 'Add' : 'Edit'}} Schedule</h4>
             <a href="javascript:;" @click.prevent="modalClose=true;$emit('close',modalClose)">&#10006;</a>
@@ -26,14 +38,14 @@
                 <CustomFieldVue 
                     type="time"
                     name="scheduler-form-timestart"
-                    :value="queSchedule.shift_start"
+                    :value="dateFormat('%H:%M','2022-01-01 '+queSchedule.shift_start)"
                     @on-result="e=>queSchedule.shift_start=e"
                 />
                 <label>End Time</label>
                 <CustomFieldVue 
                     type="time"
                     name="scheduler-form-timeend"
-                    :value="queSchedule.shift_end"
+                    :value="dateFormat('%H:%M','2022-01-01 '+queSchedule.shift_end)"
                     @on-result="e=>queSchedule.shift_end=e"
                 />
                 <label v-if="queSchedule.id == ''">Repeat Days</label>
@@ -54,29 +66,45 @@
                     :select="queSchedule.repeatDays"
                     @on-result="e=>queSchedule.repeatDays=e"
                 />
+                <label>Type</label>
+                <CustomFieldVue
+                    type="radio-group"
+                    name="scheduler-form-type"
+                    columns="1fr 1fr"
+                    :values="[
+                        {label:'Assigned Only',value:0},
+                        {label:'Open',value:1},
+                    ]"
+                    :value="queSchedule.type"
+                    @on-result="e=>queSchedule.type=e"
+                />
+                <label>Facility</label>
+                <CustomFieldVue 
+                    type="select"
+                    name="scheduler-form-facilities"
+                    columns="1fr 1fr 1fr 1fr"
+                    :values="facilities"
+                    :value="queSchedule.branch_id"
+                    @on-result="e=>queSchedule.branch_id=e"
+                />
                 <label>Role</label>
                 <CustomFieldVue 
                     type="select"
-                    name="scheduler-form-repeatdays"
+                    name="scheduler-form-roles"
                     columns="1fr 1fr 1fr 1fr"
-                    :values="[
-                        {label: 'IT Support',value:0},
-                        {label: 'RNA',value:1},
-                        {label: 'CNA',value:2},
-                        {label: 'LPA',value:3}
-                    ]"
+                    :values="roles"
                     :value="queSchedule.designation"
                     @on-result="e=>queSchedule.designation=e"
                 />
-                <label>Slots</label>
+                <!-- <label>Rate/hr ($)</label>
                 <CustomFieldVue 
-                    type="integer"
-                    placeholder="Maximum no. of slots"
-                    name="scheduler-form-slots"
-                    :value="queSchedule.slots"
-                    @on-result="e=>queSchedule.slots=e"
+                    type="number"
+                    placeholder="Hourly rate (only applies to schedule takers)"
+                    name="scheduler-form-rate"
+                    :value="queSchedule.wage"
+                    @on-result="e=>queSchedule.wage=e"
 
-                />
+                /> -->
                 <label>Description</label>
                 <CustomFieldVue 
                     type="textarea"
@@ -97,16 +125,27 @@
 </template>
 
 <script>
-import {validateForm} from './scheduler.utils'
+import {validateForm,dateFormat} from './scheduler.utils'
 import CustomFieldVue from './CustomField.vue';
+import StyledAlert from './StyledAlert.vue';
 
 export default{
-    components:{CustomFieldVue},
-    props:{modalCloseProp:Boolean,schedule:Object},
+    components:{CustomFieldVue,StyledAlert},
+    props:{modalCloseProp:Boolean,schedule:Object,facilities:Array,roles:Array},
     data(){
         return{
+            dateFormat,
             modalClose:true,
             errormsg:'',
+            alertResult:null,
+            styledAlert:{
+                header:'Scheduler Error',
+                body:'asdsad',
+                buttons:[],
+                type:'neutral',
+                duration:2000,
+                show:false
+            },
             queSchedule:{
                 id:'',
                 shift_date: '',
@@ -115,11 +154,15 @@ export default{
                 shift_end:'',
                 repeatDays:[0,1,2,3,4,5,6],
                 description:'',
-                branch_id:0,
-                designation: 1,
-                slots:0
+                branch_id:null,
+                designation: null,
+                type:0,
+                wage: 10
             }
         }
+    },
+    mounted(){
+        
     },
     methods:{
         resetQueSched(){
@@ -127,17 +170,42 @@ export default{
                 id:'',
                 shift_date: '',
                 shift_date_end: '',
-                shift_start:'07:00',
-                shift_end:'13:00',
+                shift_start:'',
+                shift_end:'',
                 repeatDays:[0,1,2,3,4,5,6],
                 description:'',
-                branch_id:0,
-                designation: 1,
-                slots:0
+                branch_id:null,
+                designation: null,
+                wage: 10,
+                type:0,
             }
         },
-        deleteSched(){
-            if(!confirm('Confirm deletion?')) return;
+        waitForConfirm(header,body,type,buttons=[],duration=2000){
+            this.alertResult = null;
+            this.alert(header,body,type,buttons,duration);
+
+            return new Promise(res=>{
+                let wait = setInterval(()=>{
+                    if(this.alertResult == null) return;
+                    clearInterval(wait);
+                    res(this.alertResult);
+                },100)
+            })
+        },
+        alert(header,body,type,buttons=[],duration=2000){
+            this.styledAlert.header = header;
+            this.styledAlert.body = body;
+            this.styledAlert.type = type;
+            this.styledAlert.buttons = buttons;
+            this.styledAlert.duration = duration;
+            this.styledAlert.show = true;
+        },
+        async deleteSched(){
+            let resp = await this.waitForConfirm('Confirm Deletion?','This action cannot be undone once saved!','warning',[
+                {label:'Yes',data:true},
+                {label:'No',data:false},
+            ],3000);
+            if(!resp) return;
             this.$emit('onDelete',this.queSchedule.id)
             this.modalClose = true;
         },
@@ -147,7 +215,6 @@ export default{
             let rules = {
                 shift_start:'required',
                 shift_end:'required',
-                slots:'required',
             };
             
             if(this.queSchedule.id == ''){
@@ -155,9 +222,10 @@ export default{
                     shift_date_end:'required',
                     shift_start:'required',
                     shift_end:'required',
-                    slots:'required',
+                    // wage:'required',
                 }
             }
+
 
             rules.callback = (v)=>{
                 switch(v){
@@ -170,9 +238,9 @@ export default{
                     case 'shift_end':
                         emptyFieldsErrorMsg+='<strong>End Time</strong>, '
                     break;
-                    case 'slots':
-                        emptyFieldsErrorMsg+='<strong>Slots</strong>, '
-                    break;
+                    // case 'wage':
+                    //     emptyFieldsErrorMsg+='<strong>Rate/hr</strong>, '
+                    // break;
                 }
             }
 
@@ -187,10 +255,19 @@ export default{
                 return;
             }
 
-            if(this.queSchedule.slots <= 0){
-                this.errormsg = '<strong>Slots</strong> field must be greater than 0';
+            if(new Date('2022-01-01 '+this.queSchedule.shift_start).toLocaleDateString() == "Invalid Date"){
+                this.errormsg = 'The following fields are required:<br><strong>Start Date </strong>';
+                return;
+            }else if(new Date('2022-01-01 '+this.queSchedule.shift_end).toLocaleDateString() == "Invalid Date"){
+                this.errormsg = 'The following fields are required:<br><strong>End Date </strong>';
                 return;
             }
+
+
+            // if(this.queSchedule.wage < 0){
+            //     this.errormsg = '<strong>Wage</strong> field must be a positive number or 0';
+            //     return;
+            // }
 
             if(this.queSchedule.id == '' && this.queSchedule.repeatDays.length == 0){
                 this.errormsg = '<strong>Repeat Days</strong> field should have at least one check';
@@ -201,6 +278,8 @@ export default{
                 this.errormsg = '<strong>End Date</strong> must be set later than the Start Date';
                 return;
             }
+
+            
 
             
 
@@ -220,6 +299,9 @@ export default{
                 for(let sd in this.schedule){
                     this.queSchedule[sd] = this.schedule[sd];
                 }
+                
+                if(this.queSchedule.id == '') this.queSchedule.repeatDays = [0,1,2,3,4,5,6];
+
                 this.queSchedule.shift_date_end = this.queSchedule.shift_date;
             },
             deep:true
@@ -272,5 +354,17 @@ button.danger{
 }
 
 .text-align-right{text-align: right;}
+
+@media only screen and (max-width:600px){
+    .scheduler-form-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .scheduler-form-body{
+        max-height: 70vh;
+        overflow: auto;
+    }
+}
+
 
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="pwbcf-custom-field">
+    <div class="pwbcf-custom-field" :style="(type == 'select') ?  {'min-width':largest+'em'} : {}">
         <input :readonly="readonly" :placeholder="placeholder" :type="(type == 'number' || type== 'integer') ? 'text' : type  ?? 'text'" :class="'pwbcf-'+name" v-if="!groupTypes.includes(type) &&  type != 'textarea' && type != 'paypal'" :value="valueC" @blur="valueC = $event.target.value;validate(valueC)" :name="name">
         <textarea :value="valueC" :placeholder="placeholder" :class="'pwbcf-'+type" v-if="type=='textarea'" @blur="valueC = $event.target.value"></textarea>
         
@@ -8,7 +8,7 @@
                 <input :readonly="readonly" type="checkbox" :id="name+'_'+i" :name="name+'_'+i" @change="checkThis(v.value,$event)" :checked="selectC != null && selectC.includes(v.value)">
             </label>
         </div>
-        <div class="pwbcf-radio-group" v-if="type == 'radio-group'" :style="{'grid-template':columns}">
+        <div class="pwbcf-radio-group" v-if="type == 'radio-group'" :style="{'grid-template-columns':columns}">
             <label v-for="v,i in values" :key="i" :for="name+'_'+i">{{v.label}}<input :readonly="readonly" :id="name+'_'+i" type="radio" :name="name" :checked="valueC == v.value" @change="valueC = v.value;"></label>
         </div>
         
@@ -46,6 +46,7 @@ export default({
             selectC:[],
             selectedValue:'',
             error:'',
+            largest: 0,
             console,
             groupTypes:['checkbox-group','radio-group','select']
         }
@@ -54,10 +55,21 @@ export default({
         value(){
             this.valueC = this.value
             if(this.value == null && this.type == 'select') {
-                this.selectedValue = this.values[0].value
+                if(this.values.length > 0) this.selectedValue = this.values[0].label
                 return;
             }
-            if(this.type == 'select') this.selectedValue = this.values.filter(el=>el.value==this.value)[0].label
+            if(this.type == 'select') if(this.values.length > 0) this.selectedValue = this.values.filter(el=>el.value==this.value)[0].label
+        },
+        values:{
+            handler(){
+                if(this.type == 'select') {
+                    if(this.values.length > 0) this.selectedValue = this.values[0].label
+                    if(this.values.length > 0) this.valueC = this.values[0].value;
+                    this.values.forEach(el=>this.largest = (this.largest < el.label.length) ? el.label.length : this.largest);
+                }
+            },
+            deep:true
+            
         },
         valueC(c){
             if(this.error == '') this.$emit('onResult',this.valueC);
@@ -84,8 +96,9 @@ export default({
 
         if(this.type == 'checkbox-group') this.selectC = this.select ?? [];
         if(this.type == 'select') {
-            this.selectedValue = this.values[0].label
-            this.valueC = this.values[0].value;
+            if(this.values.length > 0) this.selectedValue = this.values[0].label
+            if(this.values.length > 0) this.valueC = this.values[0].value;
+            this.values.forEach(el=>this.largest = (this.largest < el.label.length) ? el.label.length : this.largest);
         }
     },
     methods:{
@@ -135,10 +148,11 @@ export default({
 </script>
 
 <style scoped>
+*{font-size:15px}
 input[class^='pwbcf-']:not([type="radio"]):not([type="checkbox"]),textarea{
     all:unset;
     width: calc(100% - 20px);
-    padding: 5px 10px;
+    padding: 5px 7px;
     border: 1px solid #ddd;
 
     border-radius: 5px;
@@ -155,7 +169,7 @@ textarea{height: 150px;}
 }
 
 .pwbcf-checkbox-group label, .pwbcf-radio-group label{
-    padding: 5px 10px;
+    padding: 5px 7px;
     border: 1px solid #ddd;
 
     border-radius: 5px;
@@ -178,7 +192,7 @@ textarea{height: 150px;}
 
 
 .pwbcf-select{
-    padding: 5px 10px;
+    padding: 5px 7px;
     padding-right: 50px;
     border: 1px solid #ddd;
 
@@ -219,7 +233,7 @@ textarea{height: 150px;}
 .pwbcf-select.shown .pwbcf-select-menu{display: block;}
 
 .pwbcf-select-option{
-    padding: 5px 10px;
+    padding: 5px 7px;
 }
 
 .pwbcf-select-option:hover{

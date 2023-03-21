@@ -3,10 +3,13 @@
         <ScheduleSetForm
             :modalCloseProp="modalClose"
             :schedule="queSchedule"
-            @close="e=>{modalClose=e;resetQueSchedule()}"
+            :facilities="labelValueForFacilities.noAllOpts"
+            :roles="labelValueForDesignations.noAllOpts"
+            @close="e=>{modalClose=e;this.resetQueSchedule()}"
             @onCreate="e=>createSchedule(e)"
             @onUpdate="e=>updateSchedule(e)"
             @onDelete="e=>deleteSchedule(e)"
+            @onResult="e=>alertResult=e"
         />
         <StyledAlert
             :header="styledAlert.header"
@@ -16,6 +19,7 @@
             :duration="styledAlert.duration"
             :show="styledAlert.show"
             @dismiss="styledAlert.show=false"
+            @onResult="e=>alertResult=e"
         />
 
 
@@ -26,16 +30,21 @@
                 <h4 class="title">{{ title }}</h4>
                 <button v-if="viewMode == 1" @click="nextDays(7)">&raquo;</button>
                 <button v-if="viewMode == 0" @click="nextMonths(1)">&raquo;</button>
-               
             </div>
-            <div><button class="viewselect" :class="{active:viewMode == 0}" @click="viewMode = 0;buildCalendar()">Month View</button>
-                <button class="viewselect" :class="{active:viewMode == 1}" @click="viewMode = 1;buildCalendar()">Week View</button></div>
+            <div>
+                <button class="viewselect" :class="{active:viewMode == 0}" @click="viewMode = 0;buildCalendar()">Month View</button>
+                <button class="viewselect" :class="{active:viewMode == 1}" @click="viewMode = 1;buildCalendar()">Week View</button>
+            </div>
+            <div>
+                <button class="viewselect" :class="{active:dragMode == 1}" @click="dragMode = (dragMode == 0) ? 1:0">Drag to: {{ (dragMode == 0) ? 'Move':'Copy' }}</button>
+                <button class="savechanges" @click="saveChanges">Save Changes</button>
+            </div>
         </div>
         
         <div class="scheduler-calendar-days" :class="{calendarWeekView: viewMode == 1}">
             <div v-if="viewMode == 1" class="scheduler-calendar-item title openschedule">
                 <strong>Open Schedules</strong>
-                <p class="instrux">Click and hold schedule to drag, then release mouse to drop schedule to a date or assign it to an employee</p>
+                <p class="instrux">All Schedules that appear here are available for the employees to apply</p>
             </div>
 
             <div class="scheduler-calendar-item title">SUN</div>
@@ -48,14 +57,36 @@
 
             
 
-            <div class="scheduler-calendar-item" :class="{isNotCurrentMonth:!cb.isCurrentMonth && viewMode == 0,active: new Date(cb.date + ' 00:00:00').getTime() == new Date(qd.y,qd.m,qd.d).getTime()}" v-for="cb,i in calendarBoxes" :key="i" @click="cb.onclick(cb.date,$event)" @dragenter.prevent @dragover.prevent="$event.target.closest('.scheduler-calendar-item').classList.add('dragovered')" @dragleave.prevent="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered')" @drop="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered');dropSched(cb.date,$event)" @dblclick="">
-                <p class="datenum"><span>{{cb.dateNum}}</span> <span class="calendar-date-tooltip" @click="addSchedule(cb.date)">Add Schedule</span></p>
+            <div class="scheduler-calendar-item" :class="{isNotCurrentMonth:!cb.isCurrentMonth && viewMode == 0,active: new Date(cb.date + ' 00:00:00').getTime() == new Date(qd.y,qd.m,qd.d).getTime()}" v-for="cb,i in calendarBoxes" :key="i" @click="cb.onclick(cb.date,$event)" @dragenter.prevent @dragover.prevent="$event.target.closest('.scheduler-calendar-item').classList.add('dragovered')" @dragleave.prevent="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered')" @drop="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered');dropSched(cb.date,$event,1)" @dblclick="">
+                <p class="datenum"><span>{{cb.dateNum}}</span> <span class="calendar-date-tooltip" @click="addSchedule(cb.date)" v-if="viewMode == 0">Add Schedule</span></p>
                 <div class="dayschedule-cont">
-                    <div class="dayschedule" v-for="ds,i in cb.scheds" :key="i" :style="{'border-left': '5px solid '+designations[ds.designation].color}" draggable="true" @dragstart="dragSched(ds,$event)" @click="editSchedule(ds)">
+                    <div class="dayschedule" v-for="ds,i in cb.scheds" :key="i" :style="{'border-left': '5px solid '+designations[ds.designation].color}" draggable="true" @dragstart="dragSched(ds,$event,0)" @click="editSchedule(ds)" v-show="viewMode == 0 || (viewMode==1 && ds.type==1)">
                         <h5 ><span class="dayschedule-color" :style="{'background-color': designations[ds.designation].color}"></span>{{ designations[ds.designation].name }}</h5>
-                        <p>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_start) }} - 
-                            {{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_end) }}</p>
-                        <p>Slots remaining: {{ ds.slots - ds.assignedEmps.length }}/{{ ds.slots }}</p>
+                        <p>
+                            <span>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_start) }}</span> - 
+                            <span>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_end) }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="scheduler-calendar-days closedschedule" :class="{calendarWeekView: viewMode == 1}" v-if="viewMode == 1">
+            <div v-if="viewMode == 1" class="scheduler-calendar-item title openschedule closedschedule">
+                <strong>Assign-Only Schedules</strong>
+                <p class="instrux">All Schedules that appear here can only be assigned and not available for application</p>
+            </div>
+            
+
+            <div class="scheduler-calendar-item" :class="{isNotCurrentMonth:!cb.isCurrentMonth && viewMode == 0,active: new Date(cb.date + ' 00:00:00').getTime() == new Date(qd.y,qd.m,qd.d).getTime()}" v-for="cb,i in calendarBoxes" :key="i" @click="cb.onclick(cb.date,$event)" @dragenter.prevent @dragover.prevent="$event.target.closest('.scheduler-calendar-item').classList.add('dragovered')" @dragleave.prevent="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered')" @drop="$event.target.closest('.scheduler-calendar-item').classList.remove('dragovered');dropSched(cb.date,$event,0)" @dblclick="">
+                <div class="dayschedule-cont">
+                    <div class="dayschedule" v-for="ds,i in cb.scheds" :key="i" :style="{'border-left': '5px solid '+designations[ds.designation].color}" draggable="true" @dragstart="dragSched(ds,$event,1)" @click="editSchedule(ds)" v-show="viewMode == 0 || (viewMode==1 && ds.type==0)">
+                        <h5 ><span class="dayschedule-color" :style="{'background-color': designations[ds.designation].color}"></span>{{ designations[ds.designation].name }}</h5>
+                        <p>
+                            <span>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_start) }}</span> - 
+                            <span>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_end) }}</span>
+                        </p>
                     </div>
                 </div>
                 
@@ -69,13 +100,10 @@
                 <CustomFieldVue
                 type="select"
                 name="scheduler-calendar-employees-branches"
-                :values="[
-                    {label:'All Facilities',value:0},
-                    {label:'Keppel Hub',value:0},
-                    {label:'Argao Hub',value:1},
-                    {label:'Plaridel Hub',value:2},
-                    {label:'Bogo Hub',value:3}
-                ]"
+                :values="labelValueForFacilities.opts"
+
+                :value="employeesFilter.facility"
+                @onResult="e=>employeesFilter.facility=e"
                 />
             </div>
             <div>
@@ -83,17 +111,13 @@
                 <CustomFieldVue
                 type="select"
                 name="scheduler-calendar-employees-designations"
-                :values="[
-                    {label: 'IT Support',value:0},
-                    {label: 'RNA',value:1},
-                    {label: 'CNA',value:2},
-                    {label: 'LPA',value:3}
-                ]"
+                :values="labelValueForDesignations.opts"
+                :value="employeesFilter.designation"
+                @onResult="e=>employeesFilter.designation=e"
                 />
             </div>
             
         </div>
-
         <div class="scheduler-calendar-employees" v-if="viewMode == 1">
             <div class="scheduler-calendar-item title">Employee</div>
             <div class="scheduler-calendar-item title">SUN</div>
@@ -104,35 +128,33 @@
             <div class="scheduler-calendar-item title">FRI</div>
             <div class="scheduler-calendar-item title">SAT</div>
         </div>
-
-
+        
+        
         <div v-if="!refreshEmployeeList">
-            <div class="scheduler-calendar-employees" v-show="viewMode == 1" v-for="emp,i in employees" :key="i">
-            <div class="scheduler-calendar-item title openschedule">
-                <p>
-                    <strong>{{ emp.employee_firstname }} {{ emp.employee_lastname }}</strong>
-                    
-                </p>
-                <p><span class="dayschedule-color" :style="{'background-color': designations[emp.role_id].color}"></span>{{ designations[emp.role_id].name }} </p>
-                    
-            </div>
-
-            <div class="scheduler-calendar-item" :class="{isNotCurrentMonth:!cb.isCurrentMonth && viewMode == 0,active: new Date(cb.date + ' 00:00:00').getTime() == new Date(qd.y,qd.m,qd.d).getTime()}" v-for="cb,i in calendarBoxes" :key="i" @dragenter.prevent @dragover.prevent="" @dragleave.prevent="" @drop="assignSchedule($event,emp.employee_id)">
-                <p class="datenum" style="background:transparent;border: none;"><span>{{cb.dateNum}}</span></p>
-                <div class="dayschedule-cont">
-                    <div class="dayschedule" v-for="ds,i in fetchEmployeeSchedules(emp.employee_id,cb.date)" :key="i" :style="{'border-left': '5px solid '+designations[ds.designation].color}" draggable="true" @dragstart="dragSched(ds,$event)" >
-                        <h5><span class="dayschedule-color" :style="{'background-color': designations[ds.designation].color}"></span>{{ designations[ds.designation].name }}</h5>
-                        <p>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_start) }} - 
-                            {{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_end) }}</p>
-                        <a href="javascript:;" class="removeAssign" @click="removeEmployeeFromSchedule(ds.id,emp.employee_id)">Remove</a>
+            <div class="scheduler-calendar-employees" v-show="viewMode == 1" v-for="emp,i in employeesFiltered" :key="i">
+                <div class="scheduler-calendar-item title openschedule closedschedule">
+                    <p>
+                        <strong>{{ emp.employee_firstname }} {{ emp.employee_lastname }}</strong>
+                    </p>
+                    <div class="roles">
+                        <p v-for="er,i in emp.roles" :key="i" :style="{'border': '1px solid '+designations[er].color}"><span class="dayschedule-color" :style="{'background-color': designations[er].color}"></span>{{ designations[er].name }} </p>
                     </div>
                 </div>
-                
-            </div>
-        </div>
-        </div>
 
-        
+                <div class="scheduler-calendar-item" :class="{isNotCurrentMonth:!cb.isCurrentMonth && viewMode == 0,active: new Date(cb.date + ' 00:00:00').getTime() == new Date(qd.y,qd.m,qd.d).getTime()}" v-for="cb,i in calendarBoxes" :key="i" @dragenter.prevent @dragover.prevent="" @dragleave.prevent="" @drop="assignSchedule($event,emp.employee_id)">
+                    <p class="datenum" style="background:transparent;border: none;"><span>{{cb.dateNum}}</span></p>
+                    <div class="dayschedule-cont">
+                        <div class="dayschedule" v-for="ds,i in fetchEmployeeSchedules(emp.employee_id,cb.date)" :key="i" :style="{'border-left': '5px solid '+designations[ds.designation].color}" draggable="true" @dragstart="dragSched(ds,$event)" >
+                            <h5><span class="dayschedule-color" :style="{'background-color': designations[ds.designation].color}"></span>{{ designations[ds.designation].name }}</h5>
+                            <p>{{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_start) }} - 
+                                {{ dateFormat('%h:%M%a',ds.shift_date + ' '+ds.shift_end) }}</p>
+                            <a href="javascript:;" class="removeAssign" @click="removeEmployeeFromSchedule(ds.id,emp.employee_id)">Remove</a>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            <p class="scheduler-no-employees" v-if="employeesFilter.len == 0 && viewMode == 1">No employees matching the current filter setting...</p>
+        </div>
 
 
     </div>
@@ -140,6 +162,7 @@
 
 <script>
 import {dateFormat} from './scheduler.utils'
+import {axios} from '../../functions'
 import CustomFieldVue from './CustomField.vue';
 import ScheduleSetForm from './ScheduleSetForm.vue';
 import StyledAlert from './StyledAlert.vue';
@@ -148,18 +171,21 @@ export default{
     components:{ScheduleSetForm,CustomFieldVue,StyledAlert},
     data(){
         return{
+            editTracker:{
+                created: [],
+                updated: [],
+                deleted: [],
+                assignedChanges:{},
+
+            },
+            alertResult:null,
             cc:{y:0,m:0,d:0},
             qd:{y:0,m:0,d:0},
             calendarBoxes:[],
             title:'',
             modalClose:true,
             refreshEmployeeList:false,
-            branches:{
-                0: 'Keppel Hub',
-                1: 'Argao Hub',
-                2: 'Plaridel Hub',
-                3: 'Bogo Hub'
-            },
+            branches:{},
             styledAlert:{
                 header:'Scheduler Error',
                 body:'asdsad',
@@ -169,64 +195,40 @@ export default{
                 show:false
             },
             viewMode:1,
+            dragMode: 0,
             queSchedule:{
                 id:'',
                 shift_date: '',
                 shift_start:'',
                 shift_end:'',
+                type:0,
                 description:'',
-                branch_id:0, // note: replace with selected branch
-                designation: 2,
-                slots:0
+                branch_id:null, // note: replace with selected branch
+                designation: null,
+                wage: 10
             },
-            designations:{
-                0: {name: 'IT Support',color:'#6c9e79'},
-                1: {name: 'RNA',color:'#d6e65e'},
-                2: {name: 'CNA',color:'#d45d48'},
-                3: {name: 'LPA',color:'#6821c4'}
+            defVals:{
+                id:'',
+                shift_date: '',
+                shift_start:'',
+                shift_end:'',
+                type:0,
+                description:'',
+                branch_id:null, // note: replace with selected branch
+                designation: null,
+                wage: 10
             },
-            employees:{
-                0:{
-                    employee_firstname: 'Kim',
-                    employee_lastname: 'Baring',
-                    employee_id: 0,
-                    role_id:0,
-                },
-                1:{
-                    employee_firstname: 'Ceejay',
-                    employee_lastname: 'Abellanosa',
-                    employee_id: 1,
-                    role_id:1,
-                }
+            designations:{},
+            employeesFilter:{
+                facility: -1,
+                designation: -1,
+                search:'',
+                len: 0,
             },
-            schedules:{
-                'vasdaasasd': {
-                    id:'vasdaasasd',
-                    shift_date: '2023-03-01',
-                    shift_start:'05:00',
-                    shift_end:'14:00',
-                    description:'',
-                    branch_id:0,
-                    designation: 2,
-                    assignedEmps:[
-                        {employee_id:0}
-                    ],
-                    slots:2
-                },
-                'vasdaas': {
-                    id:'vasdaas',
-                    shift_date: '2023-03-02',
-                    shift_date_end: '',
-                    shift_start:'07:00',
-                    shift_end:'13:00',
-                    repeatDays:[],
-                    description:'',
-                    branch_id:0,
-                    designation: 1,
-                    assignedEmps:[],
-                    slots:2
-                }
-            },
+            employees:{},
+            schedules:{},
+            lastFetch:{m:0,y:0},
+            hasFetched: false
         }
     },
     mounted(){
@@ -238,16 +240,310 @@ export default{
         this.qd.m = date.getMonth();
         this.qd.d = date.getDate();
         this.buildCalendar();
+        this.checkResponsive();
+        this.initScheduler();
+        window.onresize = ()=>this.checkResponsive();
     },
     watch:{
+        cc:{
+            handler(){
+                if(!this.hasFetched) return;
+                if(this.cc.m != this.lastFetch.m) {
+                    this.fetchSchedulesFromServer();
+                    return;
+                }
+
+                if(this.cc.y != this.lastFetch.y) {
+                    this.fetchSchedulesFromServer();
+                    return;
+                }
+            },
+            deep:true
+        }
+    },
+    computed:{
+        employeesFiltered(){
+            let filter = this.employeesFilter;
+            let hitEmps = {};
+            for(let i in this.employees){
+                if(!this.employees[i].branches.includes(filter.facility) && filter.facility != -1) continue;
+                if(!this.employees[i].roles.includes(filter.designation) && filter.designation != -1) continue;
+                hitEmps[i] = JSON.parse(JSON.stringify(this.employees[i]));
+            }
+            this.employeesFilter.len = Object.values(hitEmps).length;
+            return hitEmps;
+        },
+        labelValueForFacilities(){
+            let opts = [];
+            for(let b in this.branches){
+                opts.push({
+                    label: this.branches[b],
+                    value: b
+                });
+            }
+
+            let noAllOpts = JSON.parse(JSON.stringify(opts));
+
+            opts.splice(0,0,{
+                label: 'All Facilities',
+                value: -1
+            });
+            
+            return {
+                noAllOpts,
+                opts
+            };
+        },
+        labelValueForDesignations(){
+            let opts = [];
+            for(let d in this.designations){
+                opts.push({
+                    label: this.designations[d].name,
+                    value: d
+                });
+            }
+
+            let noAllOpts = JSON.parse(JSON.stringify(opts));
+
+            opts.splice(0,0,{
+                label: 'All Designations',
+                value: -1
+            });
+
+            return {
+                noAllOpts,
+                opts
+            };
+        }
 
     },
     methods:{
+        fetchSchedulesFromServer(){
+            let start = dateFormat('%y-%m2-%D', new Date(this.cc.y,this.cc.m-1,1).getTime())
+            let end = dateFormat('%y-%m2-%D', new Date(this.cc.y,this.cc.m+2,0).getTime())
+            this.lastFetch.m = this.cc.m;
+            this.lastFetch.y = this.cc.y;
+            this.hasFetched = true;
+            axios.post(`Schedulercontroller/fetchWithAssigned?date=${start}&dateend=${end}`).then(res=>{
+                if(!res.data.success) return;
+                function filterAssignedEmps(schedule_assigns){
+                    return schedule_assigns.map(el=>{
+                        return {employee_id:el.schedule_assigns_user_id}
+                    })
+                }
+
+                res.data.result.forEach(el=>{
+                    this.schedules[el.schedule_id] = {
+                        id: el.schedule_id,
+                        shift_date: el.schedule_detail_date,
+                        shift_start: el.schedule_detail_start_time,
+                        shift_end: el.schedule_detail_end_time,
+                        type: el.schedule_type,
+                        description: el.schedule_detail_description,
+                        branch_id: el.schedule_detail_facilit_id,
+                        designation: el.schedule_detail_role_id,
+                        wage: el.schedule_wage,
+                        assignedEmps: filterAssignedEmps(el.schedule_assigns)
+                    }
+                })
+
+                this.buildCalendar()
+            })
+        },
+        initScheduler(){
+            let token = 'Q0JlclZKZVphVFNBY0dtdEV5bzRwMUU3QWJLQ2dSNXFGZ1B6K2JpSzRLSjByUDFXd1hGM0dadEZXU010dWh2N1MzT2huRWpRcXpyOU0xaTdidlRYdFlkNW93OGlTakFZYWdCZ01uK0ZEczI3bVVKM0FEaCtla085K0JIemJIS006OkqgWn\/4Wq2q0yqmCps9gOQ=';
+
+            axios.post('Schedulercontroller/init',{pwauth:token}).then(res=>{
+                res.data.result.roles.forEach(el=>{
+                    this.designations[el.role_id] = {
+                        name: el.role_name,
+                        color: el.role_color
+                    }
+                });
+
+                res.data.result.facilities.forEach(el=>{
+                    this.branches[el.facility_id] = el.facility_name
+                });
+
+                for(let e in res.data.result.employees){
+                    let emp = res.data.result.employees[e];
+                    this.employees[e] = {
+                        employee_firstname: emp.info.user_firstname,
+                        employee_lastname: emp.info.user_lastname,
+                        employee_id: e,
+                        branches: emp.facilities,
+                        roles: emp.roles
+                    };
+                }
+                
+                this.fetchSchedulesFromServer()
+                this.queSchedule.branch_id = Object.keys(this.branches)[0]
+                this.queSchedule.designation = Object.keys(this.designations)[0]
+                this.defVals.branch_id = Object.keys(this.branches)[0]
+                this.defVals.designation = Object.keys(this.designations)[0]
+                
+                
+                this.loaded = true;
+            });     
+        },
+        parseToRequestContent(schedule){
+            schedule = JSON.parse(JSON.stringify(schedule))
+            let scheduleStartTime = new Date(schedule.shift_date+' '+schedule.shift_start);
+            let scheduleEndTime = this.getScheduleEnd(schedule.shift_date,schedule.shift_start,schedule.shift_end);
+            let totalhours = (scheduleEndTime.getTime() - scheduleStartTime.getTime()) / (1000 * 60 * 60);
+            let wage = 0;
+            console.log(totalhours);
+            
+
+            let sched = {...schedule,
+                hours: totalhours
+            };
+
+            return sched;
+            
+        },
+        async saveChanges(){
+            let created = [];
+            let updated = [];
+            let completed = 0;
+            let requestsCount = 0;
+
+            this.editTracker.created.forEach(el=>created.push(this.parseToRequestContent(this.schedules[el])))
+            this.editTracker.updated.forEach(el=>updated.push(this.parseToRequestContent(this.schedules[el])))
+
+
+            if(
+                created.length == 0 &&
+                updated.length == 0 &&
+                this.editTracker.deleted.length == 0 &&
+                Object.keys(this.editTracker.assignedChanges).length == 0
+            ){
+                this.alert('','No changes made...','warning',[]);
+                return;
+            }
+
+            let resp = await this.waitForConfirm('Save Changes?',
+            `Changes you have made:
+            <ul style="padding-left:15px">
+            <li>Created <strong>${created.length}</strong> schedule${created.length > 1 ? 's':''}</li>
+            <li>Updated <strong>${updated.length}</strong> schedule${updated.length > 1 ? 's':''}</li>
+            <li>Deleted <strong>${this.editTracker.deleted.length}</strong> schedule${this.editTracker.deleted.length > 1 ? 's':''}</li>
+            <li>Modified assignations for  <strong>${Object.keys(this.editTracker.assignedChanges).length}</strong> schedule${Object.keys(this.editTracker.assignedChanges).length > 1 ? 's':''}</li>
+            </ul>`
+            ,'warning',[
+                {label:'Yes',data:true},
+                {label:'No',data:false},
+            ],3000);
+            console.log(resp,'test');
+            if(!resp) return;
+
+            if(created.length > 0){
+                requestsCount++;
+                axios.post('Schedulercontroller/createBatch',null,{content:JSON.stringify(created)}).then(()=>completed++)
+            }
+                
+            if(updated.length > 0){
+                requestsCount++;
+                axios.post('Schedulercontroller/updateBatch',null,{content:JSON.stringify(updated)}).then(()=>completed++)
+            }
+
+            if(this.editTracker.deleted.length > 0){
+                requestsCount++;
+                axios.post('Schedulercontroller/deleteBatch',null,{content:JSON.stringify(this.editTracker.deleted)}).then(()=>completed++)
+            }
+
+            if(Object.keys(this.editTracker.assignedChanges).length > 0){
+                let added = {};
+                let deleted = {};
+                for(let s in this.editTracker.assignedChanges){
+                    let segregated = this.checkAssignedDiffs(this.editTracker.assignedChanges[s],this.schedules[s].assignedEmps)
+                    added[s] = segregated.added;
+                    deleted[s] = segregated.deleted;
+                }
+
+                if(Object.keys(added).length > 0){
+                    requestsCount++;
+                    axios.post('Schedulercontroller/assignBatch',null,{content:JSON.stringify(added)}).then(()=>completed++)
+                }
+
+                if(Object.keys(deleted).length > 0){
+                    requestsCount++;
+                    axios.post('Schedulercontroller/deAssignBatch',null,{content:JSON.stringify(deleted)}).then(()=>completed++)
+                }
+            }
+
+            let checkWait = setInterval(()=>{
+                if(requestsCount > completed) return;
+                clearInterval(checkWait)
+                this.editTracker={created: [],updated: [],deleted: [],assignedChanges:{}}
+                this.alert('Update Successful','All the changes you have made are saved!','success');
+                this.initScheduler();
+                this.fetchSchedulesFromServer();
+            },500)
+        },
+        checkAssignedDiffs(oldAssigned,newAssigned){
+            let added = [];
+            let deleted = [];
+            newAssigned.forEach(el=>{
+                let exists = oldAssigned.findIndex(el2=>el2.employee_id == el.employee_id)
+                if(exists == -1) added.push(el);
+            })
+
+            oldAssigned.forEach(el=>{
+                let exists = newAssigned.findIndex(el2=>el2.employee_id == el.employee_id)
+                if(exists == -1) deleted.push(el);
+            })
+
+            return {
+                added,
+                deleted
+            }
+        },
+        checkResponsive(){
+            if(document.querySelector('.scheduler-calendar-parent').offsetWidth <= 1300){
+                document.querySelector('.scheduler-calendar-parent').classList.add('responsive-1300');
+                document.querySelector('.scheduler-calendar-parent').classList.remove('responsive-1000');
+            }else if(document.querySelector('.scheduler-calendar-parent').offsetWidth <= 1000){
+                document.querySelector('.scheduler-calendar-parent').classList.add('responsive-1000');
+                document.querySelector('.scheduler-calendar-parent').classList.remove('responsive-1300');
+            }else{
+                document.querySelector('.scheduler-calendar-parent').classList.remove('responsive-1000');
+                document.querySelector('.scheduler-calendar-parent').classList.remove('responsive-1300');
+            }
+        },
         dateFormat,
-        alert(header,body,type){
+        
+        getScheduleEnd(scheduleDate,schedStart,schedEnd){
+            let scheduleStart = new Date(scheduleDate+' '+schedStart);
+            let scheduleEnd = new Date(scheduleDate+' '+schedEnd);
+            if(scheduleStart.getTime() >= scheduleEnd.getTime()) scheduleEnd.setDate(scheduleEnd.getDate() + 1);
+            return scheduleEnd;
+        },
+        checkIfIsOneDayOrMore(scheduleDate,schedStart,schedEnd){
+            let scheduleStart = new Date(scheduleDate+' '+schedStart);
+            scheduleStart.setDate(scheduleStart.getDate() + 1);
+            let scheduleEnd = this.getScheduleEnd(scheduleDate,schedStart,schedEnd);
+            if(scheduleStart.getTime() == scheduleEnd.getTime()) return true;
+            return false;
+        },
+        waitForConfirm(header,body,type,buttons=[],duration=2000){
+            this.alertResult = null;
+            this.alert(header,body,type,buttons,duration);
+
+            return new Promise(res=>{
+                let wait = setInterval(()=>{
+                    if(this.alertResult == null) return;
+                    clearInterval(wait);
+                    res(this.alertResult);
+                },100)
+            })
+        },
+        alert(header,body,type,buttons=[],duration=2000){
             this.styledAlert.header = header;
             this.styledAlert.body = body;
             this.styledAlert.type = type;
+            this.styledAlert.buttons = buttons;
+            this.styledAlert.duration = duration;
             this.styledAlert.show = true;
         },
         fetchEmployeeSchedules(userid,dateString){
@@ -261,31 +557,66 @@ export default{
             
             return hitSchedules;
         },
-        assignSchedule(e,userid){
+        assignSchedule(e,userid){ // update | create /
             let schedData = e.dataTransfer.getData('schedData')
             if(schedData == '') return;
             schedData = JSON.parse(schedData);
+
+            if(!this.employees[userid].roles.includes(schedData.designation)){
+                this.alert('Role Assignment Error',`The employee you are assigning the schedule to an employee that does not have a(n) ${this.designations[schedData.designation].name} role.`,'danger',[],4500);
+                return;
+            }
+
+            if(this.getScheduleEnd(schedData.shift_date,schedData.shift_start,schedData.shift_end).getTime() <= new Date().getTime()){
+                this.alert('Backdated Error','You are assigning a finished schedule.','danger',[],1500);
+                return;
+            }
            
             if(this.schedules[schedData.id].assignedEmps.filter(el=>el.employee_id == userid).length > 0)
                 return;
 
-            if(schedData.assignedEmps.length >= schedData.slots){
-                this.alert('Schedule full','All the slots in this schedule are taken','danger');
+            if(this.schedules[schedData.id].assignedEmps.filter(el=>el.employee_id == userid).length > 0)
                 return;
-            }
+
+            
+            if(this.editTracker.assignedChanges[schedData.id] == null) 
+                this.editTracker.assignedChanges[schedData.id] = JSON.parse(JSON.stringify(this.schedules[schedData.id].assignedEmps))
                 
             this.schedules[schedData.id].assignedEmps.push({employee_id:userid})
             this.buildCalendar();
         },
-        removeEmployeeFromSchedule(scheduleid,userid){
+        removeEmployeeFromSchedule(scheduleid,userid){ // update | create /
+            if(this.getScheduleEnd(this.schedules[scheduleid].shift_date,this.schedules[scheduleid].shift_start,this.schedules[scheduleid].shift_end).getTime() <= new Date().getTime()){
+                this.alert('Backdated Error','You cannot remove an employee from a finished schedule.','danger',[],2500);
+                return;
+            }
+
+            if(this.editTracker.assignedChanges[scheduleid] == null) 
+                this.editTracker.assignedChanges[scheduleid] = JSON.parse(JSON.stringify(this.schedules[scheduleid].assignedEmps))
             this.schedules[scheduleid].assignedEmps.splice(this.schedules[scheduleid].assignedEmps.findIndex(el=>el.employee_id==userid),1);
             this.buildCalendar();
         },
-        createSchedule(e){
+        createSchedule(e){ //create /
             let loopDate = new Date(e.shift_date);
             let endDate = new Date(e.shift_date_end);
             let iteration = 0;
             let midId = Date.now().toString(32);
+            
+            if(new Date(e.shift_date+' '+e.shift_start).getTime() <= new Date().getTime()){
+                this.alert('Backdated Error','You cannot create a schedule set back in time.','danger',[],1500);
+                return;
+            }
+
+            // if(this.getScheduleEnd(e.shift_date,e.shift_start,e.shift_end) <= new Date().getTime()){
+            //     this.alert('Backdated Error','You cannot create a finished schedule.','danger',[],1500);
+            //     return;
+            // }
+
+            if(this.checkIfIsOneDayOrMore(e.shift_date,e.shift_start,e.shift_end)){
+                this.alert('Schedule Duration Exceeded','The scheduler may only handle schedules that does not exceed or equal to 24 hours.','danger',[],2500);
+                return;
+            }
+
             while(loopDate.getTime() <= endDate.getTime()){
                 if(iteration == 0 || e.repeatDays.includes(loopDate.getDay())){
                     let newSched = {};
@@ -300,6 +631,7 @@ export default{
                     newSched.shift_date = dateFormat('%y-%m2-%D',loopDate.getTime());
 
                     this.schedules[newSched.id] = newSched;
+                    this.editTracker.created.push(newSched.id);
                     iteration++;
 
                 }
@@ -311,36 +643,66 @@ export default{
             this.buildCalendar();
 
         },
-        updateSchedule(e){
+        checkIfEmployeesHaveNewRoleSet(emps,newRole){
+            let roles = {};
+            emps.forEach(el=>{
+                roles[el.employee_id] = this.employees[el.employee_id].roles
+            });
+            for(let er in roles){
+                if(!roles[er].includes(newRole)) return false;
+            }
+
+            return true;
+        },
+        updateSchedule(e){ //update | create /
             let newSched = {};
             Object.keys(this.queSchedule).forEach(qs=>newSched[qs] = e[qs])
 
-            if(this.schedules[e.id].assignedEmps.length > e.slots){
-                this.alert('Exceeding Number','The number of assigned employees exceeded the number of slots specified','danger');
+
+            if(this.getScheduleEnd(e.shift_date,e.shift_start,e.shift_end).getTime() <= new Date().getTime()){
+                this.alert('Backdated Error','The schedule is set back in time.','danger',[],1500);
+                return;
+            }
+
+            if(this.checkIfIsOneDayOrMore(e.shift_date,e.shift_start,e.shift_end)){
+                this.alert('Schedule Duration Exceeded','The scheduler may only handle schedules that does not exceed or equal to 24 hours.','danger',[],1500);
                 return;
             }
             
+            if(!this.checkIfEmployeesHaveNewRoleSet(this.schedules[e.id].assignedEmps,e.designation)){
+                this.alert('Role Assignment Error',`This schedule was assigned to one or more employees that does not have a(n) ${this.designations[e.designation].name} role. Please resolve it first before trying again.`,'danger',[],4500);
+                return;
+            }
+
+            let indexTrack = this.editTracker.created.indexOf(newSched.id);
+            if(indexTrack === -1) this.editTracker.updated.push(newSched.id);
+            
+
             for(let ns in newSched) this.schedules[e.id][ns] = newSched[ns];
 
             this.modalClose = true;
             this.buildCalendar();
         },
-        deleteSchedule(e){
+        deleteSchedule(e){ //delete | none /
+            let ref = this.schedules[e];
+            if(this.getScheduleEnd(ref.shift_date,ref.shift_start,ref.shift_end).getTime() <= new Date().getTime()){
+                this.alert('Completed Schedule Error','The schedule is already finished, therefore the schedule cannot be deleted.','danger',[],3000);
+                this.modalClose = true;
+                this.resetQueSchedule();
+                return;
+            }
+
+            let indexTrack = this.editTracker.created.indexOf(e);
+            if(indexTrack === -1) this.editTracker.deleted.push(e);
+            else this.editTracker.created.splice(indexTrack, 1)
+
             delete this.schedules[e];
             this.modalClose = true;
+            this.resetQueSchedule();
             this.buildCalendar();
         },
-        resetQueSchedule(){
-            this.queSchedule = {
-                id:'',
-                shift_date: '',
-                shift_start:'',
-                shift_end:'',
-                description:'',
-                branch_id:0, // note: replace with selected branch
-                designation: 2,
-                slots:0
-            }
+        resetQueSchedule(){ 
+            this.queSchedule = JSON.parse(JSON.stringify(this.defVals   ))
         },
         addSchedule(date){
             this.queSchedule.shift_date = date;
@@ -366,11 +728,50 @@ export default{
             return hitScheds;
         },
         dragSched(ds,e){
-            try{e.dataTransfer.setData('schedData',JSON.stringify(ds));}catch(err){return;}
+            try{
+                e.dataTransfer.setData('schedData',JSON.stringify(ds));
+            }catch(err){return;}
         },
-        dropSched(date,e){
+        dropSched(date,e,originType){ //update | create /
             if(e.dataTransfer.getData('schedData') == '') return;
             let ds = JSON.parse(e.dataTransfer.getData('schedData'));
+
+            if(this.getScheduleEnd(ds.shift_date,ds.shift_start,ds.shift_end).getTime() <= new Date().getTime() && this.dragMode == 0){
+                this.alert('Backdated Error','You are trying to move a finished schedule.','danger');
+                return;
+            }
+
+            if(this.getScheduleEnd(date,ds.shift_start,ds.shift_end).getTime() <= new Date().getTime()){
+                this.alert('Backdated Error','You are trying to move a schedule where its end time is set back in time.','danger',[],3000);
+                return;
+            }
+
+            if(this.dragMode == 1){
+                ds.id = 
+                (1000).toString(32)+'-'+ //note: replace with user id of user adding the scheduke
+                Date.now().toString(32)+'-'+
+                0;
+                ds.assignedEmps = [];
+                ds.shift_date = date;
+                if(this.viewMode == 1) ds.type = originType;
+                this.schedules[ds.id] = ds;
+
+                
+                this.editTracker.created.push(ds.id);
+                this.buildCalendar();
+                return;
+            }
+
+            if(this.viewMode == 1){
+                // if(this.schedules[ds.id].assignedEmps.length > 0 && e.dataTransfer.getData('originType') == 0){
+                //     this.alert('Schedule Type Update Warning','You are changing a schedule\'s type of a schedule that is previously open. You may want to check if the employees that are currently assigned are according to your decision.','warning',[],5000)
+                // }
+
+                this.schedules[ds.id].type = originType;
+            }
+
+            let indexTrack = this.editTracker.updated.indexOf(ds.id);
+            if(indexTrack === -1) this.editTracker.updated.push(ds.id);
             this.schedules[ds.id].shift_date = date;
             this.buildCalendar()
         },
@@ -469,13 +870,17 @@ export default{
 .scheduler-calendar-controls button{margin:0 5px}
 .scheduler-calendar-controls .title{text-align: center;width: 100%;max-width: 400px;border:1px solid #333;height: 34px;line-height: 34px;border-radius: 5px;font-size: 17px;}
 
-.scheduler-calendar-topcontrols{display: grid;grid-template-columns: 1fr 1fr;align-items: center;}
+.scheduler-calendar-topcontrols{display: grid;grid-template-columns: 2fr 1fr 2fr;align-items: center;}
 .scheduler-calendar-days{
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     border-top:1px solid #ddd;
     border-left:1px solid #ddd;
     gap:7px
+}
+
+.scheduler-calendar-days.closedschedule{
+    border-top:none
 }
 
 .scheduler-calendar-days.calendarWeekView{
@@ -492,11 +897,26 @@ export default{
 }
 
 .scheduler-calendar-employees-controls > div{
-    display:grid;
+    display:flex;
     grid-template-columns: 1fr 2fr;
     gap:5px;
     align-items: center;
 }
+
+::-webkit-scrollbar,::-moz-scrollbar,::-ms-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track,::-moz-scrollbar-track,::-ms-scrollbar-track {
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb,::-moz-scrollbar-thumb,::-ms-scrollbar-thumb {
+    background-color: #AAA;
+    border-radius: 5px;
+}
+
 
 
 .scheduler-calendar-employees{
@@ -513,7 +933,12 @@ export default{
     padding: 10px;
     grid-row: 1/3;
 }
-.scheduler-calendar-employees .scheduler-calendar-item.title.openschedule.openschedule{
+
+.scheduler-calendar-item.title.openschedule.closedschedule{
+    grid-row: 1/2;
+}
+
+.scheduler-calendar-employees .scheduler-calendar-item.title.openschedule{
     grid-row: 1/2;
 }
 
@@ -537,7 +962,7 @@ button:active{scale:0.95}
 .scheduler-calendar-item .datenum{margin:0;width: 30px;height:30px;text-align: center;line-height: 30px;border-right:1px solid #ddd;border-bottom:1px solid #ddd;margin-bottom: 10px;transition:0.2s;display: flex;align-items: center;overflow: hidden;}
 
 .scheduler-calendar-item .datenum span:first-child{width: 30px;}
-.calendar-date-tooltip{width:0;overflow: hidden;padding: 0px;white-space: nowrap;text-align: center;flex-grow: 1;background: #85cbf4;color: #222;transition:0.2s}
+.calendar-date-tooltip{width:0;overflow: hidden;padding: 0px;white-space: nowrap;text-align: center;flex-grow: 1;background: #85cbf4;color: #222;transition:0.2s;font-size: 14px;}
 
 .calendar-date-tooltip:hover{background: #007dc6;color: #fff;}
 .calendar-date-tooltip:active{background: #005a8e;color: #fff;}
@@ -545,21 +970,24 @@ button:active{scale:0.95}
 .calendar-date-tooltip{}
 .scheduler-calendar-item.active .calendar-date-tooltip{width:max-content;padding: 5px;}
 .scheduler-calendar-item.active{background:rgba(186, 229, 255, 0.263);}
-.scheduler-calendar-item.active .datenum{width: 100%;background: #ffffff;border-bottom:1px solid #1b98e3;}
+.scheduler-calendar-days:not(.calendarWeekView) .scheduler-calendar-item.active .datenum{width: 100%;background: #ffffff;border-bottom:1px solid #1b98e3;}
 .scheduler-calendar-item.active .datenum span:first-child{background: #1b98e3;color:#fff;}
 .scheduler-calendar-item.isNotCurrentMonth:not(.active){background: #eee;}
 .scheduler-calendar-item{border-right: 1px solid #ddd;}
 .dayschedule-cont{min-height: 70px;padding: 3px;}
 .dragovered .dayschedule-cont{box-shadow: inset 0 0 10px #aaa}
-.dayschedule{background:#fff;text-align: center;padding: 5px;border:1px solid #ddd;border-radius:5px;margin:0 5px 5px 5px;transition:0.2s}
+.dayschedule{background:#fff;text-align: center;padding: 5px;border:1px solid #ddd;border-radius:5px;margin:5px 0;transition:0.2s}
 
 .dayschedule *{pointer-events: none;}
 .dayschedule h3{}
 
-.scheduler-calendar-days .dayschedule:hover{scale: 1.05;box-shadow: 0 0px 10px #aaa;}
+.savechanges{background: rgb(64, 122, 64);margin: 0 5px;}
+.scheduler-calendar-days .dayschedule:hover{scale: 1.02;box-shadow: 0 0px 10px #aaa;}
 
 .dayschedule-color{border:1px solid #ddd;display: inline-block;width:10px;height:10px;margin:0 5px;vertical-align: middle;border-radius: 50%;margin-bottom: 2px;}
+
 .dayschedule p{font-size: 14px;}
+.dayschedule p span{display: inline-block;}
 .removeAssign{
     all: unset;
     font-size: 14px;
@@ -567,4 +995,28 @@ button:active{scale:0.95}
     display: block;
     color: #593434;
 }
+
+.scheduler-calendar-parent{min-width: 1100px;min-height: 600px;}
+
+
+
+/* responsive */
+.scheduler-calendar-parent.responsive-1300 .dayschedule p{font-size: 12px;}
+.scheduler-calendar-parent.responsive-1300 .dayschedule h5{font-size: 15px;}
+
+.scheduler-calendar-parent.responsive-1300 .scheduler-calendar-employees .scheduler-calendar-item.title.openschedule.openschedule {font-size: 15px;}
+
+.scheduler-no-employees{
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    border-top: none;
+    border-left: none;
+}
+
+.scheduler-calendar-item .roles p{display: inline-block;padding: 3px;font-size: 14px;margin: 2px;border-radius: 5px;}
+.scheduler-calendar-item .roles p span{border:none}
+
+
 </style>
