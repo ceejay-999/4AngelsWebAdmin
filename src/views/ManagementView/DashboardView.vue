@@ -7,19 +7,23 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalFormTitle"></h5>
+                        <h5 class="modal-title" id="exampleModalFormTitle"> {{ viewemployeeclock.user_firstname }} {{ viewemployeeclock.user_lastname }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
                     <div class="modal-body">
-                        
-                    </div>
-
-                    <div class="modal-footer">
-                        <!-- <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
-                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal">Edit</button> -->
+                        <div class="space">
+                            <h5>Worked</h5>
+                            <h6>{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
+                            <h6>Scheduled: {{ Math.floor(viewemployeeclock.schedule_detail_hours) }} hrs {{ Math.round(parseFloat(viewemployeeclock.schedule_detail_hours) * 60) }} min ({{ new Date(viewemployeeclock.schedule_detail_date +' '+viewemployeeclock.schedule_detail_start_time).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.schedule_detail_date+' '+viewemployeeclock.schedule_detail_end_time).toLocaleTimeString() }})</h6>
+                        </div>
+                        <div class="space">
+                            <h5>GPS Validation</h5>
+                            <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_inlat+'%2C'+viewemployeeclock.clock_event_inlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockin Location</a></h6>
+                            <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_outlat+'%2C'+viewemployeeclock.clock_event_outlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockout Location</a></h6>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -321,7 +325,7 @@
                         <div class="tab-pane fade show" id="Complete" role="tabpanel" aria-labelledby="settings-tab">
                             <div class="tab-pane-content">
                                 <small class="d-flex justify-content-center text-default">{{ new Date().toLocaleTimeString('en-US',{timeZone: "America/New_York"}) }}</small>
-                                <div v-if="nowup == 0">
+                                <div v-if="complte == 0">
                                     <div class="d-flex justify-content-center">
                                     <div class="text-center mt-5">
                                         <h3 class="mb-2">Keep track of your Employees.</h3>
@@ -448,6 +452,7 @@ export default ({
             complte: "",
             schedassignid: "",
             totalRhoursb: 0,
+            viewemployeeclock: [],
         }
     },
     mounted(){
@@ -499,16 +504,9 @@ export default ({
         },
         GetEmployeeScheduleDetails(data){
             axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
-                if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
-                {
-                    this.clockid = data;
-                    return;
-                }
+                console.log(res.data.result);
                 if(res.data.success){
-                    this.clockid = data;
-                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
-                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
-                    
+                    this.viewemployeeclock = res.data.result[0];
                 }
             });
         },
@@ -702,5 +700,10 @@ color: #6c757d
 }
 .datepick{
     border-style: none;
+}
+.space{
+    margin-bottom: 20px;
+    padding:20px;
+    border: 1px solid #000;
 }
 </style>

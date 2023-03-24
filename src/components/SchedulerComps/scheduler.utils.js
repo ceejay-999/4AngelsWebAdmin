@@ -34,6 +34,14 @@ export function dateFormat(format='',dateString=''){
     return format;
 }
 
+const timeZoneValue = 'America/New_York'
+
+export function timeZone(date=null,month=null,day=null){
+    if(date == null || date == '') return new Date(new Date().toLocaleString('en-US',{timeZone: timeZoneValue}))
+    else if(month==null&&day==null) return new Date(new Date(date).toLocaleString('en-US',{timeZone: timeZoneValue}))
+    else return new Date(new Date(date,month,day).toLocaleString('en-US',{timeZone: timeZoneValue}))
+}
+
 export function validateForm(obj,rules) {
     let validated = {
         allValid: true

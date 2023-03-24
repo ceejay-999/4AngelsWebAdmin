@@ -161,7 +161,7 @@
 </template>
 
 <script>
-import {dateFormat} from './scheduler.utils'
+import {dateFormat,timeZone} from './scheduler.utils'
 import {axios} from '../../functions'
 import CustomFieldVue from './CustomField.vue';
 import ScheduleSetForm from './ScheduleSetForm.vue';
@@ -171,6 +171,7 @@ export default{
     components:{ScheduleSetForm,CustomFieldVue,StyledAlert},
     data(){
         return{
+            timeZone,
             editTracker:{
                 created: [],
                 updated: [],
@@ -350,6 +351,20 @@ export default{
                 this.buildCalendar()
             })
         },
+        checkForClockin(scheduleId, userid=null){
+            return new Promise((res2)=>{
+                let urlString = 'Schedulercontroller/checkForClockin?id='+scheduleId
+                if(userid != null) urlString+= `&userid=`+userid;
+                axios.post(urlString).then(res=>{
+                    if(!res.data.success) {
+                        this.alert('Fetching Error',res.data.msg,'danger',[],2500);
+                        res2(true);
+                        return;
+                    }
+                    res2(res.data.result);
+                })
+            })
+        },
         initScheduler(){
             let token = 'Q0JlclZKZVphVFNBY0dtdEV5bzRwMUU3QWJLQ2dSNXFGZ1B6K2JpSzRLSjByUDFXd1hGM0dadEZXU010dWh2N1MzT2huRWpRcXpyOU0xaTdidlRYdFlkNW93OGlTakFZYWdCZ01uK0ZEczI3bVVKM0FEaCtla085K0JIemJIS006OkqgWn\/4Wq2q0yqmCps9gOQ=';
 
@@ -392,7 +407,6 @@ export default{
             let scheduleEndTime = this.getScheduleEnd(schedule.shift_date,schedule.shift_start,schedule.shift_end);
             let totalhours = (scheduleEndTime.getTime() - scheduleStartTime.getTime()) / (1000 * 60 * 60);
             let wage = 0;
-            console.log(totalhours);
             
 
             let sched = {...schedule,
@@ -567,6 +581,8 @@ export default{
                 return;
             }
 
+            
+
             if(this.getScheduleEnd(schedData.shift_date,schedData.shift_start,schedData.shift_end).getTime() <= new Date().getTime()){
                 this.alert('Backdated Error','You are assigning a finished schedule.','danger',[],1500);
                 return;
@@ -585,7 +601,12 @@ export default{
             this.schedules[schedData.id].assignedEmps.push({employee_id:userid})
             this.buildCalendar();
         },
-        removeEmployeeFromSchedule(scheduleid,userid){ // update | create /
+        async removeEmployeeFromSchedule(scheduleid,userid){ // update | create /
+            if(await this.checkForClockin(scheduleid,userid)) {
+                this.alert('Schedule Editing Denied','You cannot remove this employee from this schedule for it already was clocked in by this employee.','danger',[],3500);
+                return;
+            }
+
             if(this.getScheduleEnd(this.schedules[scheduleid].shift_date,this.schedules[scheduleid].shift_start,this.schedules[scheduleid].shift_end).getTime() <= new Date().getTime()){
                 this.alert('Backdated Error','You cannot remove an employee from a finished schedule.','danger',[],2500);
                 return;
@@ -607,10 +628,10 @@ export default{
                 return;
             }
 
-            // if(this.getScheduleEnd(e.shift_date,e.shift_start,e.shift_end) <= new Date().getTime()){
-            //     this.alert('Backdated Error','You cannot create a finished schedule.','danger',[],1500);
-            //     return;
-            // }
+            if(this.getScheduleEnd(e.shift_date,e.shift_start,e.shift_end) <= new Date().getTime()){
+                this.alert('Backdated Error','You cannot create a finished schedule.','danger',[],1500);
+                return;
+            }
 
             if(this.checkIfIsOneDayOrMore(e.shift_date,e.shift_start,e.shift_end)){
                 this.alert('Schedule Duration Exceeded','The scheduler may only handle schedules that does not exceed or equal to 24 hours.','danger',[],2500);
@@ -654,10 +675,14 @@ export default{
 
             return true;
         },
-        updateSchedule(e){ //update | create /
+        async updateSchedule(e){ //update | create /
             let newSched = {};
             Object.keys(this.queSchedule).forEach(qs=>newSched[qs] = e[qs])
 
+            if(await this.checkForClockin(e.id)) {
+                this.alert('Schedule Editing Denied','You cannot remove this employee from this schedule for it already was clocked in by one or more employees.','danger',[],3500);
+                return;
+            }
 
             if(this.getScheduleEnd(e.shift_date,e.shift_start,e.shift_end).getTime() <= new Date().getTime()){
                 this.alert('Backdated Error','The schedule is set back in time.','danger',[],1500);
@@ -683,8 +708,13 @@ export default{
             this.modalClose = true;
             this.buildCalendar();
         },
-        deleteSchedule(e){ //delete | none /
+        async deleteSchedule(e){ //delete | none /
             let ref = this.schedules[e];
+            if(await this.checkForClockin(e.id)) {
+                this.alert('Schedule Editing Denied','You cannot remove this employee from this schedule for it already was clocked in by one or more employees.','danger',[],3500);
+                return;
+            }
+
             if(this.getScheduleEnd(ref.shift_date,ref.shift_start,ref.shift_end).getTime() <= new Date().getTime()){
                 this.alert('Completed Schedule Error','The schedule is already finished, therefore the schedule cannot be deleted.','danger',[],3000);
                 this.modalClose = true;
@@ -732,9 +762,14 @@ export default{
                 e.dataTransfer.setData('schedData',JSON.stringify(ds));
             }catch(err){return;}
         },
-        dropSched(date,e,originType){ //update | create /
+        async dropSched(date,e,originType){ //update | create /
             if(e.dataTransfer.getData('schedData') == '') return;
             let ds = JSON.parse(e.dataTransfer.getData('schedData'));
+
+            if(await this.checkForClockin(e.id)) {
+                this.alert('Schedule Editing Denied','You cannot remove this employee from this schedule for it already was clocked in by one or more employees.','danger',[],3500);
+                return;
+            }
 
             if(this.getScheduleEnd(ds.shift_date,ds.shift_start,ds.shift_end).getTime() <= new Date().getTime() && this.dragMode == 0){
                 this.alert('Backdated Error','You are trying to move a finished schedule.','danger');
