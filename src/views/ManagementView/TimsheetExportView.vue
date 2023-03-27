@@ -8,35 +8,36 @@
                 <th class="font-weight-bold">Time Card</th>
                 <th class="font-weight-bold">Total Hours</th>
                 <th class="font-weight-bold">Total Paid</th>
+                <th class="font-weight-bold">Action</th>
             </tr>
         </thead>
         
         <tbody v-for="timeshet in timesheets">
             <tr>
-                <th :id="timeshet.timesheets_schedule" class="font-weight-bold text-left">{{ new Date(timeshet.timesheets_schedule).toLocaleString('en-US',{
+                <td class="font-weight-bold text-left">{{ new Date(timeshet.timesheet_date).toLocaleString('en-US',{
                 weekday: "long",
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-            })  }}</th>
-                <th></th>
-                <th></th>
-                <th>{{ timeshet.timesheets_totaltimecard }} Total Time Cards</th>
-                <th class="font-weight-bold text-left">{{ timeshet.timesheets_totalhour }}</th>
-                <th class="font-weight-bold text-left">${{ timeshet.timesheets_totalpaid }}</th>
+            })  }}</td>
+                <td></td>
+                <td></td>
+                <td>{{ timeshet.timesheet_time_card }} Total Time Cards</td>
+                <td class="font-weight-bold text-left"></td>
+                <td class="font-weight-bold text-left"></td>
+                <td></td>
             </tr>
-            <tr v-for="sched in pastschedules" v-show="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()">
-            <template v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()">
-                <td :headers="timeshet.timesheets_schedule"><div>{{ sched.employee_firstname+" "+ sched.employee_lastname }}</div></td>
-                <td :headers="timeshet.timesheets_schedule"><div>{{ sched.role_name }}</div></td>
-                <td :headers="timeshet.timesheets_schedule"><div>{{ sched.assignschedules_lastrecordrate }}</div></td>
-                <td :headers="timeshet.timesheets_schedule"><div v-if="sched.assignschedules_timein != null && sched.assignschedules_timeout != null ">{{ sched.assignschedules_timein +" - "+ sched.assignschedules_timeout }}</div><div class="text-danger" v-else>No Clockin / No Clockout</div></td>
-                <td :headers="timeshet.timesheets_schedule"><div>{{ sched.assignschedules_totalhours }}</div></td>
-                <td :headers="timeshet.timesheets_schedule"><div>${{ sched.assignschedules_totalwage }}</div></td>
-            </template>
-            <template v-else>
-                
-            </template>
+            <tr v-for="sched in timeshet.timesheetdetails">
+                <td><div>{{ sched.user_firstname+" "+ sched.user_lastname }}</div></td>
+                <td><div>{{ sched.role_name }}</div></td>
+                <td><div>$ {{ sched.schedule_assign_wage }}</div></td>
+                <td><div v-if="sched.clock_event_isclockin == 1 && sched.clock_event_isclockout == 1 ">{{ new Date(sched.clock_event_intime).toLocaleTimeString() +" - "+ new Date(sched.clock_event_outtime).toLocaleTimeString() }}</div><div class="text-danger" v-else>No Clockin / No Clockout</div></td>
+                <td><div>{{ sched.timesheet_detail_paid_hours }}</div></td>
+                <td><div>${{ sched.timesheet_detail_total_est_wage }}</div></td>
+                <td><a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                </div></td>
             </tr>
         </tbody>
     </table>
@@ -61,6 +62,11 @@ export default ({
             loaded: "",
         }
     },
+    computed: {
+        variable() {
+            return JSON.parse(this.$route.params.variable)
+        }
+    },
     mounted(){
         this.loadTable();
         let rep = setInterval(() => {
@@ -82,29 +88,7 @@ export default ({
             }
         },
         async loadTable(){
-            await axios.post('timesheet?_batch=true').then(res=>{
-                if(res.data.result == null)
-                {
-                    return;
-                }
-                this.timesheets = res.data.result;
-                if(this.timesheets != null)
-                {
-                    let temp = []
-                    axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
-                        temp = res.data.result;
-                        this.timesheets.forEach(element => {
-                            temp.forEach(e => {
-                                if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
-                                {
-
-                                    this.pastschedules.push(e);
-                                }
-                            });
-                        });
-                    });
-                }
-            });
+            this.timesheets = this.variable;
             this.loaded = true;
         }
     }

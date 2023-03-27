@@ -1,7 +1,98 @@
 <template>
     <LayoutView>
-        <div class="toast" >
+        <div id="toaster" >
 
+        </div>
+        <div class="modal fade" id="ViewClockModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle"> {{ viewemployeeclock.user_firstname }} {{ viewemployeeclock.user_lastname }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="space">
+                            <h5>Worked</h5>
+                            <h6 v-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 1">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
+                            <h6 v-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 0">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - Missing Clockout</h6>
+                            <h6 v-if="viewemployeeclock.clock_event_isclockin == 0 && viewemployeeclock.clock_event_isclockout == 1">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • Missing Clockin - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
+                            <h6 v-else class="text-danger">No Show</h6>
+                            <h6>Scheduled: {{ Math.floor(viewemployeeclock.schedule_detail_hours) }} hrs {{ Math.round(parseFloat(viewemployeeclock.schedule_detail_hours) * 60) }} min ({{ new Date(viewemployeeclock.schedule_detail_date +' '+viewemployeeclock.schedule_detail_start_time).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.schedule_detail_date+' '+viewemployeeclock.schedule_detail_end_time).toLocaleTimeString() }})</h6>
+                        </div>
+                        <div class="space">
+                            <div v-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 1">
+                                <h5>GPS Validation</h5>
+                                <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_inlat+'%2C'+viewemployeeclock.clock_event_inlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockin Location</a></h6>
+                                <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_outlat+'%2C'+viewemployeeclock.clock_event_outlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockout Location</a></h6>
+                            </div>
+                            <div v-else>
+                                No Data
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addClockinModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockin</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Clockin Time</label>
+                                <input type="time" class="form-control" v-model="assignschedclockin">
+                                <div class="invalid-feedback feedback1">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockin()" data-dismiss="modal"> Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addClockoutModalForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalFormTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalFormTitle">Clockout</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Clockout Time</label>
+                                <input type="time" class="form-control" v-model="assignschedclockout">
+                                <div class="invalid-feedback feedback1">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal" @click="cleardata()">Close</button>
+                        <button type="button" class="btn btn-primary btn-pill" @click="EditClockout()" data-dismiss="modal"> Save Changes</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="breadcrumb-wrapper d-flex justify-content-between" v-if="branchselected != null">
             <div>
@@ -16,9 +107,11 @@
                         <li class="breadcrumb-item" aria-current="page">Timesheets</li>
                     </ol>
                 </nav>
+                <h3 v-if="fromdate != null && todate != null" class="text-dark">Timesheet for the Month of: {{ new Date().toLocaleString('en-US',{timeZone: 'america/new_york', month: 'long'}) }}</h3>
+                <h3 v-else class="text-dark">Timesheet for from: {{ fromdate }} to {{ todate }}</h3>
             </div>
             <div>
-                <RouterLink class="btn btn-primary" to="/timesheetexport" target="_blank"> Export to Excel</RouterLink>
+                <RouterLink class="btn btn-primary" @click="ExportTimesheet()" to="#" target="_blank"> Export to Excel</RouterLink>
             </div>
         </div>
         <div class="form-row">
@@ -45,8 +138,8 @@
                 </thead>
                 
                 <tbody v-for="timeshet in timesheets">
-                    <tr data-toggle="collapse" :data-target="'#accordion'+timeshet.timesheets_id" class="clickable">
-                        <td class="font-weight-bold text-left">{{ new Date(timeshet.timesheets_schedule).toLocaleString('en-US',{
+                    <tr data-toggle="collapse" :data-target="'#accordion'+timeshet.timesheet_id" class="clickable">
+                        <td class="font-weight-bold text-left">{{ new Date(timeshet.timesheet_date).toLocaleString('en-US',{
                         weekday: "long",
                         year: "numeric",
                         month: "long",
@@ -54,21 +147,28 @@
                     })  }}</td>
                         <td></td>
                         <td></td>
-                        <td>{{ timeshet.timesheets_totaltimecard }} Total Time Cards</td>
-                        <td class="font-weight-bold text-left">{{ timeshet.timesheets_totalhour }}</td>
-                        <td class="font-weight-bold text-left">${{ timeshet.timesheets_totalpaid }}</td>
+                        <td>{{ timeshet.timesheet_time_card }} Total Time Cards</td>
+                        <td class="font-weight-bold text-left"></td>
+                        <td class="font-weight-bold text-left"></td>
                         <td></td>
                     </tr>
-                    <tr :id="'accordion'+timeshet.timesheets_id" class="collapse" v-for="sched in pastschedules">
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.employee_firstname+" "+ sched.employee_lastname }}</div></td>
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.role_name }}</div></td>
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.assignschedules_lastrecordrate }}</div></td>
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div v-if="sched.assignschedules_timein != null && sched.assignschedules_timeout != null ">{{ sched.assignschedules_timein +" - "+ sched.assignschedules_timeout }}</div><div class="text-danger" v-else>No Clockin / No Clockout</div></td>
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>{{ sched.assignschedules_totalhours }}</div></td>
-                        <td v-if="new Date(sched.schedules_dates).getTime() == new Date(timeshet.timesheets_schedule).getTime()"><div>${{ sched.assignschedules_totalwage }}</div></td>
+                    <tr :id="'accordion'+timeshet.timesheet_id" class="collapse bg-light" v-for="sched in timeshet.timesheetdetails">
+                        <td><div>{{ sched.user_firstname+" "+ sched.user_lastname }}</div></td>
+                        <td><div>{{ sched.role_name }}</div></td>
+                        <td><div>$ {{ sched.schedule_assign_wage }}</div></td>
+                        <td><div v-if="sched.clock_event_isclockin == 1 && sched.clock_event_isclockout == 1 ">{{ new Date(sched.clock_event_intime).toLocaleTimeString() +" - "+ new Date(sched.clock_event_outtime).toLocaleTimeString() }}</div>
+                            <div v-else-if="sched.clock_event_isclockin == 1 && sched.clock_event_isclockout == 0 ">{{ new Date(sched.clock_event_intime).toLocaleTimeString() +" - "}}<span class="text-danger">No Clockout</span></div>
+                            <div v-else-if="sched.clock_event_isclockin == 1 && sched.clock_event_isclockout == null ">{{ new Date(sched.clock_event_intime).toLocaleTimeString() +" - "}}<span class="text-danger">No Clockout</span></div>
+                            <div v-else-if="sched.clock_event_isclockin == 0 && sched.clock_event_isclockout == 1 "><span class="text-danger">No Clockin</span> - {{new Date(sched.clock_event_outtime).toLocaleTimeString() }}</div>
+                            <div v-else-if="sched.clock_event_isclockin == null && sched.clock_event_isclockout == 1 "><span class="text-danger">No Clockin</span> - {{new Date(sched.clock_event_outtime).toLocaleTimeString() }}</div>
+                        <div class="text-danger" v-else>No Clockin / No Clockout</div></td>
+                        <td><div>{{ sched.timesheet_detail_paid_hours }}</div></td>
+                        <td><div>${{ sched.timesheet_detail_total_est_wage }}</div></td>
                         <td><a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="mdi mdi-dots-horizontal"></span></a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(arr.assignschedules_id)">Edit Clockin / Clockout</a>
+                            <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockinModalForm" @click="GetClockinorClockout(sched.clock_event_id)">Edit Clockin</a>
+                            <a class="dropdown-item addclockin" data-toggle="modal" data-target="#addClockoutModalForm" @click="GetClockinorClockout(sched.clock_event_id)">Edit Clockout</a>
+                            <a class="dropdown-item addclockin" data-toggle="modal" data-target="#ViewClockModalForm" @click="GetEmployeeScheduleDetails(sched.clock_event_id)">View Clockin/Clockout Details</a>
                         </div></td>
                     </tr>
                 </tbody>
@@ -78,7 +178,7 @@
 </template>
 <script>
 import LayoutView from "../../views/SharedLayoutView/LayoutView.vue"
-import { axios , validateForm,lStore } from '@/functions.js';
+import { axios , validateForm,lStore,dateFormat } from '@/functions.js';
 import {utils,writeFileXLSX} from 'xlsx';
 import toastr from 'toastr';
 
@@ -92,81 +192,103 @@ export default ({
         return{
             branchselected: lStore.get('selected_facility'),
             timesheets: [],
-            pastschedules: [],
             fromdate: "",
             todate: "",
+            assignschedclockout: "",
+            assignschedclockin: "",
+            viewemployeeclock: [],
+            clockid: "",
+            schedassignid: "",
         }
     },
     mounted(){
-        axios.post('timesheetcontroller/gettimesheet?facility='+this.branchselected).then(res=>{
-            console.log(res);
+        axios.post('dashboardcontroller/checkScheduleTimesheet',{pwauth: lStore.get('usertoken')});
+        axios.post('Timesheetcontroller/GetTimesheet',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{
+            this.timesheets = res.data.result;
         });
-        // axios.post('timesheet?_batch=true').then(res=>{
-        //     if(res.data.result == null)
-        //     {
-        //         return;
-        //     }
-        //     this.timesheets = res.data.result;
-        //     if(this.timesheets != null)
-        //     {
-        //         let temp = []
-        //         axios.post("")
-        //         // axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
-        //         //     temp = res.data.result;
-        //         //     this.timesheets.forEach(element => {
-        //         //         temp.forEach(e => {
-        //         //             if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
-        //         //             {
-
-        //         //                 this.pastschedules.push(e);
-        //         //             }
-        //         //         });
-        //         //     });
-        //         // });
-        //     } 
-        // });
     },
     methods:{
+        EditClockin(){
+            console.log('aw');
+            let indate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            let outdate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            if(this.assignschedclockin == "00:00"){
+                indate = "0000-00-00";
+            }
+            axios.post('dashboardcontroller/UpdateClockinevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockin:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockin+':00'),assignschedid: this.schedassignid}).then(res=>{
+                if(res.data.success){
+                    this.callToaster("toast-top-right",res.data);
+                    this.cleardata();
+                }else{
+                    this.callToaster("toast-top-right",res.data);
+                    this.cleardata();
+                }
+            });
+        },
+        EditClockout(){
+            let indate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            let outdate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
+            if(this.assignschedclockout == "00:00"){
+                outdate = "0000-00-00";
+            }
+            axios.post('dashboardcontroller/UpdateClockoutevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockout:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockout+':00'),assignschedid: this.schedassignid}).then(res=>{
+                if(res.data.success){
+                    this.callToaster("toast-top-right",res.data);
+                }else{
+                    this.callToaster("toast-top-right",res.data);
+                }
+            });
+        },
+        cleardata(){
+            this.assignschedclockout = "";
+            this.assignschedclockin = "";
+            this.viewemployeeclock = [];
+        },
+        GetClockinorClockout(data){
+            axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
+                if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
+                {
+                    this.clockid = data;
+                    
+                    return;
+                }
+                if(res.data.success){
+                    this.clockid = data;
+                    this.assignschedclockin = new Date(res.data.result[0].clock_event_intime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    this.assignschedclockout = new Date(res.data.result[0].clock_event_outtime).toLocaleTimeString('en-Us',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                    this.schedassignid = res.data.result[0].schedule_assigns_id
+                    
+                }
+            });
+        },
+        GetEmployeeScheduleDetails(data){
+            axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
+                console.log(res.data.result);
+                if(res.data.success){
+                    this.viewemployeeclock = res.data.result[0];
+                }
+            });
+        },
+        ExportTimesheet(){
+            this.$router.push({ name: 'timesheetexport', params: { variable: JSON.stringify(this.timesheets) }})
+        },
         FilterDates(currentDateString,weekDateString){
-            this.pastschedules = [];
             this.timesheets = [];
-            document.querySelector(".toast").id = "toaster";
             if(currentDateString == null || currentDateString == "")
             {
-                this.callToaster("toast-top-right",2);
+                this.callToaster1("toast-top-right",2);
                 return;
             }
             if(weekDateString == null || weekDateString == "")
             {
-                this.callToaster("toast-top-right",2);
+                this.callToaster1("toast-top-right",2);
                 return;
             }
-            axios.post(`timesheet?_batch=true&_GTE_timesheets_schedule=${currentDateString}&_LSE_timesheets_schedule=${weekDateString}`).then(res=>{
-                if(res.data.success == false)
-                {
-                    this.callToaster("toast-top-right",3);
-                    return;
-                }
-                this.timesheets = res.data.result;
-                if(this.timesheets != null)
-                {
-                    let temp = []
-                    axios.post("assigned?schedules_facilityid="+lStore.get("selected_facilityId")+"&_joins=assignschedules,assigndesignation,employee,role&_on=assignschedules_scheduleid=schedules_id,assigndesignation_id=assignschedules_assigndesignationid,employee_id=assigndesignation_employeeid,role_id=assigndesignation_roleid&_batch=true").then(res=>{
-                        temp = res.data.result;
-                        this.timesheets.forEach(element => {
-                            temp.forEach(e => {
-                                if(new Date(e.schedules_dates).getTime() == new Date(element.timesheets_schedule).getTime() && e.assignschedules_status == 4)
-                                {
-
-                                    this.pastschedules.push(e);
-                                }
-                            });
-                        });
-                    });
-                } 
-            });
+            axios.post('Timesheetcontroller/SearchTimesheet',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId'),fromdate:currentDateString,todate:weekDateString}).then(res=>{
+            this.timesheets = res.data.result;
+        });
         },
-        callToaster(positionClass, reserror) {
+        callToaster1(positionClass, reserror) {
             if (document.getElementById("toaster")) {
                 toastr.options = {
                 closeButton: true,
@@ -192,6 +314,35 @@ export default ({
                 if(reserror == 3)
                 {
                     toastr.error("No Timesheets Found", "Error!");
+                }
+            }
+        },
+        callToaster(positionClass, reserror) {
+            if (document.getElementById("toaster")) {
+                toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: true,
+                progressBar: true,
+                positionClass: positionClass,
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "2000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+                };
+                if(reserror.success == true)
+                {
+                    toastr.success(""+reserror.msg, "Successfully!");
+                }
+                else
+                {
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
         },
@@ -228,5 +379,13 @@ export default ({
 {
     width: 100%;
     padding:20px;
+}
+.datepick{
+    border-style: none;
+}
+.space{
+    margin-bottom: 20px;
+    padding:20px;
+    border: 1px solid #000;
 }
 </style>

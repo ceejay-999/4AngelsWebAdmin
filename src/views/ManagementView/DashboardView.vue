@@ -463,13 +463,17 @@ export default ({
             this.totalmanagers = res.data.result.manager;
         });
         this.gethourlydata();
+        this.CheckifAllSchedRecorded();
         setInterval(() => {
             this.gethourlydata();
-            
-        }, 3000);
+            this.CheckifAllSchedRecorded();
+        }, 5000);
 
     },
     methods: {
+        CheckifAllSchedRecorded(){
+            axios.post('dashboardcontroller/checkScheduleTimesheet',{pwauth: lStore.get('usertoken')});
+        },
         gethourlydata(){
             this.facilityid = lStore.get('selected_facilityid');
             axios.post('dashboardcontroller/DashboardTodaySched',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{

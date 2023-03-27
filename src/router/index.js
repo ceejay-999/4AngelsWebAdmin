@@ -41,7 +41,7 @@ const router = createRouter({
       
     },
     {
-      path: '/timesheetexport',
+      path: '/timesheetexport/:variable',
       name: 'timesheetexport',
       component: TimeSheetExport,
       beforeEnter: () => {
