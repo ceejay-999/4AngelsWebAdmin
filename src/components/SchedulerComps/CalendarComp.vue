@@ -453,17 +453,20 @@ export default{
 
             if(created.length > 0){
                 requestsCount++;
-                axios.post('Schedulercontroller/createBatch',null,{content:JSON.stringify(created)}).then(()=>completed++)
+                let res = await axios.post('Schedulercontroller/createBatch',null,{content:JSON.stringify(created)});
+                completed++;
             }
                 
             if(updated.length > 0){
                 requestsCount++;
-                axios.post('Schedulercontroller/updateBatch',null,{content:JSON.stringify(updated)}).then(()=>completed++)
+                let res = await axios.post('Schedulercontroller/updateBatch',null,{content:JSON.stringify(updated)})
+                completed++;
             }
 
             if(this.editTracker.deleted.length > 0){
                 requestsCount++;
-                axios.post('Schedulercontroller/deleteBatch',null,{content:JSON.stringify(this.editTracker.deleted)}).then(()=>completed++)
+                let res = await axios.post('Schedulercontroller/deleteBatch',null,{content:JSON.stringify(this.editTracker.deleted)})
+                completed++;
             }
 
             if(Object.keys(this.editTracker.assignedChanges).length > 0){
