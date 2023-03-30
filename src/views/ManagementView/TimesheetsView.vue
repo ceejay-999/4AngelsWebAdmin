@@ -17,8 +17,8 @@
                         <div class="space">
                             <h5>Worked</h5>
                             <h6 v-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 1">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
-                            <h6 v-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 0">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - Missing Clockout</h6>
-                            <h6 v-if="viewemployeeclock.clock_event_isclockin == 0 && viewemployeeclock.clock_event_isclockout == 1">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • Missing Clockin - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
+                            <h6 v-else-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 0 || viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == null">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • {{ new Date(viewemployeeclock.clock_event_intime).toLocaleTimeString() }} - <span class="text-danger">Missing Clockout</span></h6>
+                            <h6 v-else-if="viewemployeeclock.clock_event_isclockin == 0 && viewemployeeclock.clock_event_isclockout == 1||viewemployeeclock.clock_event_isclockin == null && viewemployeeclock.clock_event_isclockout == 1">{{ Math.floor(viewemployeeclock.clock_event_totalacthour) }} hrs {{ Math.round(parseFloat(viewemployeeclock.clock_event_totalacthour) *60) }}m • <span class="text-danger">Missing Clockin</span> - {{ new Date(viewemployeeclock.clock_event_outtime).toLocaleTimeString() }}</h6>
                             <h6 v-else class="text-danger">No Show</h6>
                             <h6>Scheduled: {{ Math.floor(viewemployeeclock.schedule_detail_hours) }} hrs {{ Math.round(parseFloat(viewemployeeclock.schedule_detail_hours) * 60) }} min ({{ new Date(viewemployeeclock.schedule_detail_date +' '+viewemployeeclock.schedule_detail_start_time).toLocaleTimeString() }} - {{ new Date(viewemployeeclock.schedule_detail_date+' '+viewemployeeclock.schedule_detail_end_time).toLocaleTimeString() }})</h6>
                         </div>
@@ -28,9 +28,27 @@
                                 <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_inlat+'%2C'+viewemployeeclock.clock_event_inlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockin Location</a></h6>
                                 <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_outlat+'%2C'+viewemployeeclock.clock_event_outlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockout Location</a></h6>
                             </div>
+                            <div v-else-if="viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == 0 || viewemployeeclock.clock_event_isclockin == 1 && viewemployeeclock.clock_event_isclockout == null">
+                                <h5>GPS Validation</h5>
+                                <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_inlat+'%2C'+viewemployeeclock.clock_event_inlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockin Location</a></h6>
+                            </div>
+                            <div v-else-if="viewemployeeclock.clock_event_isclockin == 0 && viewemployeeclock.clock_event_isclockout == 1 || viewemployeeclock.clock_event_isclockin == null && viewemployeeclock.clock_event_isclockout == 1">
+                                <h5>GPS Validation</h5>
+                                <h6><a :href="'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+viewemployeeclock.clock_event_outlat+'%2C'+viewemployeeclock.clock_event_outlong+'&heading=-45&pitch=38&fov=80'" target="_blank">View Clockout Location</a></h6>
+                            </div>
                             <div v-else>
                                 No Data
                             </div>
+                        </div>
+                        <div class="space">
+                            <div v-if="viewemployeeclock.timesheet_file_status == 1">
+                                <h5>Timesheet Files</h5>
+                                <br />
+                                <img @click="window.open('https://www.4angelshc.com/wangelmobile/filesystem/'+ viewemployeeclock.timesheet_file)" :src="'https://www.4angelshc.com/wangelmobile/filesystem/'+ viewemployeeclock.timesheet_file" class="timg" />
+                            </div>
+                            <divv v-else>
+                                No Uploaded Timesheet
+                            </divv>
                         </div>
                     </div>
                 </div>
@@ -199,17 +217,18 @@ export default ({
             viewemployeeclock: [],
             clockid: "",
             schedassignid: "",
+            window
         }
     },
     mounted(){
         axios.post('dashboardcontroller/checkScheduleTimesheet',{pwauth: lStore.get('usertoken')});
         axios.post('Timesheetcontroller/GetTimesheet',{pwauth: lStore.get('usertoken')},{facilityid: lStore.get('selected_facilityId')}).then(res=>{
             this.timesheets = res.data.result;
+            console.log(res.data.result);
         });
     },
     methods:{
         EditClockin(){
-            console.log('aw');
             let indate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
             let outdate = new Date().toLocaleDateString('en-US',{timeZone: "America/New_York"});
             if(this.assignschedclockin == "00:00"){
@@ -219,9 +238,15 @@ export default ({
                 if(res.data.success){
                     this.callToaster("toast-top-right",res.data);
                     this.cleardata();
+                    setTimeout(() => {
+                        this.$router.go(0);
+                    }, 3000);
                 }else{
                     this.callToaster("toast-top-right",res.data);
                     this.cleardata();
+                    setTimeout(() => {
+                        this.$router.go(0);
+                    }, 3000);
                 }
             });
         },
@@ -234,8 +259,14 @@ export default ({
             axios.post('dashboardcontroller/UpdateClockoutevent',{pwauth: lStore.get('usertoken')},{clockid: this.clockid, clockout:dateFormat('%y-%m-%D %H:%I:%S',indate+' '+this.assignschedclockout+':00'),assignschedid: this.schedassignid}).then(res=>{
                 if(res.data.success){
                     this.callToaster("toast-top-right",res.data);
+                    setTimeout(() => {
+                        this.$router.go(0);
+                    }, 3000);
                 }else{
                     this.callToaster("toast-top-right",res.data);
+                    setTimeout(() => {
+                        this.$router.go(0);
+                    }, 3000);
                 }
             });
         },
@@ -246,6 +277,7 @@ export default ({
         },
         GetClockinorClockout(data){
             axios.post('dashboardcontroller/GetClockevent',{pwauth: lStore.get('usertoken')},{clockid: data}).then(res=>{
+                console.log(res.data.result);
                 if(res.data.result[0].clock_event_isclockin == 0 && res.data.result[0].clock_event_isclockout == 0)
                 {
                     this.clockid = data;
@@ -387,5 +419,11 @@ export default ({
     margin-bottom: 20px;
     padding:20px;
     border: 1px solid #000;
+}
+.timg{
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    max-height: 600px;
 }
 </style>

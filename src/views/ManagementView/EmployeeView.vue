@@ -598,7 +598,7 @@ export default ({
                 toastr.options = {
                 closeButton: true,
                 debug: false,
-                newestOnTop: false,
+                newestOnTop: true,
                 progressBar: true,
                 positionClass: positionClass,
                 preventDuplicates: false,
@@ -612,17 +612,13 @@ export default ({
                 showMethod: "fadeIn",
                 hideMethod: "fadeOut"
                 };
-                if(reserror == 1)
+                if(reserror.success == true)
                 {
-                    toastr.success("Data was save successfully", "Successfully Save!");
+                    toastr.success(""+reserror.msg, "Successfully!");
                 }
-                if(reserror == 2)
+                else
                 {
-                    toastr.error("Something went Wrong!", "Error!");
-                }
-                if(reserror == 3)
-                {
-                    toastr.success("Data was successfully deleted!", "Successfully Deleted!");
+                    toastr.error(""+reserror.msg, "Error!");
                 }
             }
         },

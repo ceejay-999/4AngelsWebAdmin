@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { axios } from '@/functions';
+import { axios,lStore } from '@/functions';
 import { read, utils, writeFile, writeFileXLSX } from 'xlsx'; 
 
 export default ({
