@@ -147,7 +147,6 @@ export default ({
             })
         },
         ApproveRequest(requestid){
-            
             axios.post('requestcontroller/ApproveRequest',{pwauth: lStore.get('usertoken')},{requestid: requestid, managerid: lStore.get('userdetails').user_id}).then(res=>{
                 if(res.data.success){
                     this.callToaster("toast-top-right",res.data);

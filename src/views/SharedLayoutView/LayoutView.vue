@@ -839,4 +839,7 @@ export default ({
     overflow: unset !important;
     white-space: unset !important;
   }
+  .list-unstyled{
+    overflow: auto;
+  }
 </style>
